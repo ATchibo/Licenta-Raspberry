@@ -2,14 +2,15 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 
 
-class PongGame(Widget):
+class PlantBuddy(Widget):
     pass
 
 
-class PongApp(App):
+class PlantBuddyApp(App):
     def build(self):
-        return PongGame()
+        self.load_kv("home.kv")
+        return PlantBuddy()
 
 
 if __name__ == '__main__':
-    PongApp().run()
+    PlantBuddyApp().run()
