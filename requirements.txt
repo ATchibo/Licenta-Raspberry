@@ -1,0 +1,3 @@
+Kivy==2.2.1
+Kivy_examples==2.2.1
+kivymd==1.1.1

@@ -17,7 +17,7 @@ class ContentNavigationDrawer(MDScrollView):
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
-        Window.size = (480, 320)
+        Window.size = (800, 480)
 
 
 if __name__ == '__main__':
