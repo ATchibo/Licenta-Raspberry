@@ -1,5 +1,52 @@
 #:kivy 2.2.1
 
-WindowManager:
-    ConnectPage:
-    HomePage:
+<ContentNavigationDrawer>
+
+    MDList:
+
+        MDNavigationDrawerHeader:
+            title: "Plant Buddy"
+            spacing: "4dp"
+            padding: "12dp", 0, 0, "56dp"
+
+        OneLineListItem:
+            text: "Home Screen"
+            on_press:
+                root.nav_drawer.set_state("close")
+                root.screen_manager.current = "home"
+                app.root.ids.toolbar.title = "Home"
+
+        OneLineListItem:
+            text: "Connect"
+            on_press:
+                root.nav_drawer.set_state("close")
+                root.screen_manager.current = "connect"
+                app.root.ids.toolbar.title = "Connect"
+
+MDScreen:
+
+    MDNavigationLayout:
+
+        MDTopAppBar:
+            id: toolbar
+            pos_hint: {"top": 1}
+            elevation: 1
+            title: "Home"
+            left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+
+
+        MDScreenManager:
+            id: screen_manager
+            size_hint_y: None
+            height: root.height - toolbar.height
+
+            HomePage:
+            ConnectPage:
+
+        MDNavigationDrawer:
+            id: nav_drawer
+            radius: (0, 16, 16, 0)
+
+            ContentNavigationDrawer:
+                screen_manager: screen_manager
+                nav_drawer: nav_drawer

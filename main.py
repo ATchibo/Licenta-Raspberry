@@ -1,25 +1,23 @@
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.lang import Builder
+from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
-from kivymd.uix.screenmanager import MDScreenManager
+from kivymd.uix.scrollview import MDScrollView
 
 from pages.connect_page import ConnectPage
 from pages.home_page import HomePage
 
 
-class WindowManager(MDScreenManager):
-    pass
-
-
-# kv = Builder.load_file("home.kv")
+class ContentNavigationDrawer(MDScrollView):
+    screen_manager = ObjectProperty()
+    nav_drawer = ObjectProperty()
 
 
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
         Window.size = (480, 320)
-        # return kv
 
 
 if __name__ == '__main__':
