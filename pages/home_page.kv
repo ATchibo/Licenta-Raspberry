@@ -1,9 +1,82 @@
-
 <HomePage>:
     name: "home"
 
-    MDLabel:
-        text: "Home Page"
-        halign: "center"
-        font_style: "H2"
-        pos_hint: {"center_x": .5, "center_y": .9}
+    MDGridLayout:
+        cols: 2
+        padding: 10
+        spacing: 10
+
+        MDGridLayout:
+            cols: 1
+            spacing: 10
+
+            MDLabel:
+                text: "Soil humidity history"
+                halign: "center"
+                font_style: "H4"
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, 1
+
+            MDBoxLayout:
+                id: graph_box
+
+            MDLabel:
+                text: "Current program"
+                halign: "center"
+
+            MDLabel:
+                text: "dropdown"
+                halign: "center"
+
+            MDRaisedButton:
+                text: "Water now"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: app.root.current = "program"
+
+        MDScrollView:
+            MDGridLayout:
+                cols: 1
+                spacing: 10
+                padding: 10
+                size_hint_y: None
+                height: self.minimum_height
+
+                MDLabel:
+                    text: "Soil humidity history"
+                    halign: "center"
+                    font_style: "H4"
+                    theme_text_color: "Custom"
+                    text_color: 0, 0, 0, 1
+
+                MDLabel:
+                    text: "Soil humidity"
+                    halign: "center"
+                    font_style: "H5"
+                    theme_text_color: "Custom"
+                    text_color: 0, 0, 0, 1
+
+                MDLabel:
+                    text: "Current program"
+                    halign: "center"
+
+                MDLabel:
+                    text: "dropdown"
+                    halign: "center"
+
+                MDRaisedButton:
+                    text: "Water now"
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    on_release: app.root.current = "program"
+
+                MDLabel:
+                    text: "Soil humidity history"
+                    halign: "center"
+                    font_style: "H4"
+                    theme_text_color: "Custom"
+                    text_color: 0, 0, 0, 1
+
+                MDLabel:
+                    text: "Soil humidity"
+                    halign: "center"
+                    font_style: "H5"
+                    theme_text_color: "Custom"

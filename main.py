@@ -7,7 +7,7 @@ from kivymd.uix.scrollview import MDScrollView
 
 from pages.connect_page import ConnectPage
 from pages.home_page import HomePage
-
+from pages.settings_page import SettingsPage
 
 class ContentNavigationDrawer(MDScrollView):
     screen_manager = ObjectProperty()

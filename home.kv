@@ -23,6 +23,13 @@
                 root.screen_manager.current = "connect"
                 app.root.ids.toolbar.title = "Connect"
 
+        OneLineListItem:
+            text: "Settings"
+            on_press:
+                root.nav_drawer.set_state("close")
+                root.screen_manager.current = "settings"
+                app.root.ids.toolbar.title = "Settings"
+
 MDScreen:
 
     MDNavigationLayout:
@@ -42,6 +49,7 @@ MDScreen:
 
             HomePage:
             ConnectPage:
+            SettingsPage:
 
         MDNavigationDrawer:
             id: nav_drawer
