@@ -1,3 +1,4 @@
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivymd.uix.screen import MDScreen
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
@@ -11,11 +12,17 @@ class HomePage(MDScreen):
     def __init__(self, **kwargs):
         super(HomePage, self).__init__(**kwargs)
 
-        print("HomePage init")
-        print(self.ids)
+    def on_enter(self, *args):
+        Clock.schedule_once(self.add_matplotlib_widget, 0.1)
 
-        # graph_box = self.ids.graph_box
-        # graph_box.add_widget(FigureCanvasKivyAgg(figure=self.get_graph()))
+    def add_matplotlib_widget(self, dt):
+        print(self.ids)
+        graph_box = self.ids.graph_box
+        graph_box.clear_widgets()  # Clear any existing widgets
+
+        # Create a Matplotlib figure and add it to the graph_box
+        figure = self.get_graph()
+        graph_box.add_widget(FigureCanvasKivyAgg(figure=figure))
 
     def get_graph(self):
         x = [1, 2, 3, 4, 5]
