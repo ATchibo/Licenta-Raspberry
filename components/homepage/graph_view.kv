@@ -1,0 +1,18 @@
+<GraphView>:
+    name: "graph_view"
+
+    MDLabel:
+        text: "Soil humidity history"
+        halign: "center"
+        font_style: "H5"
+        size_hint_y: 0.1
+
+    MDBoxLayout:
+        id: graph_box
+        size_hint_y: 1
+
+    MDRaisedButton:
+        text: "See more"
+        elevation: 1
+        pos_hint: {"center_x": .5, "center_y": .5}
+        on_release: app.root.current = "program"

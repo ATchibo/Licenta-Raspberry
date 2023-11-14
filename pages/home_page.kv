@@ -1,75 +1,28 @@
 <HomePage>:
     name: "home"
 
-    MDGridLayout:
-        cols: 2
-        padding: 10
-        spacing: 10
+    MDBottomNavigation:
+        #panel_color: "#eeeaea"
+        selected_color_background: "orange"
+        text_color_active: "lightgrey"
 
-        MDBoxLayout:
-            orientation: "vertical"
-            size_hint_y: 1
-            spacing: 10
+        MDBottomNavigationItem:
+            name: 'screen 1'
+            text: 'Humidity graph'
+            icon: 'water-percent'
 
-            MDLabel:
-                text: "Soil humidity history"
-                halign: "center"
-                font_style: "H5"
-                size_hint_y: 0.1
+            GraphView:
 
-            MDBoxLayout:
-                id: graph_box
-                size_hint_y: 1
+        MDBottomNavigationItem:
+            name: 'screen 2'
+            text: 'Event History'
+            icon: 'history'
 
-            MDRaisedButton:
-                text: "See more"
-                pos_hint: {"center_x": .5, "center_y": .5}
-                on_release: app.root.current = "program"
+            WateringHistoryView:
 
-        MDScrollView:
-            MDGridLayout:
-                cols: 1
-                spacing: 10
-                padding: 10
-                size_hint_y: None
-                height: self.minimum_height
+        MDBottomNavigationItem:
+            name: 'screen 3'
+            text: 'Watering Options'
+            icon: 'water-pump'
 
-                MDLabel:
-                    text: "Soil humidity history"
-                    halign: "center"
-                    font_style: "H4"
-                    theme_text_color: "Custom"
-                    text_color: 0, 0, 0, 1
-
-                MDLabel:
-                    text: "Soil humidity"
-                    halign: "center"
-                    font_style: "H5"
-                    theme_text_color: "Custom"
-                    text_color: 0, 0, 0, 1
-
-                MDLabel:
-                    text: "Current program"
-                    halign: "center"
-
-                MDLabel:
-                    text: "dropdown"
-                    halign: "center"
-
-                MDRaisedButton:
-                    text: "Water now"
-                    pos_hint: {"center_x": .5, "center_y": .5}
-                    on_release: app.root.current = "program"
-
-                MDLabel:
-                    text: "Soil humidity history"
-                    halign: "center"
-                    font_style: "H4"
-                    theme_text_color: "Custom"
-                    text_color: 0, 0, 0, 1
-
-                MDLabel:
-                    text: "Soil humidity"
-                    halign: "center"
-                    font_style: "H5"
-                    theme_text_color: "Custom"
+            WateringOptionsView:
