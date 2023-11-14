@@ -22,7 +22,8 @@ class HomePage(MDScreen):
 
         # Create a Matplotlib figure and add it to the graph_box
         figure = self.get_graph()
-        graph_box.add_widget(FigureCanvasKivyAgg(figure=figure))
+        canvas = FigureCanvasKivyAgg(figure=figure)
+        graph_box.add_widget(canvas)
 
     def get_graph(self):
         x = [1, 2, 3, 4, 5]
@@ -31,6 +32,8 @@ class HomePage(MDScreen):
         plt.plot(x, y)
         plt.ylabel("This is MY Y Axis")
         plt.xlabel("X Axis")
+
+        plt.tight_layout(pad=5)
 
         return plt.gcf()
 
