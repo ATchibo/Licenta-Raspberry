@@ -5,14 +5,28 @@
         text: "Soil humidity history"
         halign: "center"
         font_style: "H5"
-        size_hint_y: 0.1
+        size_hint_y: 0.15
 
     MDBoxLayout:
         id: graph_box
         size_hint_y: 1
 
-    MDRaisedButton:
-        text: "See more"
-        elevation: 1
-        pos_hint: {"center_x": .5, "center_y": .5}
-        on_release: app.root.current = "program"
+    MDBoxLayout:
+        size_hint: 1, 0.15
+        padding: 10
+        md_bg_color: 0, 1, 1, 1
+
+        MDLabel:
+            text: "Period: "
+            halign: "right"
+            font_style: "H6"
+            size_hint_x: 0.5
+            size_hint_y: 1
+            pos_hint: {"center_x": 0, "center_y": 0.5}
+            md_bg_color: 0, 0.5, 0.5, 1
+
+        MDDropDownItem:
+            id: drop_item
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: 'Item 0'
+            on_release: root.menu.open()
