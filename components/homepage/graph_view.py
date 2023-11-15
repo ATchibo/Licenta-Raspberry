@@ -1,9 +1,9 @@
+from math import sin
+
 from kivy.clock import Clock
-from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
-from kivy.properties import StringProperty
+from kivy_garden.graph import Graph, MeshLinePlot
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.list import OneLineIconListItem, OneLineListItem
 from kivymd.uix.menu import MDDropdownMenu
 from matplotlib import pyplot as plt
 
@@ -19,17 +19,31 @@ class GraphView(MDBoxLayout):
 
         self.menu = None
 
-        Clock.schedule_once(self.add_matplotlib_widget, 0.1)
+        Clock.schedule_once(self.add_graph, 0.1)
         Clock.schedule_once(self.init_dropdown, 0.1)
 
-    def add_matplotlib_widget(self, *args):
+    def add_graph(self, *args):
         graph_box = self.ids.graph_box
-        graph_box.clear_widgets()  # Clear any existing widgets
+        graph_box.clear_widgets()
 
-        # Create a Matplotlib figure and add it to the graph_box
-        figure = self.get_graph()
-        canvas = FigureCanvasKivyAgg(figure=figure)
-        graph_box.add_widget(canvas)
+        graph_theme = {
+            'label_options': {
+                'color': [1, 0, 0, 1],  # color of tick labels and titles
+                'bold': True},
+            'tick_color': [1, 0, 0, 1],  # ticks and grid
+            'border_color': [1, 0, 0, 1]
+        }  # border drawn around each graph
+
+        graph = Graph(xlabel='X axis', ylabel='Y axis', x_ticks_minor=5,
+                      x_ticks_major=25, y_ticks_major=1,
+                      y_grid_label=True, x_grid_label=True, padding=5,
+                      x_grid=True, y_grid=True, xmin=-0, xmax=100, ymin=-1, ymax=1,
+                      **graph_theme)
+        plot = MeshLinePlot(color=[1, 0, 0, 1])
+        plot.points = [(x, sin(x / 10.)) for x in range(0, 101)]
+        graph.add_plot(plot)
+
+        graph_box.add_widget(graph)
 
     def get_graph(self):
         x = [1, 2, 3, 4, 5]
