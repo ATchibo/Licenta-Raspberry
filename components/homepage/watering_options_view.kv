@@ -1,8 +1,43 @@
 <WateringOptionsView>:
     name: "watering_options_view"
 
-    MDLabel:
-        text: "Watering Options"
-        font_style: "H4"
-        halign: "center"
-        pos_hint: {"center_x": .5, "center_y": .9}
+    MDBoxLayout:
+        size_hint: 1, 1
+        orientation: "vertical"
+
+        MDBoxLayout:
+            size_hint: 1, 0.4
+            orientation: "vertical"
+            padding: 10
+
+            MDLabel:
+                text: "Current watering program: "
+                halign: "right"
+                font_style: "H4"
+                size_hint: 1, 1
+                pos_hint: {"center_x": 0.25, "center_y": 0}
+
+            MDDropDownItem:
+                id: drop_item
+                text: 'Item 0'
+                font_size: 24
+                pos_hint: {"center_x": 0.5, "center_y": 0}
+                on_release: root.menu.open()
+
+        MDBoxLayout:
+            size_hint: 1, 0.6
+            padding: [10, 30, 10, 10]
+            orientation: "vertical"
+
+            MDRaisedButton:
+                text: "Water now"
+                font_size: 24
+                elevation: 1
+                pos_hint: {"center_x": 0.5}
+
+            MDLabel:
+                text: "Running time: 4s;\nWater quantity: 4l"
+                halign: "center"
+                font_style: "H5"
+                pos_hint: {"center_x": 0.5}
+                size_hint: 1, None
