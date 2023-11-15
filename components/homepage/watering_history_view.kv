@@ -2,72 +2,9 @@
     name: "watering_history_view"
 
     MDScrollView:
-        size_hint: 1, None
-        padding: dp(10), dp(10), dp(10), dp(10)
+        id: scroll_view
+        size_hint: 1, 1
+        padding: dp(10)
 
         MDList:
-            id: container
-            size_hint_y: 1
-
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
-
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
-
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
-
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
-
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
-
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
-
-            MDLabel:
-                text: "Watering History"
-                font_style: "H5"
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: "center"
-                valign: "center"
+            id: watering_history_list

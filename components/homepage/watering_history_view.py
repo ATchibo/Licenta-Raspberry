@@ -2,6 +2,8 @@ from kivy.clock import Clock
 from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.list import MDList, OneLineListItem
+from kivymd.uix.scrollview import MDScrollView
 from matplotlib import pyplot as plt
 
 
@@ -16,5 +18,12 @@ class WateringHistoryView(MDBoxLayout):
         Clock.schedule_once(self.init, 0.1)
 
     def init(self, *args):
-        print("rahat")
+        ml = self.ids.watering_history_list
 
+        contacts = ["Paula", "John", "Kate", "Vlad"]
+        for c in contacts:
+            ml.add_widget(
+                OneLineListItem(
+                    text=c
+                )
+            )
