@@ -11,19 +11,26 @@
         id: graph_box
         size_hint_y: 1
 
-
-    MDStackLayout:
+    MDBoxLayout:
         size_hint: 1, 0.15
         padding: 10
 
-        MDLabel:
-            text: "Period: "
-            halign: "right"
-            font_style: "H6"
-            size_hint: 0.5, 1
+        MDBoxLayout:
+            padding: [0, 0, 0, 15]
+            size_hint: 0.5, None
 
-        MDDropDownItem:
-            id: drop_item
-            text: 'Item 0'
-            size_hint_y: 1
-            on_release: root.menu.open()
+            MDLabel:
+                text: "Period: "
+                halign: "right"
+                font_style: "H6"
+                size_hint: 1, 1
+                pos_hint: {"center_x": 0.5, "center_y": 0}
+
+        MDBoxLayout:
+            size_hint: 0.5, None
+
+            MDDropDownItem:
+                id: drop_item
+                text: 'Item 0'
+                size_hint_y: 1
+                on_release: root.menu.open()
