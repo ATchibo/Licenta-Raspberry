@@ -12,10 +12,10 @@
 
             MDLabel:
                 text: "Current watering program: "
-                halign: "right"
+                halign: "center"
                 font_style: "H4"
-                size_hint: 1, 1
-                pos_hint: {"center_x": 0.25, "center_y": 0}
+                size_hint: 1, None
+                pos_hint: {"center_x": 0.5, "center_y": 0}
 
             MDDropDownItem:
                 id: drop_item
@@ -26,7 +26,7 @@
 
         MDBoxLayout:
             size_hint: 1, 0.6
-            padding: [10, 30, 10, 10]
+            padding: [10, 30, 10, 30]
             orientation: "vertical"
 
             MDRaisedButton:
