@@ -1,9 +1,28 @@
-
 <HomePage>:
     name: "home"
 
-    MDLabel:
-        text: "Home Page"
-        halign: "center"
-        font_style: "H2"
-        pos_hint: {"center_x": .5, "center_y": .9}
+    MDBottomNavigation:
+        #panel_color: "#eeeaea"
+        selected_color_background: "orange"
+        text_color_active: "lightgrey"
+
+        MDBottomNavigationItem:
+            name: 'screen 1'
+            text: 'Humidity graph'
+            icon: 'water-percent'
+
+            GraphView:
+
+        MDBottomNavigationItem:
+            name: 'screen 2'
+            text: 'Event History'
+            icon: 'history'
+
+            WateringHistoryView:
+
+        MDBottomNavigationItem:
+            name: 'screen 3'
+            text: 'Watering Options'
+            icon: 'water-pump'
+
+            WateringOptionsView:
