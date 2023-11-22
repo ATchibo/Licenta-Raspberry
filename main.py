@@ -9,6 +9,7 @@ from pages.connect_page import ConnectPage
 from pages.home_page import HomePage
 from pages.settings_page import SettingsPage
 
+
 class ContentNavigationDrawer(MDScrollView):
     screen_manager = ObjectProperty()
     nav_drawer = ObjectProperty()
@@ -17,9 +18,17 @@ class ContentNavigationDrawer(MDScrollView):
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
-        Window.size = (800, 480)
-        # Window.fullscreen = 'auto'
+
+        if Window.size[0] >= 800:
+            print("Window size is greater than 800: ", Window.size)
+            Window.size = (1200, 720)
+            Window.fullscreen = False
+        else:
+            print("Window size is less than 800: ", Window.size)
+            Window.fullscreen = 'auto'
+
         self.theme_cls.primary_palette = "Green"
+
 
 if __name__ == '__main__':
     PlantBuddyApp().run()
