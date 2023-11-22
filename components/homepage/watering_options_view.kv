@@ -17,11 +17,12 @@
                 size_hint: 1, None
                 pos_hint: {"center_x": 0.5, "center_y": 0}
 
-                Button:
-                    id: mainbutton
-                    text: "Change"
-                    size_hint: 0.5, 0.5
-                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            MDFillRoundFlatButton:
+                id: mainbutton
+                text: "Change"
+                font_size: 24
+                text_color: 1, 1, 1, 1
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
         MDBoxLayout:
             size_hint: 1, 0.6

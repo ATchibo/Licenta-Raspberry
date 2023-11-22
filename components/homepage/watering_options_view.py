@@ -51,8 +51,6 @@ class WateringOptionsView(MDBoxLayout):
         # assign the data to the button text.
         dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', x))
 
-        # self.menu.bind()
-
     def set_item(self, text_item):
         self.ids.drop_item.set_item(text_item)
         self.menu.dismiss()
