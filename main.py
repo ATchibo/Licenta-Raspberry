@@ -19,13 +19,8 @@ class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
 
-        if Window.size[0] >= 800:
-            print("Window size is greater than 800: ", Window.size)
-            Window.size = (1200, 720)
-            Window.fullscreen = False
-        else:
-            print("Window size is less than 800: ", Window.size)
-            Window.fullscreen = 'auto'
+        # Window.size = (1200, 720)
+        Window.fullscreen = 'auto'
 
         self.theme_cls.primary_palette = "Green"
 
