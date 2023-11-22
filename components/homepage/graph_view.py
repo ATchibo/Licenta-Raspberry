@@ -2,6 +2,8 @@ from math import sin
 
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
 from kivy_garden.graph import Graph, MeshLinePlot
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.menu import MDDropdownMenu
@@ -58,23 +60,15 @@ class GraphView(MDBoxLayout):
         return plt.gcf()
 
     def init_dropdown(self, *args):
+        dropdown = DropDown()
+        for index in range(10):
+            btn = Button(text='Value %d' % index, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
+            dropdown.add_widget(btn)
 
-        menu_items = [
-            {
-                "viewclass": "OneLineListItem",
-                "text": f"Item {i}",
-                "on_release": lambda x=f"Item {i}": self.set_item(x),
-            } for i in range(5)
-        ]
-
-        self.menu = MDDropdownMenu(
-            caller=self.ids.drop_item,
-            items=menu_items,
-            position="center",
-            width_mult=2,
-        )
-
-        self.menu.bind()
+        mainbutton = self.ids.mainbutton
+        mainbutton.bind(on_release=dropdown.open)
+        dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', x))
 
     def set_item(self, text_item):
         self.ids.drop_item.set_item(text_item)

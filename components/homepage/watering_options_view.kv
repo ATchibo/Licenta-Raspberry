@@ -17,12 +17,12 @@
                 size_hint: 1, None
                 pos_hint: {"center_x": 0.5, "center_y": 0}
 
-            MDDropDownItem:
-                id: drop_item
-                text: 'Item 0'
+            MDFillRoundFlatButton:
+                id: mainbutton
+                text: "Change"
                 font_size: 24
-                pos_hint: {"center_x": 0.5, "center_y": 0}
-                on_release: root.menu.open()
+                text_color: 1, 1, 1, 1
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
         MDBoxLayout:
             size_hint: 1, 0.6
