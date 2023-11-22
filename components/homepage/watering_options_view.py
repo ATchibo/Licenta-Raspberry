@@ -1,6 +1,8 @@
 from kivy.clock import Clock
 from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.menu import MDDropdownMenu
 from matplotlib import pyplot as plt
@@ -20,23 +22,36 @@ class WateringOptionsView(MDBoxLayout):
         self.init_dropdown(*args)
 
     def init_dropdown(self, *args):
+        dropdown = DropDown()
+        for index in range(10):
+            # When adding widgets, we need to specify the height manually
+            # (disabling the size_hint_y) so the dropdown can calculate
+            # the area it needs.
 
-        menu_items = [
-            {
-                "viewclass": "OneLineListItem",
-                "text": f"Item {i}",
-                "on_release": lambda x=f"Item {i}": self.set_item(x),
-            } for i in range(5)
-        ]
+            btn = Button(text='Value %d' % index, size_hint_y=None, height=44)
 
-        self.menu = MDDropdownMenu(
-            caller=self.ids.drop_item,
-            items=menu_items,
-            position="center",
-            width_mult=2,
-        )
+            # for each button, attach a callback that will call the select() method
+            # on the dropdown. We'll pass the text of the button as the data of the
+            # selection.
+            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
 
-        self.menu.bind()
+            # then add the button inside the dropdown
+            dropdown.add_widget(btn)
+
+        # create a big main button
+        mainbutton = self.ids.mainbutton
+
+        # show the dropdown menu when the main button is released
+        # note: all the bind() calls pass the instance of the caller (here, the
+        # mainbutton instance) as the first argument of the callback (here,
+        # dropdown.open.).
+        mainbutton.bind(on_release=dropdown.open)
+
+        # one last thing, listen for the selection in the dropdown list and
+        # assign the data to the button text.
+        dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', x))
+
+        # self.menu.bind()
 
     def set_item(self, text_item):
         self.ids.drop_item.set_item(text_item)
