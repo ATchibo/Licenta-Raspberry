@@ -12,6 +12,7 @@ Builder.load_file("components/homepage/watering_options_view.kv")
 class WateringOptionsView(MDBoxLayout):
     def __init__(self, **kwargs):
         super(WateringOptionsView, self).__init__(**kwargs)
+        self.menu = None
         self.orientation = "vertical"
         self.size_hint_y = 1
         Clock.schedule_once(self.init, 0.1)
@@ -40,7 +41,7 @@ class WateringOptionsView(MDBoxLayout):
 
     def set_item(self, text_item):
         self.ids.drop_item.set_item(text_item)
-        self.menu.dismiss()
+        # self.menu.dismiss()
 
 
 
