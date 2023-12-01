@@ -7,6 +7,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.menu import MDDropdownMenu
 from matplotlib import pyplot as plt
 
+from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("components/homepage/watering_options_view.kv")
 
@@ -17,6 +18,8 @@ class WateringOptionsView(MDBoxLayout):
         self.orientation = "vertical"
         self.size_hint_y = 1
         Clock.schedule_once(self.init, 0.1)
+
+        self.raspberry_controller = RaspberryController()
 
     def init(self, *args):
         self.init_dropdown(*args)
@@ -36,5 +39,10 @@ class WateringOptionsView(MDBoxLayout):
         self.ids.drop_item.set_item(text_item)
         self.menu.dismiss()
 
+    def water_now(self):
+        print("Watering now")
 
+        moisture_percentage = self.raspberry_controller.get_moisture_percentage()
+        self.ids.water_now_label.text = f"Moisture: {moisture_percentage}%"
 
+        self.raspberry_controller.check_need_for_watering()

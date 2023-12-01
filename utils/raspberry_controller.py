@@ -4,6 +4,13 @@ from utils.watering_program import WateringProgram
 
 
 class RaspberryController:
+    _self = None
+
+    def __new__(cls):
+        if cls._self is None:
+            cls._self = super().__new__(cls)
+        return cls._self
+
     def __init__(self):
         self.moisture_controller = MoistureController(channel=1)
         self.pump_controller = PumpController(pin=4, liters_per_second=0.1)
