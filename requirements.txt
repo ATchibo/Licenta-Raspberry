@@ -21,3 +21,4 @@ yarg==0.1.9
 matplotlib==3.7.2
 gpiozero==2.0
 RPi.GPIO==0.7.1
+firebase_admin==6.2.0
