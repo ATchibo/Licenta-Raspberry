@@ -30,12 +30,15 @@
             orientation: "vertical"
 
             MDFillRoundFlatButton:
+                id: water_now_button
                 text: "Water now"
                 font_size: 24
                 text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5}
+                on_release: root.water_now()
 
             MDLabel:
+                id: water_now_label
                 text: "Running time: 4s;\nWater quantity: 4l"
                 halign: "center"
                 font_style: "H5"
