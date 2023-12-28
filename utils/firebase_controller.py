@@ -15,6 +15,10 @@ class FirebaseController:
             cls._instance.db = firestore.client()
         return cls._instance
 
+    def __init__(self):
+        self.watering_now_callback = None
+        self.watering_now_listener = None
+
     def is_raspberry_registered(self, serial):
         query_result = self.db.collection('raspberry_info').where('serial', '==', serial).get()
         return len(query_result) > 0
@@ -28,3 +32,9 @@ class FirebaseController:
             )
         else:
             raise Exception("Raspberry Pi already registered")
+
+    def add_watering_now_listener(self, serial, callback):
+        self.watering_now_callback = callback
+
+        doc_ref = self.db.collection('watering_info').document(serial)
+        self.watering_now_listener = doc_ref.on_snapshot(callback)

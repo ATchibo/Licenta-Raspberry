@@ -2,10 +2,10 @@
 class RaspberryInfo:
     def __init__(self,
                  raspberryId = "",
-                 raspberryName = "",
+                 raspberryName = "___",
                  raspberryLocation = "",
                  raspberryDescription = "",
-                 raspberryStatus = ""):
+                 raspberryStatus = "OFFLINE"):
         self.raspberryId = raspberryId
         self.raspberryName = raspberryName
         self.raspberryLocation = raspberryLocation

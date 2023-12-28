@@ -25,18 +25,18 @@ class PumpController:
 
         time_end = time.time() + seconds
         while time.time() < time_end:
-            self._start()
-        self._stop()
+            self.start_watering()
+        self.stop_watering()
 
     def start_watering_for_liters(self, liters):
         """Start watering for the specified amount of minutes."""
         seconds = liters / self.pump_capacity
         self.start_watering_for_seconds(seconds)
 
-    def _start(self):
+    def start_watering(self):
         """Start the pump."""
         GPIO.output(self.pin, GPIO.HIGH)
 
-    def _stop(self):
+    def stop_watering(self):
         """Stop the pump."""
         GPIO.output(self.pin, GPIO.LOW)
