@@ -20,7 +20,7 @@ class FirebaseController:
         self.watering_now_listener = None
 
     def is_raspberry_registered(self, serial):
-        query_result = self.db.collection('raspberry_info').where('serial', '==', serial).get()
+        query_result = self.db.collection('raspberry_info').where('raspberryId', '==', serial).get()
         return len(query_result) > 0
 
     def register_raspberry(self, serial):
