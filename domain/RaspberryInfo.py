@@ -13,7 +13,11 @@ class RaspberryInfo:
         self.raspberryStatus = raspberryStatus
 
     def __str__(self):
-        return f"Name: {self.name}, IP: {self.ip}, MAC: {self.mac}, Status: {self.status}"
+        return f"Id: {self.raspberryId}\n" \
+               f"Name: {self.raspberryName}\n" \
+               f"Location: {self.raspberryLocation}\n" \
+               f"Description: {self.raspberryDescription}\n" \
+               f"Status: {self.raspberryStatus}\n"
 
     def getInfoDict(self):
         return {
