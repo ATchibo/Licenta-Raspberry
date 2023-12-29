@@ -3,7 +3,7 @@ from gpiozero import MCP3008
 
 class MoistureController:
     def __init__(self, channel):
-        # print("MoistureController init")
+        print("MoistureController init")
 
         self.sensor = MCP3008(channel=channel)
 
