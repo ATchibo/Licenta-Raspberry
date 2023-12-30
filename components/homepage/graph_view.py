@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
-
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
-from kivy_garden.graph import Graph, MeshLinePlot
+from kivy.uix.boxlayout import BoxLayout
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivymd.uix.boxlayout import MDBoxLayout
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 
@@ -21,21 +24,11 @@ class GraphView(MDBoxLayout):
         self.firebase_controller = FirebaseController()
 
         self.menu = None
-        self.plot = None
         self.dropdown = None
         self.dropdown_items = ["Last 24h", "Last 7 days", "Last 30 days"]
 
         self.end_datetime = datetime.now()
-        self.start_datetime = self.end_datetime - timedelta(days=7)
-
-        self.graph_theme = {
-            'label_options': {
-                'color': [1, 0, 0, 1],
-                'bold': True
-            },
-            'tick_color': [1, 0, 0, 1],
-            'border_color': [1, 0, 0, 1],
-        }
+        self.start_datetime = self.end_datetime - timedelta(days=1)
 
         Clock.schedule_once(self.add_graph, 0.1)
         Clock.schedule_once(self.init_dropdown, 0.1)
@@ -47,38 +40,31 @@ class GraphView(MDBoxLayout):
         graph_box = self.ids.graph_box
         graph_box.clear_widgets()
 
-        graph = Graph(
-            xlabel='Time',
-            ylabel='Moisture (%)',
-            x_ticks_minor=1,
-            x_ticks_major=1,
-            y_ticks_major=1,
-            y_grid_label=True,
-            x_grid_label=True,
-            padding=5,
-            x_grid=False,
-            y_grid=False,
-            xmin=0,
-            xmax=10,
-            ymin=0,
-            ymax=100,
-            **self.graph_theme
-        )
+        fig, ax = plt.subplots()
 
         moisture_info_list = self.firebase_controller.get_moisture_info_for_rasp_id(getserial(), self.start_datetime,
                                                                                     self.end_datetime)
 
-        points = []
-        for moisture_info in moisture_info_list:
-            print("Moisture info value: " + str(moisture_info["measurementValuePercent"]))
-            points.append((moisture_info_list.index(moisture_info), moisture_info["measurementValuePercent"]))
-            # points.append((moisture_info["measurementTime"].timestamp(), moisture_info["measurementValuePercent"]))
+        timestamps = [moisture_info["measurementTime"] for moisture_info in moisture_info_list]
+        values = [moisture_info["measurementValuePercent"] for moisture_info in moisture_info_list]
 
-        self.plot = MeshLinePlot(color=[1, 0, 0, 1])
-        self.plot.points = points
+        ax.plot(timestamps, values, color='red', marker='o')
 
-        graph.add_plot(self.plot)
-        graph_box.add_widget(graph)
+        ax.grid()
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Moisture (%)')
+
+        # Set minimum and maximum values for the y-axis
+        ax.set_ylim(0, 100)  # Adjust the values as needed
+
+        xfmt = mdates.DateFormatter('%Y-%m-%d %H:%M')
+        ax.xaxis.set_major_formatter(xfmt)
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
+        plt.xticks(rotation=45, ha="right")
+
+        plt.tight_layout()
+
+        graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
 
     def init_dropdown(self, *args):
         self.dropdown = DropDown()
@@ -106,7 +92,3 @@ class GraphView(MDBoxLayout):
             self.start_datetime = self.end_datetime - timedelta(days=30)
 
         self.update_plot()
-
-    # def set_item(self, text_item):
-    #     self.ids.drop_item.set_item(text_item)
-    #     self.menu.dismiss()

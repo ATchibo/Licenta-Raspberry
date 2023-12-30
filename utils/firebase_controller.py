@@ -53,6 +53,4 @@ class FirebaseController:
         docs = query.stream()
         moisture_info_list = [doc.to_dict() for doc in docs]
 
-        print(moisture_info_list)
-
         return moisture_info_list
