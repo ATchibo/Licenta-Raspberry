@@ -57,7 +57,7 @@ class GraphView(MDBoxLayout):
         # Set minimum and maximum values for the y-axis
         ax.set_ylim(0, 100)  # Adjust the values as needed
 
-        xfmt = mdates.DateFormatter('%Y-%m-%d \n %H:%M')
+        xfmt = mdates.DateFormatter('%MM-%d \n %H:%M')
         ax.xaxis.set_major_formatter(xfmt)
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
         plt.xticks(rotation=45, ha="right")
