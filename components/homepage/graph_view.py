@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.uix.button import Button
@@ -27,7 +27,10 @@ class GraphView(MDBoxLayout):
         self.dropdown = None
         self.dropdown_items = ["Last 24h", "Last 7 days", "Last 30 days"]
 
-        self.end_datetime = datetime.now()
+        # Get the local timezone
+        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+
+        self.end_datetime = datetime.now(local_tz)
         self.start_datetime = self.end_datetime - timedelta(days=1)
 
         Clock.schedule_once(self.add_graph, 0.1)
@@ -82,7 +85,9 @@ class GraphView(MDBoxLayout):
         print(f"Selected item: {index}")
         self.dropdown.select(index)
 
-        self.end_datetime = datetime.now()
+        # Get the local timezone
+        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        self.end_datetime = datetime.now(local_tz)
 
         if index == 0:
             self.start_datetime = self.end_datetime - timedelta(days=1)
