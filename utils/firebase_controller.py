@@ -16,18 +16,22 @@ class FirebaseController:
         return cls._instance
 
     def __init__(self):
+        self.deviceLinksCollectionName = "device_links"
+        self.raspberryInfoCollectionName = "raspberry_info"
+        self.moistureInfoCollectionName = "humidity_readings"
+        self.wateringNowCollectionName = "watering_info"
         self.watering_now_callback = None
         self.watering_now_listener = None
 
     def is_raspberry_registered(self, serial):
-        query_result = self.db.collection('raspberry_info').where('raspberryId', '==', serial).get()
+        query_result = self.db.collection(self.raspberryInfoCollectionName).where('raspberryId', '==', serial).get()
         return len(query_result) > 0
 
     def register_raspberry(self, serial):
         if not self.is_raspberry_registered(serial):
             rpi_info = RaspberryInfo(raspberryId=serial)
 
-            self.db.collection('raspberry_info').add(
+            self.db.collection(self.raspberryInfoCollectionName).add(
                 rpi_info.getInfoDict()
             )
         else:
@@ -36,5 +40,19 @@ class FirebaseController:
     def add_watering_now_listener(self, serial, callback):
         self.watering_now_callback = callback
 
-        doc_ref = self.db.collection('watering_info').document(serial)
+        doc_ref = self.db.collection(self.wateringNowCollectionName).document(serial)
         self.watering_now_listener = doc_ref.on_snapshot(callback)
+
+    def get_moisture_info_for_rasp_id(self, rpi_id, start_datetime, end_datetime):
+        moisture_info_ref = self.db.collection(self.moistureInfoCollectionName)
+
+        query = moisture_info_ref.where('raspberryId', '==', rpi_id) \
+            .where('measurementTime', '>=', start_datetime) \
+            .where('measurementTime', '<=', end_datetime)
+
+        docs = query.stream()
+        moisture_info_list = [doc.to_dict() for doc in docs]
+
+        print(moisture_info_list)
+
+        return moisture_info_list

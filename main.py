@@ -27,6 +27,6 @@ class PlantBuddyApp(MDApp):
 if __name__ == '__main__':
     FirebaseController()
 
-    RaspberryController().start_listening_for_watering_now()
+    # RaspberryController().start_listening_for_watering_now()
 
     PlantBuddyApp().run()
