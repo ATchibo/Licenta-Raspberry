@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.uix.button import Button
@@ -48,7 +50,8 @@ class GraphView(MDBoxLayout):
                                                                                     self.end_datetime)
 
         timestamps = [moisture_info["measurementTime"] for moisture_info in moisture_info_list]
-        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        local_tz = ZoneInfo("Europe/Bucharest")
         timestamps = [timestamp.astimezone(local_tz) for timestamp in timestamps]
 
         values = [moisture_info["measurementValuePercent"] for moisture_info in moisture_info_list]
@@ -70,6 +73,8 @@ class GraphView(MDBoxLayout):
         plt.tight_layout()
 
         graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
+
+        # TODO: check timezone and add some kind of loading spinner
 
     def init_dropdown(self, *args):
         self.dropdown = DropDown()
