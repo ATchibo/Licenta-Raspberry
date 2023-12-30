@@ -27,7 +27,6 @@ class GraphView(MDBoxLayout):
         self.dropdown = None
         self.dropdown_items = ["Last 24h", "Last 7 days", "Last 30 days"]
 
-        # Get the local timezone
         local_tz = datetime.now(timezone.utc).astimezone().tzinfo
 
         self.end_datetime = datetime.now(local_tz)
@@ -49,6 +48,9 @@ class GraphView(MDBoxLayout):
                                                                                     self.end_datetime)
 
         timestamps = [moisture_info["measurementTime"] for moisture_info in moisture_info_list]
+        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        timestamps = [timestamp.astimezone(local_tz) for timestamp in timestamps]
+
         values = [moisture_info["measurementValuePercent"] for moisture_info in moisture_info_list]
 
         ax.plot(timestamps, values, color='red', marker='o')
@@ -85,7 +87,6 @@ class GraphView(MDBoxLayout):
         print(f"Selected item: {index}")
         self.dropdown.select(index)
 
-        # Get the local timezone
         local_tz = datetime.now(timezone.utc).astimezone().tzinfo
         self.end_datetime = datetime.now(local_tz)
 
