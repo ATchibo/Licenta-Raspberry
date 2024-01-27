@@ -1,6 +1,7 @@
 from kivy.clock import Clock
 from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
+from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -13,6 +14,9 @@ Builder.load_file("components/homepage/watering_options_view.kv")
 
 
 class WateringOptionsView(MDBoxLayout):
+    watering_label_variable = StringProperty()
+    water_now_disabled_variable = BooleanProperty(False)
+
     def __init__(self, **kwargs):
         super(WateringOptionsView, self).__init__(**kwargs)
         self.orientation = "vertical"
@@ -20,6 +24,10 @@ class WateringOptionsView(MDBoxLayout):
         Clock.schedule_once(self.init, 0.1)
 
         self.raspberry_controller = RaspberryController()
+        self.watering_label_variable = f"Water amount: 0L\nTime running: 0s"
+        self.water_now_disabled_variable = False
+
+        self.bind_raspberry_controller_properties()
 
     def init(self, *args):
         self.init_dropdown(*args)
@@ -46,3 +54,13 @@ class WateringOptionsView(MDBoxLayout):
         self.ids.water_now_label.text = f"Moisture: {moisture_percentage}%"
 
         self.raspberry_controller.check_need_for_watering()
+
+
+    def bind_raspberry_controller_properties(self):
+        self.raspberry_controller.set_callback_for_watering_updates(callback=self.update_watering_label_variable)
+
+    def update_watering_label_variable(self, is_watering, watering_time, liters_sent):
+        print("Is watering: ", is_watering)
+
+        self.water_now_disabled_variable = is_watering
+        self.watering_label_variable = f"Water amount: {liters_sent}L\nTime running: {watering_time}s"

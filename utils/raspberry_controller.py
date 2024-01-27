@@ -28,6 +28,7 @@ class RaspberryController:
         self.liters_sent = 0  # liters
         self._send_watering_updates_thread = None
         self._send_watering_updates = False
+        self._watering_callback_function = None
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -64,6 +65,13 @@ class RaspberryController:
 
                         self.pump_controller.stop_watering()
                         self.stop_sending_watering_updates()
+
+                        if self._watering_callback_function is not None:
+                            self._watering_callback_function(
+                                is_watering=self.pump_controller.is_watering,
+                                watering_time=round(self.watering_time),
+                                liters_sent=round(self.liters_sent, 2)
+                            )
 
             else:
                 print("Current data: null")
@@ -103,6 +111,14 @@ class RaspberryController:
 
             self.stop_sending_watering_updates()
             self.pump_controller.stop_watering()
+
+            if self._watering_callback_function is not None:
+                self._watering_callback_function(
+                    is_watering=self.pump_controller.is_watering,
+                    watering_time=round(self.watering_time),
+                    liters_sent=round(self.liters_sent, 2)
+                )
+
         else:
             FirebaseController().update_watering_info(
                 getserial(),
@@ -110,3 +126,13 @@ class RaspberryController:
                 round(self.liters_sent, 2),
                 round(self.watering_time)
             )
+
+            if self._watering_callback_function is not None:
+                self._watering_callback_function(
+                    is_watering=self.pump_controller.is_watering,
+                    watering_time=round(self.watering_time),
+                    liters_sent=round(self.liters_sent, 2)
+                )
+
+    def set_callback_for_watering_updates(self, callback):
+        self._watering_callback_function = callback
