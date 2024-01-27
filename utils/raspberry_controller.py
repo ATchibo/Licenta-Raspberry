@@ -88,7 +88,7 @@ class RaspberryController:
 
         FirebaseController().update_watering_info(
             getserial(),
-            'start_watering',
+            '',
             round(liters_sent, 2),
             round(watering_time)
         )
