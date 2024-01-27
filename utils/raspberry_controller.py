@@ -22,7 +22,8 @@ class RaspberryController:
         self._watering_program = WateringProgram(name="Test", liters_needed=1, time_interval=1, min_moisture=30,
                                                  max_moisture=70)
 
-        self.send_watering_updates_interval_ms = 1000
+        self._send_watering_updates_interval_ms = 1000
+        self._max_watering_time_sec = 30
         self._send_watering_updates_thread = None
         self._send_watering_updates = False
 
@@ -84,11 +85,22 @@ class RaspberryController:
 
         while self._send_watering_updates:
             self._send_watering_update_function(watering_time_start)
-            time.sleep(self.send_watering_updates_interval_ms / 1000.0)
+            time.sleep(self._send_watering_updates_interval_ms / 1000.0)
 
     def _send_watering_update_function(self, watering_time_start):
         watering_time = time.time() - watering_time_start  # seconds
         liters_sent = watering_time * self.pump_controller.pump_capacity  # seconds * liters/second -> liters
+
+        if watering_time >= self._max_watering_time_sec:
+            FirebaseController().update_watering_info(
+                getserial(),
+                'stop_watering',
+                round(liters_sent, 2),
+                round(watering_time)
+            )
+
+            self.stop_sending_watering_updates()
+            self.pump_controller.stop_watering()
 
         FirebaseController().update_watering_info(
             getserial(),
