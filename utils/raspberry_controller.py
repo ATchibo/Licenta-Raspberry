@@ -24,6 +24,7 @@ class RaspberryController:
 
         self.send_watering_updates_interval_ms = 1000
         self._send_watering_updates_thread = None
+        self._send_watering_updates = False
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -68,17 +69,20 @@ class RaspberryController:
         FirebaseController().watering_now_listener.unsubscribe()
 
     def start_sending_watering_updates(self):
+        self._send_watering_updates = True
         self._send_watering_updates_thread = threading.Thread(target=self._send_watering_updates_worker)
         self._send_watering_updates_thread.start()
 
     def stop_sending_watering_updates(self):
+        self._send_watering_updates = False
+
         if self._send_watering_updates_thread is not None and self._send_watering_updates_thread.is_alive():
             self._send_watering_updates_thread.interrupt()
 
     def _send_watering_updates_worker(self):
         watering_time_start = time.time()
 
-        while True:
+        while self._send_watering_updates:
             self._send_watering_update_function(watering_time_start)
             time.sleep(self.send_watering_updates_interval_ms / 1000.0)
 
