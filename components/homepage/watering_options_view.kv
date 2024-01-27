@@ -36,10 +36,11 @@
                 text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5}
                 on_release: root.water_now()
+                disabled: root.water_now_disabled_variable
 
             MDLabel:
                 id: water_now_label
-                text: "Running time: 4s;\nWater quantity: 4l"
+                text: root.watering_label_variable
                 halign: "center"
                 font_style: "H5"
                 pos_hint: {"center_x": 0.5}
