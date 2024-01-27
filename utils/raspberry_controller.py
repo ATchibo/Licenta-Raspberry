@@ -86,4 +86,9 @@ class RaspberryController:
         watering_time = time.time() - watering_time_start  # seconds
         liters_sent = watering_time * self.pump_controller.pump_capacity  # seconds * liters/second -> liters
 
-        FirebaseController().update_watering_info(getserial(), 'start_watering', liters_sent, watering_time)
+        FirebaseController().update_watering_info(
+            getserial(),
+            'start_watering',
+            round(liters_sent, 2),
+            round(watering_time)
+        )
