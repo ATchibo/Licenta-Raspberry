@@ -58,7 +58,7 @@ class FirebaseController:
     def update_watering_info(self, serial, command, liters_sent, watering_time):
         doc_ref = self.db.collection(self.wateringNowCollectionName).document(serial)
 
-        doc_ref.set({
+        doc_ref.update({
             'command': command,
             'watering_duration': watering_time,
             'water_volume': liters_sent

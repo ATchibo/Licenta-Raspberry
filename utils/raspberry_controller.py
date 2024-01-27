@@ -22,7 +22,7 @@ class RaspberryController:
         self._watering_program = WateringProgram(name="Test", liters_needed=1, time_interval=1, min_moisture=30,
                                                  max_moisture=70)
 
-        self.send_watering_updates_interval_ms = 500
+        self.send_watering_updates_interval_ms = 1000
         self._send_watering_updates_thread = None
 
     def set_watering_program(self, watering_program):
