@@ -47,7 +47,7 @@ class RaspberryController:
                 print(f"Document data: {updated_data}")
 
                 if updated_data["command"] is not None:
-                    if updated_data["command"] == "water_now":
+                    if updated_data["command"] == "start_watering":
                         if self.pump_controller.is_watering:
                             return
 
