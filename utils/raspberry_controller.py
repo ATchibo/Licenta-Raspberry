@@ -1,3 +1,6 @@
+import threading
+import time
+
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.moisture_controller import MoistureController
@@ -18,6 +21,9 @@ class RaspberryController:
         self.pump_controller = PumpController(pin=4, liters_per_second=0.1)
         self._watering_program = WateringProgram(name="Test", liters_needed=1, time_interval=1, min_moisture=30,
                                                  max_moisture=70)
+
+        self.send_watering_updates_interval_ms = 500
+        self._send_watering_updates_thread = None
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -42,9 +48,42 @@ class RaspberryController:
 
                 if updated_data["command"] is not None:
                     if updated_data["command"] == "water_now":
+                        if self.pump_controller.is_watering:
+                            return
+
                         self.pump_controller.start_watering()
+                        self.start_sending_watering_updates()
+
                     elif updated_data["command"] == "stop_watering":
+                        if not self.pump_controller.is_watering:
+                            return
+
                         self.pump_controller.stop_watering()
+                        self.stop_sending_watering_updates()
 
             else:
                 print("Current data: null")
+
+    def stop_listening_for_watering_now(self):
+        FirebaseController().watering_now_listener.unsubscribe()
+
+    def start_sending_watering_updates(self):
+        self._send_watering_updates_thread = threading.Thread(target=self._send_watering_updates_worker)
+        self._send_watering_updates_thread.start()
+
+    def stop_sending_watering_updates(self):
+        if self._send_watering_updates_thread is not None and self._send_watering_updates_thread.is_alive():
+            self._send_watering_updates_thread.join()
+
+    def _send_watering_updates_worker(self):
+        watering_time_start = time.time()
+
+        while True:
+            self._send_watering_update_function(watering_time_start)
+            time.sleep(self.send_watering_updates_interval_ms / 1000.0)
+
+    def _send_watering_update_function(self, watering_time_start):
+        watering_time = time.time() - watering_time_start  # seconds
+        liters_sent = watering_time * self.pump_controller.pump_capacity  # seconds * liters/second -> liters
+
+        FirebaseController().update_watering_info(getserial(), '', liters_sent, watering_time)

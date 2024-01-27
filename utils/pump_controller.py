@@ -12,6 +12,8 @@ class PumpController:
         # set the liters per second
         self.pump_capacity = liters_per_second
 
+        self.is_watering = False
+
         GPIO.setwarnings(False)
         # set the mode to BCM - refer to the pins by the GPIO number
         GPIO.setmode(GPIO.BCM)
@@ -34,9 +36,19 @@ class PumpController:
         self.start_watering_for_seconds(seconds)
 
     def start_watering(self):
+        if self.is_watering:
+            return
+
         """Start the pump."""
         GPIO.output(self.pin, GPIO.HIGH)
 
+        self.is_watering = True
+
     def stop_watering(self):
+        if not self.is_watering:
+            return
+
         """Stop the pump."""
         GPIO.output(self.pin, GPIO.LOW)
+
+        self.is_watering = False
