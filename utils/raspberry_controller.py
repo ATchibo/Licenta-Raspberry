@@ -73,7 +73,7 @@ class RaspberryController:
 
     def stop_sending_watering_updates(self):
         if self._send_watering_updates_thread is not None and self._send_watering_updates_thread.is_alive():
-            self._send_watering_updates_thread.join()
+            self._send_watering_updates_thread.interrupt()
 
     def _send_watering_updates_worker(self):
         watering_time_start = time.time()
