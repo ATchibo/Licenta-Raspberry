@@ -55,7 +55,7 @@ class WateringOptionsView(MDBoxLayout):
     def water_now(self):
         print("Watering now")
 
-        if (self.raspberry_controller.water_now()):
+        if self.raspberry_controller.water_now():
             moisture_percentage = self.raspberry_controller.get_moisture_percentage()
             self.ids.water_now_label.text = f"Moisture: {moisture_percentage}%"
             self.ids.water_now_button.text = "Stop watering"
