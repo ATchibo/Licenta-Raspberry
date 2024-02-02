@@ -41,7 +41,16 @@ class RaspberryController:
             self.pump_controller.start_watering_for_liters(self._watering_program.get_liters_needed())
 
     def water_now(self) -> bool:
-        return self.pump_controller.start_watering()
+        if self.pump_controller.start_watering():
+            self.start_sending_watering_updates()
+            return True
+        return False
+
+    def stop_watering(self) -> bool:
+        if self.pump_controller.stop_watering():
+            self.stop_sending_watering_updates()
+            return True
+        return False
 
     def start_listening_for_watering_now(self):
         FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback)

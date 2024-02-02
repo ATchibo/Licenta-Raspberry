@@ -66,7 +66,7 @@ class WateringOptionsView(MDBoxLayout):
     def stop_watering(self):
         print("Stopping watering")
 
-        self.raspberry_controller.pump_controller.stop_watering()
+        self.raspberry_controller.stop_watering()
         self.ids.water_now_button.text = "Water now"
         self.water_now_disabled_variable = False
 
