@@ -35,8 +35,7 @@
                 font_size: 24
                 text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5}
-                on_release: root.water_now()
-                disabled: root.water_now_disabled_variable
+                on_release: root.toggle_water_now()
 
             MDLabel:
                 id: water_now_label

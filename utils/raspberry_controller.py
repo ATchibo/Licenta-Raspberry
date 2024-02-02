@@ -40,6 +40,9 @@ class RaspberryController:
         if self.get_moisture_percentage() < self._watering_program.get_min_moisture():
             self.pump_controller.start_watering_for_liters(self._watering_program.get_liters_needed())
 
+    def water_now(self) -> bool:
+        return self.pump_controller.start_watering()
+
     def start_listening_for_watering_now(self):
         FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback)
 

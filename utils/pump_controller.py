@@ -35,20 +35,22 @@ class PumpController:
         seconds = liters / self.pump_capacity
         self.start_watering_for_seconds(seconds)
 
-    def start_watering(self):
+    def start_watering(self) -> bool:
         if self.is_watering:
-            return
+            return False
 
         """Start the pump."""
         GPIO.output(self.pin, GPIO.HIGH)
 
         self.is_watering = True
+        return True
 
     def stop_watering(self):
         if not self.is_watering:
-            return
+            return False
 
         """Stop the pump."""
         GPIO.output(self.pin, GPIO.LOW)
 
         self.is_watering = False
+        return True
