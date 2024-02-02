@@ -56,8 +56,7 @@ class WateringOptionsView(MDBoxLayout):
         print("Watering now")
 
         if self.raspberry_controller.water_now():
-            moisture_percentage = self.raspberry_controller.get_moisture_percentage()
-            self.ids.water_now_label.text = f"Moisture: {moisture_percentage}%"
+            # moisture_percentage = self.raspberry_controller.get_moisture_percentage()
             self.ids.water_now_button.text = "Stop watering"
             self.water_now_disabled_variable = True
         else:
@@ -71,10 +70,14 @@ class WateringOptionsView(MDBoxLayout):
         self.water_now_disabled_variable = False
 
     def bind_raspberry_controller_properties(self):
-        self.raspberry_controller.set_callback_for_watering_updates(callback=self.update_watering_label_variable)
+        self.raspberry_controller.set_callback_for_watering_updates(callback=self._update_watering_now_info)
 
-    def update_watering_label_variable(self, is_watering, watering_time, liters_sent):
-        print("Is watering: ", is_watering)
+    def _update_watering_now_info(self, is_watering, watering_time, liters_sent):
+        if self.water_now_disabled_variable is not is_watering:
+            if is_watering:
+                self.ids.water_now_button.text = "Stop watering"
+            else:
+                self.ids.water_now_button.text = "Water now"
 
         self.water_now_disabled_variable = is_watering
         self.watering_label_variable = f"Water amount: {liters_sent}L\nTime running: {watering_time}s"

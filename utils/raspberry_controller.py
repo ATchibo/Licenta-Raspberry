@@ -28,7 +28,7 @@ class RaspberryController:
         self.liters_sent = 0  # liters
         self._send_watering_updates_thread = None
         self._send_watering_updates = False
-        self._watering_callback_function = None
+        self._while_watering_callback_function = None
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -49,13 +49,14 @@ class RaspberryController:
     def stop_watering(self) -> bool:
         if self.pump_controller.stop_watering():
             self.stop_sending_watering_updates()
+            self._send_stop_watering_message()
             return True
         return False
 
     def start_listening_for_watering_now(self):
-        FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback)
+        FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback_for_incoming_messages)
 
-    def _watering_now_callback(self, doc_snapshot, changes, read_time):
+    def _watering_now_callback_for_incoming_messages(self, doc_snapshot, changes, read_time):
         for doc in doc_snapshot:
             if doc.exists:
                 # Handle the updated data
@@ -78,8 +79,8 @@ class RaspberryController:
                         self.pump_controller.stop_watering()
                         self.stop_sending_watering_updates()
 
-                        if self._watering_callback_function is not None:
-                            self._watering_callback_function(
+                        if self._while_watering_callback_function is not None:
+                            self._while_watering_callback_function(
                                 is_watering=self.pump_controller.is_watering,
                                 watering_time=round(self.watering_time),
                                 liters_sent=round(self.liters_sent, 2)
@@ -114,37 +115,39 @@ class RaspberryController:
         self.liters_sent = self.watering_time * self.pump_controller.pump_capacity  # seconds * liters/second -> liters
 
         if self.watering_time >= self._max_watering_time_sec:
-            FirebaseController().update_watering_info(
-                getserial(),
-                'stop_watering',
-                round(self.liters_sent, 2),
-                round(self.watering_time)
-            )
-
-            self.stop_sending_watering_updates()
-            self.pump_controller.stop_watering()
-
-            if self._watering_callback_function is not None:
-                self._watering_callback_function(
-                    is_watering=self.pump_controller.is_watering,
-                    watering_time=round(self.watering_time),
-                    liters_sent=round(self.liters_sent, 2)
-                )
-
+            self._send_stop_watering_message()
+            self._update_info_for_watering_callback()
+            return
         else:
-            FirebaseController().update_watering_info(
-                getserial(),
-                '',
-                round(self.liters_sent, 2),
-                round(self.watering_time)
-            )
+            self._update_current_watering_info()
+            self._update_info_for_watering_callback()
 
-            if self._watering_callback_function is not None:
-                self._watering_callback_function(
-                    is_watering=self.pump_controller.is_watering,
-                    watering_time=round(self.watering_time),
-                    liters_sent=round(self.liters_sent, 2)
-                )
+    def _send_stop_watering_message(self):
+        FirebaseController().update_watering_info(
+            getserial(),
+            'stop_watering',
+            round(self.liters_sent, 2),
+            round(self.watering_time)
+        )
+
+        self.stop_sending_watering_updates()
+        self.pump_controller.stop_watering()
+
+    def _update_current_watering_info(self):
+        FirebaseController().update_watering_info(
+            getserial(),
+            'start_watering',
+            round(self.liters_sent, 2),
+            round(self.watering_time)
+        )
+
+    def _update_info_for_watering_callback(self):
+        if self._while_watering_callback_function is not None:
+            self._while_watering_callback_function(
+                is_watering=self.pump_controller.is_watering,
+                watering_time=round(self.watering_time),
+                liters_sent=round(self.liters_sent, 2)
+            )
 
     def set_callback_for_watering_updates(self, callback):
-        self._watering_callback_function = callback
+        self._while_watering_callback_function = callback
