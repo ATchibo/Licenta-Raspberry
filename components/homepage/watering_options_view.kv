@@ -10,13 +10,16 @@
             orientation: "vertical"
             padding: 10
             pos_hint: {"center_x": 0.5, "center_y": 0}
+            md_bg_color: 1, 0, 0, 1
 
             MDBoxLayout:
                 id: toggle_watering_program
                 orientation: "horizontal"
                 halign: "center"
                 pos_hint: {"center_x": 0.5}
+                size_hint: 1, 0.5
                 padding: 20
+                md_bg_color: 0, 1, 0, 1
 
                 MDLabel:
                     text: "Enable watering programs"
@@ -35,8 +38,9 @@
                 text: "Current watering program:"
                 halign: "center"
                 font_style: "H5"
-                size_hint: 1, None
+                size_hint: 1, 0.5
                 pos_hint: {"center_x": 0.5}
+                md_bg_color: 0, 0, 1, 1
 
             Spinner:
                 id: watering_program_spinner
