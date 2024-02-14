@@ -17,7 +17,6 @@
                 size_hint: 0.5, None
                 halign: "center"
                 pos_hint: {"center_x": 0.5, "center_y": 0}
-                spacing: 10
                 padding: 20
 
                 MDLabel:
@@ -62,7 +61,7 @@
             MDFillRoundFlatButton:
                 id: water_now_button
                 text: "Water now"
-                font_size: 24
+                font_style: "H5"
                 text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5}
                 on_release: root.toggle_water_now()
