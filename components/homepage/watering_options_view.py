@@ -1,3 +1,5 @@
+import threading
+
 from kivy.clock import Clock
 from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
@@ -78,9 +80,16 @@ class WateringOptionsView(MDBoxLayout):
     def stop_watering(self):
         print("Stopping watering")
 
-        self.raspberry_controller.stop_watering()
-        self.ids.water_now_button.text = "Water now"
-        self.water_now_disabled_variable = False
+        threading.Thread(target = self._stop_watering_thread()).start()
+
+    def _stop_watering_thread(self):
+        res = self.raspberry_controller.stop_watering()
+
+        if res:
+            self.ids.water_now_button.text = "Water now"
+            self.water_now_disabled_variable = False
+        else:
+            self.ids.water_now_label.text = "Could not stop watering"
 
     def bind_raspberry_controller_properties(self):
         self.raspberry_controller.set_callback_for_watering_updates(callback=self._update_watering_now_info)
