@@ -9,6 +9,8 @@
             size_hint: 1, 0.4
             orientation: "vertical"
             padding: 10
+            pos_hint: {"center_x": 0.5, "center_y": 0}
+            md_bg_color: 1, 0, 1, 1
 
             MDBoxLayout:
                 id: toggle_watering_program
@@ -18,6 +20,7 @@
                 pos_hint: {"center_x": 0.5, "center_y": 0}
                 spacing: 10
                 padding: 20
+                md_bg_color: 0, 1, 1, 1
 
                 MDLabel:
                     text: "Enable watering programs"
@@ -37,20 +40,21 @@
                 halign: "center"
                 font_style: "H4"
                 size_hint: 1, None
-                pos_hint: {"center_x": 0.5, "center_y": 0}
+                pos_hint: {"center_x": 0.5}
 
             MDFillRoundFlatButton:
-                id: mainbutton
+                id: dropdown_button
                 text: "Change"
                 font_size: 24
                 text_color: 1, 1, 1, 1
-                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                pos_hint: {"center_x": 0.5}
                 disabled: not root.are_programs_active
 
         MDBoxLayout:
             size_hint: 1, 0.6
             padding: [10, 30, 10, 30]
             orientation: "vertical"
+            md_bg_color: 1, 1, 0, 1
 
             MDFillRoundFlatButton:
                 id: water_now_button

@@ -43,14 +43,15 @@ class WateringOptionsView(MDBoxLayout):
             btn = Button(text=str(program), size_hint_y=None, height=44)
             btn.bind(on_release=lambda btn: self._select_item(dropdown, btn))
             btn.id = str(i)
+            btn.padding = (10, 0)
             dropdown.add_widget(btn)
 
-        mainbutton = self.ids.mainbutton
-        mainbutton.bind(on_release=dropdown.open)
-        dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', x))
+        dropdown_button = self.ids.dropdown_button
+        dropdown_button.bind(on_release=dropdown.open)
+        dropdown.bind(on_select=lambda instance, x: setattr(dropdown_button, 'text', x))
 
         if self.current_program_index != -1:
-            mainbutton.text = self.programs[self.current_program_index].name
+            dropdown_button.text = self.programs[self.current_program_index].name
 
     def _select_item(self, dropdown, btn):
         dropdown.select(btn.text)
