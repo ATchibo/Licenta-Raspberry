@@ -107,3 +107,7 @@ class WateringOptionsView(MDBoxLayout):
 
         self.water_now_disabled_variable = is_watering
         self.watering_label_variable = f"Water amount: {liters_sent}L\nTime running: {watering_time}s"
+
+    def toggle_watering_program(self):
+        self.are_programs_active = not self.are_programs_active
+        self.raspberry_controller.set_is_watering_programs_active(self.are_programs_active)

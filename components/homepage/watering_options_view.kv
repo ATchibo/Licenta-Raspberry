@@ -10,8 +10,30 @@
             orientation: "vertical"
             padding: 10
 
+            MDBoxLayout:
+                id: toggle_watering_program
+                orientation: "horizontal"
+                size_hint: 0.5, None
+                halign: "center"
+                pos_hint: {"center_x": 0.5, "center_y": 0}
+                spacing: 10
+                padding: 20
+
+                MDLabel:
+                    text: "Enable watering programs"
+                    font_style: "H4"
+                    size_hint: 0.5, None
+                    pos_hint: {"center_x": 0.5, "center_y": 0}
+
+                MDSwitch:
+                    id: watering_program_switch
+                    size_hint: None, None
+                    pos_hint: {"center_x": 0.5, "center_y": 0}
+                    active: root.are_programs_active
+                    on_active: root.toggle_watering_program()
+
             MDLabel:
-                text: "Current watering program: "
+                text: "Current watering program:"
                 halign: "center"
                 font_style: "H4"
                 size_hint: 1, None
@@ -23,6 +45,7 @@
                 font_size: 24
                 text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                disabled: not root.are_programs_active
 
         MDBoxLayout:
             size_hint: 1, 0.6
