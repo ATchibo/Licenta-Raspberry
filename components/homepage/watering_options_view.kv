@@ -43,12 +43,10 @@
                 id: watering_program_spinner
                 text: "Select a program"
                 values: root.programs.keys()
-                size_hint: 0.3, 0.3
+                size_hint: 0.3, 0.25
                 pos_hint: {"center_x": 0.5}
                 auto_width: True
                 sync_height: True
-                auto_height: False
-                height: 40
                 on_text: root.change_program()
                 background_color: app.theme_cls.primary_color
                 text_color: 0, 0, 0, 1
