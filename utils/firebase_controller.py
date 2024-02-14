@@ -2,6 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 from domain.RaspberryInfo import RaspberryInfo
+from domain.WateringProgram import WateringProgram
 
 
 class FirebaseController:
@@ -20,6 +21,9 @@ class FirebaseController:
         self.raspberryInfoCollectionName = "raspberry_info"
         self.moistureInfoCollectionName = "humidity_readings"
         self.wateringNowCollectionName = "watering_info"
+        self.wateringProgramsCollectionName = "watering_programs"
+        self.wateringProgramsCollectionNestedCollectionName = "programs"
+        self.globalWateringProgramsCollectionName = "global_watering_programs"
         self.watering_now_callback = None
         self.watering_now_listener = None
 
@@ -69,3 +73,48 @@ class FirebaseController:
                 'watering_duration': watering_time,
                 'water_volume': liters_sent
             })
+
+    def get_watering_programs(self, raspberry_id):
+        watering_programs_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id).collection(
+            self.wateringProgramsCollectionNestedCollectionName)
+
+        watering_programs = []
+
+        for doc_snapshot in watering_programs_ref.get():
+            watering_program_data = doc_snapshot.to_dict()
+
+            if watering_program_data:
+                watering_program_data["id"] = doc_snapshot.id
+                watering_programs.append(WateringProgram().fromDict(watering_program_data))
+
+        global_watering_programs_ref = self.db.collection(self.globalWateringProgramsCollectionName)
+
+        global_watering_programs = []
+
+        for doc_snapshot in global_watering_programs_ref.get():
+            global_watering_program_data = doc_snapshot.to_dict()
+
+            if global_watering_program_data:
+                global_watering_program_data["id"] = doc_snapshot.id
+                global_watering_programs.append(WateringProgram().fromDict(global_watering_program_data))
+
+        watering_programs.extend(global_watering_programs)
+        return watering_programs
+
+    def get_active_watering_program_id(self, raspberry_id):
+        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc = doc_ref.get()
+        return doc.get("activeProgramId")
+
+    def set_active_watering_program_id(self, raspberry_id, program_id):
+        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc_ref.update({"activeProgramId": program_id})
+
+    def get_is_watering_programs_active(self, raspberry_id):
+        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc = doc_ref.get()
+        return doc.get("wateringProgramsEnabled")
+
+    def set_is_watering_programs_active(self, raspberry_id, is_active):
+        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc_ref.update({"wateringProgramsEnabled": is_active})

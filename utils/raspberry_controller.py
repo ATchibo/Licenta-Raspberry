@@ -5,8 +5,6 @@ from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.moisture_controller import MoistureController
 from utils.pump_controller import PumpController
-from utils.watering_program import WateringProgram
-
 
 class RaspberryController:
     _self = None
@@ -19,8 +17,7 @@ class RaspberryController:
     def __init__(self):
         self.moisture_controller = MoistureController(channel=1)
         self.pump_controller = PumpController(pin=4, liters_per_second=0.1)
-        self._watering_program = WateringProgram(name="Test", liters_needed=1, time_interval=1, min_moisture=30,
-                                                 max_moisture=70)
+
 
         self._send_watering_updates_interval_ms = 1000
         self._max_watering_time_sec = 30
@@ -29,6 +26,8 @@ class RaspberryController:
         self._send_watering_updates_thread = None
         self._send_watering_updates = False
         self._while_watering_callback_function = None
+
+        self.raspberry_id = getserial()
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -151,3 +150,21 @@ class RaspberryController:
 
     def set_callback_for_watering_updates(self, callback):
         self._while_watering_callback_function = callback
+
+
+    # For waterings programs
+
+    def get_watering_programs(self):
+        return FirebaseController().get_watering_programs(self.raspberry_id)
+
+    def get_active_watering_program_id(self):
+        return FirebaseController().get_active_watering_program_id(self.raspberry_id)
+
+    def set_active_watering_program_id(self, program_id):
+        FirebaseController().set_active_watering_program_id(self.raspberry_id, program_id)
+
+    def get_is_watering_programs_active(self):
+        return FirebaseController().get_is_watering_programs_active(self.raspberry_id)
+
+    def set_is_watering_programs_active(self, is_active):
+        FirebaseController().set_is_watering_programs_active(self.raspberry_id, is_active)

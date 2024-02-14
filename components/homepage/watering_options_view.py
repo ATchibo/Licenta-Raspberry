@@ -20,27 +20,53 @@ class WateringOptionsView(MDBoxLayout):
         super(WateringOptionsView, self).__init__(**kwargs)
         self.orientation = "vertical"
         self.size_hint_y = 1
-        Clock.schedule_once(self.init, 0.1)
 
         self.raspberry_controller = RaspberryController()
         self.watering_label_variable = f"Water amount: 0L\nTime running: 0s"
         self.water_now_disabled_variable = False
 
+        self.programs = []
+        self.current_program_index = -1
+        self.are_programs_active = True
+
         self.bind_raspberry_controller_properties()
+        self.load_programs()
+
+        Clock.schedule_once(self.init, 0.1)
 
     def init(self, *args):
         self.init_dropdown(*args)
 
     def init_dropdown(self, *args):
         dropdown = DropDown()
-        for index in range(10):
-            btn = Button(text='Value %d' % index, size_hint_y=None, height=44)
-            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
+        for i, program in enumerate(self.programs):
+            btn = Button(text=str(program), size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: self._select_item(dropdown, btn))
+            btn.id = str(i)
             dropdown.add_widget(btn)
 
         mainbutton = self.ids.mainbutton
         mainbutton.bind(on_release=dropdown.open)
         dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', x))
+
+        if self.current_program_index != -1:
+            mainbutton.text = self.programs[self.current_program_index].name
+
+    def _select_item(self, dropdown, btn):
+        dropdown.select(btn.text)
+        self.current_program_index = int(btn.id)
+        self.raspberry_controller.set_active_watering_program_id(self.programs[self.current_program_index].id)
+
+    def load_programs(self):
+        self.programs = self.raspberry_controller.get_watering_programs()
+        self.are_programs_active = self.raspberry_controller.get_is_watering_programs_active()
+        selected_program_id = self.raspberry_controller.get_active_watering_program_id()
+
+        if selected_program_id is not None:
+            for i, program in enumerate(self.programs):
+                if program.id == selected_program_id:
+                    self.current_program_index = i
+                    break
 
     def set_item(self, text_item):
         self.ids.drop_item.set_item(text_item)
