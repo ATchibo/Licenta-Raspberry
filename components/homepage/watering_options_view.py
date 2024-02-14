@@ -78,11 +78,6 @@ class WateringOptionsView(MDBoxLayout):
             self.ids.water_now_label.text = "Could not start watering"
 
     def stop_watering(self):
-        print("Stopping watering")
-
-        threading.Thread(target = self._stop_watering_thread()).start()
-
-    def _stop_watering_thread(self):
         res = self.raspberry_controller.stop_watering()
 
         if res:
