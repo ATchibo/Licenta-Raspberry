@@ -104,7 +104,11 @@ class FirebaseController:
     def get_active_watering_program_id(self, raspberry_id):
         doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
         doc = doc_ref.get()
-        return doc.get("activeProgramId")
+
+        try:
+            return doc.get("activeProgramId")
+        except Exception as e:
+            return None
 
     def set_active_watering_program_id(self, raspberry_id, program_id):
         doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
