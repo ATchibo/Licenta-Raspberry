@@ -18,13 +18,12 @@ class RaspberryController:
         self.moisture_controller = MoistureController(channel=1)
         self.pump_controller = PumpController(pin=4, liters_per_second=0.1)
 
-
         self._send_watering_updates_interval_ms = 1000
         self._max_watering_time_sec = 30
         self.watering_time = 0  # seconds
         self.liters_sent = 0  # liters
         self._send_watering_updates_thread = None
-        self._send_watering_updates = False
+        self._send_watering_updates_event = threading.Event()
         self._while_watering_callback_function = None
 
         self.raspberry_id = getserial()
@@ -92,22 +91,22 @@ class RaspberryController:
         FirebaseController().watering_now_listener.unsubscribe()
 
     def start_sending_watering_updates(self):
-        self._send_watering_updates = True
+        self._send_watering_updates_event.set()
         self._send_watering_updates_thread = threading.Thread(target=self._send_watering_updates_worker)
         self._send_watering_updates_thread.start()
 
     def stop_sending_watering_updates(self):
-        self._send_watering_updates = False
-
+        self._send_watering_updates_event.clear()
         if self._send_watering_updates_thread is not None and self._send_watering_updates_thread.is_alive():
             self._send_watering_updates_thread.join()
 
     def _send_watering_updates_worker(self):
         watering_time_start = time.time()
+        TIMEOUT = self._send_watering_updates_interval_ms / 1000.0
 
-        while self._send_watering_updates:
+        while self._send_watering_updates_event.is_set():
             self._send_watering_update_function(watering_time_start)
-            time.sleep(self._send_watering_updates_interval_ms / 1000.0)
+            time.sleep(TIMEOUT)
 
     def _send_watering_update_function(self, watering_time_start):
         self.watering_time = time.time() - watering_time_start  # seconds
