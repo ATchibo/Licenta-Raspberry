@@ -111,8 +111,6 @@ class WateringOptionsView(MDBoxLayout):
             self.ids.watering_program_spinner.values = list(self.programs.keys())
             self.ids.watering_program_spinner.text = self.current_program_name
             self.are_programs_active = self.raspberry_controller.get_is_watering_programs_active()
-            self.ids.watering_program_switch.active = self.are_programs_active
-            self.ids.water_now_button.disabled = not self.are_programs_active
 
             self.ids.refresh_layout.refresh_done()
 
