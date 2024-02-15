@@ -25,7 +25,7 @@ class WateringOptionsView(MDBoxLayout):
 
         self.raspberry_controller = RaspberryController()
         self.watering_label_variable = f"Water amount: 0L\nTime running: 0s"
-        self.water_now_disabled_variable = False
+        self.pushed_water_now = False
 
         self.programs = {}
         self.current_program_name = ""
@@ -62,7 +62,7 @@ class WateringOptionsView(MDBoxLayout):
         self.menu.dismiss()
 
     def toggle_water_now(self):
-        if self.water_now_disabled_variable:
+        if self.pushed_water_now:
             self.stop_watering()
         else:
             self.water_now()
@@ -73,7 +73,7 @@ class WateringOptionsView(MDBoxLayout):
         if self.raspberry_controller.water_now():
             # moisture_percentage = self.raspberry_controller.get_moisture_percentage()
             self.ids.water_now_button.text = "Stop watering"
-            self.water_now_disabled_variable = True
+            self.pushed_water_now = True
         else:
             self.ids.water_now_label.text = "Could not start watering"
 
@@ -82,7 +82,7 @@ class WateringOptionsView(MDBoxLayout):
 
         if res:
             self.ids.water_now_button.text = "Water now"
-            self.water_now_disabled_variable = False
+            self.pushed_water_now = False
         else:
             self.ids.water_now_label.text = "Could not stop watering"
 
@@ -90,15 +90,30 @@ class WateringOptionsView(MDBoxLayout):
         self.raspberry_controller.set_callback_for_watering_updates(callback=self._update_watering_now_info)
 
     def _update_watering_now_info(self, is_watering, watering_time, liters_sent):
-        if self.water_now_disabled_variable is not is_watering:
+        if self.pushed_water_now is not is_watering:
             if is_watering:
                 self.ids.water_now_button.text = "Stop watering"
             else:
                 self.ids.water_now_button.text = "Water now"
 
-        self.water_now_disabled_variable = is_watering
+        self.pushed_water_now = is_watering
         self.watering_label_variable = f"Water amount: {liters_sent}L\nTime running: {watering_time}s"
 
     def toggle_watering_program(self):
         self.are_programs_active = not self.are_programs_active
         self.raspberry_controller.set_is_watering_programs_active(self.are_programs_active)
+
+    def refresh_callback(self, *args):
+        print("Refreshing")
+
+        def refresh_callback(interval):
+            self.load_programs()
+            self.ids.watering_program_spinner.values = list(self.programs.keys())
+            self.ids.watering_program_spinner.text = self.current_program_name
+            self.are_programs_active = self.raspberry_controller.get_is_watering_programs_active()
+            self.ids.watering_program_switch.active = self.are_programs_active
+            self.ids.water_now_button.disabled = not self.are_programs_active
+
+            self.ids.refresh_layout.refresh_done()
+
+        Clock.schedule_once(refresh_callback, 0.5)

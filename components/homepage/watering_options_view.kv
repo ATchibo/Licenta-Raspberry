@@ -1,82 +1,84 @@
 <WateringOptionsView>:
     name: "watering_options_view"
 
-    MDBoxLayout:
+    MDScrollViewRefreshLayout:
+        id: refresh_layout
+        refresh_callback: root.refresh_callback
+        root_layout: main_layout
         size_hint: 1, 1
-        orientation: "vertical"
+        scroll_distance: 10
 
-        MDBoxLayout:
-            size_hint: 1, 0.5
-            orientation: "vertical"
-            padding: 10
-            pos_hint: {"center_x": 0.5, "center_y": 0}
+        MDGridLayout:
+            id: main_layout
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
 
-            MDBoxLayout:
-                id: toggle_watering_program
-                orientation: "horizontal"
-                halign: "center"
-                pos_hint: {"center_x": 0.5}
-                size_hint: 1, 0.5
+            MDGridLayout:
+                id: watering_programs_enable_grid
+                cols: 2
+                size_hint_y: None
+                height: dp(80)  # You can adjust the height as needed
                 padding: 10
 
                 MDLabel:
                     text: "Enable watering programs"
                     font_style: "H5"
-                    size_hint: 0.5, None
-                    pos_hint: {"center_x": 0.5, "center_y": 0}
+                    size_hint_x: 0.9
 
-                MDSwitch:
-                    id: watering_program_switch
-                    size_hint: None, None
-                    pos_hint: {"center_x": 0.5, "center_y": 0}
-                    active: root.are_programs_active
-                    on_active: root.toggle_watering_program()
+                MDAnchorLayout:
+                    size_hint_x: 0.1
+                    height: watering_programs_enable_grid.height
+                    pos_hint: {"center_y": 0.5}
 
-            MDBoxLayout:
-                id: toggle_watering_program
-                orientation: "horizontal"
-                halign: "center"
-                pos_hint: {"center_x": 0.5}
-                size_hint: 1, 0.5
+                    MDSwitch:
+                        id: watering_program_switch
+                        active: root.are_programs_active
+                        size_hint_y: None
+                        on_active: root.toggle_watering_program()
+
+            MDGridLayout:
+                cols: 2
+                size_hint_y: None
+                height: dp(80)  # You can adjust the height as needed
                 padding: 10
 
                 MDLabel:
                     text: "Current watering program:"
                     font_style: "H5"
-                    size_hint: 0.5, None
-                    pos_hint: {"center_x": 0.5, "center_y": 0}
+                    size_hint_x: 0.5
 
                 Spinner:
                     id: watering_program_spinner
                     text: "Select a program"
                     values: root.programs.keys()
-                    size_hint: 0.3, None
-                    pos_hint: {"center_x": 0.5, "center_y": 0}
-                    auto_width: True
-                    sync_height: True
-                    auto_height: False
-                    height: 44
+                    size_hint_x: 0.3
                     on_text: root.change_program()
-                    background_color: app.theme_cls.primary_color
-                    text_color: 0, 0, 0, 1
 
-        MDBoxLayout:
-            size_hint: 1, 0.5
-            padding: [10, 30, 10, 10]
-            orientation: "vertical"
-
-            MDFillRoundFlatButton:
-                id: water_now_button
-                text: "Water now"
-                font_style: "H5"
-                text_color: 1, 1, 1, 1
-                pos_hint: {"center_x": 0.5}
-                on_release: root.toggle_water_now()
-
-            MDLabel:
-                id: water_now_label
-                text: root.watering_label_variable
-                halign: "center"
-                font_style: "H5"
-                pos_hint: {"center_x": 0.5}
+            MDGridLayout:
+                cols: 1
                 size_hint: 1, None
+                height: dp(150)  # You can adjust the height as needed
+                padding: [10, 30, 10, 10]
+
+                MDAnchorLayout:
+                    size_hint_y: None
+                    height: water_now_button.height
+
+                    MDFillRoundFlatButton:
+                        id: water_now_button
+                        text: "Water now"
+                        font_style: "H5"
+                        text_color: 1, 1, 1, 1
+                        halign: "center"
+                        on_release: root.toggle_water_now()
+
+                MDAnchorLayout:
+                    size_hint_y: None
+                    height: water_now_label.height
+
+                    MDLabel:
+                        id: water_now_label
+                        text: root.watering_label_variable
+                        halign: "center"
+                        font_style: "H5"
