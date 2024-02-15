@@ -35,7 +35,11 @@
                         id: watering_program_switch
                         active: root.are_programs_active
                         size_hint_y: None
-                        on_active: root.toggle_watering_program()
+                        icon_active: "check"
+                        icon_active_color: "white"
+                        icon_inactive: "close"
+                        icon_inactive_color: "grey"
+                        on_touch_down: root.toggle_watering_program()
 
             MDGridLayout:
                 cols: 2
