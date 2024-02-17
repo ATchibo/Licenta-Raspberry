@@ -68,6 +68,10 @@ class WateringProgramController:
         if time_to_wait_sec < 0:
             time_to_wait_sec += 24 * 60 * 60
 
+        # TODO: remove
+        print(f"Time to wait: {time_to_wait_sec}")
+        time_to_wait_sec = 10
+
         return time_to_wait_sec
 
     def _compute_watering_interval_sec(self, program):
