@@ -59,9 +59,9 @@ class WateringProgramController:
 
     def _compute_initial_delay_sec(self, program):
         current_time = datetime.now()
-        start_of_day = datetime(current_time.year, current_time.month, current_time.day)
-        seconds_passed_today = (current_time - start_of_day).total_seconds()
-
+        seconds_passed_today = (current_time.time().hour * 24 * 60
+                                + current_time.time().minute * 60
+                                + current_time.time().second)
         program_start_time = program.time_of_day_min * 60
         time_to_wait_sec = program_start_time - seconds_passed_today
 
@@ -112,6 +112,7 @@ class WateringProgramController:
         if self._is_watering_programs_active:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
             if current_soil_moisture < program.max_moisture:
+                print("Starting watering")
                 self._pump_controller.start_watering_for_liters(program.quantity_l)
 
         self._watering_thread = threading.Timer(
