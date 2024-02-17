@@ -7,6 +7,7 @@ from kivymd.uix.scrollview import MDScrollView
 from pages.connect_page import ConnectPage
 from pages.home_page import HomePage
 from pages.settings_page import SettingsPage
+from utils.WateringProgramController import WateringProgramController
 from utils.firebase_controller import FirebaseController
 from utils.raspberry_controller import RaspberryController
 
@@ -28,5 +29,6 @@ if __name__ == '__main__':
     FirebaseController()
 
     RaspberryController().start_listening_for_watering_now()
+    WateringProgramController().perform_initial_setup()
 
     PlantBuddyApp().run()

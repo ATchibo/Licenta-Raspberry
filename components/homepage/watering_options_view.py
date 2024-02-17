@@ -104,8 +104,6 @@ class WateringOptionsView(MDBoxLayout):
         self.raspberry_controller.set_is_watering_programs_active(self.are_programs_active)
 
     def refresh_callback(self, *args):
-        print("Refreshing")
-
         def refresh_callback(interval):
             self.load_programs()
             self.ids.watering_program_spinner.values = list(self.programs.keys())

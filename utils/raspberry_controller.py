@@ -149,21 +149,3 @@ class RaspberryController:
 
     def set_callback_for_watering_updates(self, callback):
         self._while_watering_callback_function = callback
-
-
-    # For waterings programs
-
-    def get_watering_programs(self):
-        return FirebaseController().get_watering_programs(self.raspberry_id)
-
-    def get_active_watering_program_id(self):
-        return FirebaseController().get_active_watering_program_id(self.raspberry_id)
-
-    def set_active_watering_program_id(self, program_id):
-        FirebaseController().set_active_watering_program_id(self.raspberry_id, program_id)
-
-    def get_is_watering_programs_active(self):
-        return FirebaseController().get_is_watering_programs_active(self.raspberry_id)
-
-    def set_is_watering_programs_active(self, is_active):
-        FirebaseController().set_is_watering_programs_active(self.raspberry_id, is_active)
