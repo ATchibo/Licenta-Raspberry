@@ -6,6 +6,10 @@ from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.raspberry_controller import RaspberryController
 
+# TODO :
+# add listener in firebase controller - look for changes in selected active program
+# add listener to look for enabled watering programs
+# add listener to look for updates to the watering program list
 
 class WateringProgramController:
     _self = None

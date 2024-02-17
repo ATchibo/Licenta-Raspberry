@@ -15,7 +15,7 @@ from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("components/homepage/watering_options_view.kv")
 
-
+# TODO: replace local variables with variables from watering program controller when necessary and if applicable
 class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
 
