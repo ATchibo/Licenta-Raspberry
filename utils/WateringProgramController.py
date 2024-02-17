@@ -109,11 +109,11 @@ class WateringProgramController:
             self._moisture_check_thread.cancel()
 
     def _watering_task(self, program):
-        if self._is_watering_programs_active:
-            current_soil_moisture = self._moisture_controller.get_moisture_percentage()
-            if current_soil_moisture < program.max_moisture:
-                print("Starting watering")
-                self._pump_controller.start_watering_for_liters(program.quantity_l)
+        # if self._is_watering_programs_active:
+        current_soil_moisture = self._moisture_controller.get_moisture_percentage()
+        if current_soil_moisture < program.max_moisture:
+            print("Starting watering")
+            self._pump_controller.start_watering_for_liters(program.quantity_l)
 
         self._watering_thread = threading.Timer(
             interval=self._compute_watering_interval_sec(program),
