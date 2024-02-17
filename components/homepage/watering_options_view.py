@@ -10,6 +10,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.menu import MDDropdownMenu
 from matplotlib import pyplot as plt
 
+from utils.WateringProgramController import WateringProgramController
 from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("components/homepage/watering_options_view.kv")
@@ -24,6 +25,7 @@ class WateringOptionsView(MDBoxLayout):
         self.size_hint_y = 1
 
         self.raspberry_controller = RaspberryController()
+        self._watering_program_controller = WateringProgramController()
         self.watering_label_variable = f"Water amount: 0L\nTime running: 0s"
         self.pushed_water_now = False
 
@@ -42,12 +44,12 @@ class WateringOptionsView(MDBoxLayout):
 
     def change_program(self):
         self.current_program_name = self.ids.watering_program_spinner.text
-        self.raspberry_controller.set_active_watering_program_id(self.programs[self.current_program_name].id)
+        self._watering_program_controller.set_active_watering_program_id(self.programs[self.current_program_name].id)
 
     def load_programs(self):
-        _programs = self.raspberry_controller.get_watering_programs()
-        self.are_programs_active = self.raspberry_controller.get_is_watering_programs_active()
-        selected_program_id = self.raspberry_controller.get_active_watering_program_id()
+        _programs = self._watering_program_controller.get_watering_programs()
+        self.are_programs_active = self._watering_program_controller.get_is_watering_programs_active()
+        selected_program_id = self._watering_program_controller.get_active_watering_program_id()
 
         if selected_program_id is not None:
             for program in _programs:
@@ -101,14 +103,14 @@ class WateringOptionsView(MDBoxLayout):
 
     def toggle_watering_program(self):
         self.are_programs_active = not self.are_programs_active
-        self.raspberry_controller.set_is_watering_programs_active(self.are_programs_active)
+        self._watering_program_controller.set_is_watering_programs_active(self.are_programs_active)
 
     def refresh_callback(self, *args):
         def refresh_callback(interval):
             self.load_programs()
             self.ids.watering_program_spinner.values = list(self.programs.keys())
             self.ids.watering_program_spinner.text = self.current_program_name
-            self.are_programs_active = self.raspberry_controller.get_is_watering_programs_active()
+            self.are_programs_active = self._watering_program_controller.get_is_watering_programs_active()
             self.ids.watering_program_switch.active = self.are_programs_active
 
             self.ids.refresh_layout.refresh_done()
