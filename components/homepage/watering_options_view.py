@@ -15,6 +15,7 @@ from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("components/homepage/watering_options_view.kv")
 
+
 # TODO: replace local variables with variables from watering program controller when necessary and if applicable
 class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
@@ -31,6 +32,7 @@ class WateringOptionsView(MDBoxLayout):
 
         self.programs = {}
         self.current_program_name = ""
+        self.selected_program_id = None
         self.are_programs_active = True
 
         self.bind_raspberry_controller_properties()
@@ -42,6 +44,8 @@ class WateringOptionsView(MDBoxLayout):
         if len(self.current_program_name) > 0:
             self.ids.watering_program_spinner.text = self.current_program_name
 
+        self._watering_program_controller.set_on_receive_from_network_callback(self._update_values_on_receive_from_network)
+
     def change_program(self):
         self.current_program_name = self.ids.watering_program_spinner.text
         self._watering_program_controller.set_active_watering_program_id(self.programs[self.current_program_name].id)
@@ -49,11 +53,11 @@ class WateringOptionsView(MDBoxLayout):
     def load_programs(self):
         _programs = self._watering_program_controller.get_watering_programs()
         self.are_programs_active = self._watering_program_controller.get_is_watering_programs_active()
-        selected_program_id = self._watering_program_controller.get_active_watering_program_id()
+        self.selected_program_id = self._watering_program_controller.get_active_watering_program_id()
 
-        if selected_program_id is not None:
+        if self.selected_program_id is not None:
             for program in _programs:
-                if program.id == selected_program_id:
+                if program.id == self.selected_program_id:
                     self.current_program_name = program.name
                     break
 
@@ -116,3 +120,32 @@ class WateringOptionsView(MDBoxLayout):
             self.ids.refresh_layout.refresh_done()
 
         Clock.schedule_once(refresh_callback, 0.5)
+
+    def _update_values_on_receive_from_network(
+            self,
+            new_programs=None,
+            new_active_program_id=None,
+            new_is_watering_programs_active=None
+    ):
+        if new_is_watering_programs_active is not None:
+            self.are_programs_active = new_is_watering_programs_active
+            self.ids.watering_program_switch.active = self.are_programs_active
+
+        if new_active_program_id is not None:
+            self.selected_program_id = new_active_program_id
+
+        if new_programs is not None:
+            if self.selected_program_id is None:
+                self.selected_program_id = self._watering_program_controller.get_active_watering_program_id()
+
+            if self.selected_program_id is not None:
+                for program in new_programs:
+                    if program.id == self.selected_program_id:
+                        self.current_program_name = program.name
+                        break
+
+            self.programs = {program.name: program for program in new_programs}
+            print("Programs keys: ", list(self.programs.keys()))
+            self.ids.watering_program_spinner.values = list(self.programs.keys())
+            self.ids.watering_program_spinner.text = self.current_program_name
+            self.ids.refresh_layout.refresh_done()

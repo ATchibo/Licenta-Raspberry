@@ -1,5 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
+from google.cloud.firestore_v1 import FieldFilter
 
 from domain.RaspberryInfo import RaspberryInfo
 from domain.WateringProgram import WateringProgram
@@ -24,8 +25,14 @@ class FirebaseController:
         self.wateringProgramsCollectionName = "watering_programs"
         self.wateringProgramsCollectionNestedCollectionName = "programs"
         self.globalWateringProgramsCollectionName = "global_watering_programs"
+
         self.watering_now_callback = None
         self.watering_now_listener = None
+
+        self.watering_programs_callback = None
+        self.watering_programs_listener = None
+
+        self._temp = None
 
     def is_raspberry_registered(self, serial):
         query_result = self.db.collection(self.raspberryInfoCollectionName).where('raspberryId', '==', serial).get()
@@ -51,8 +58,8 @@ class FirebaseController:
         moisture_info_ref = self.db.collection(self.moistureInfoCollectionName)
 
         query = moisture_info_ref.where('raspberryId', '==', rpi_id) \
-            .where('measurementTime', '>=', start_datetime) \
-            .where('measurementTime', '<=', end_datetime)
+            .where(filter=FieldFilter('measurementTime', '>=', start_datetime)) \
+            .where(filter=FieldFilter('measurementTime', '<=', end_datetime))
 
         docs = query.stream()
         moisture_info_list = [doc.to_dict() for doc in docs]
@@ -122,3 +129,13 @@ class FirebaseController:
     def set_is_watering_programs_active(self, raspberry_id, is_active):
         doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
         doc_ref.update({"wateringProgramsEnabled": is_active})
+
+    def add_listener_for_watering_programs_changes(self, raspberry_id, _update_values_on_receive_from_network):
+        self.watering_programs_callback = _update_values_on_receive_from_network
+
+        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        self.watering_programs_listener = doc_ref.on_snapshot(_update_values_on_receive_from_network)
+
+        tmp = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id).collection(self.wateringProgramsCollectionNestedCollectionName)
+        tmp_query = tmp.where(filter=FieldFilter('name', '!=', ''))
+        self._temp = tmp_query.on_snapshot(_update_values_on_receive_from_network)
