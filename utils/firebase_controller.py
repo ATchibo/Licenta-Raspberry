@@ -30,9 +30,8 @@ class FirebaseController:
         self.watering_now_listener = None
 
         self.watering_programs_callback = None
-        self.watering_programs_listener = None
-
-        self._temp = None
+        self.watering_programs_fields_listener = None
+        self.watering_programs_collection_listener = None
 
     def is_raspberry_registered(self, serial):
         query_result = self.db.collection(self.raspberryInfoCollectionName).where('raspberryId', '==', serial).get()
@@ -133,9 +132,9 @@ class FirebaseController:
     def add_listener_for_watering_programs_changes(self, raspberry_id, _update_values_on_receive_from_network):
         self.watering_programs_callback = _update_values_on_receive_from_network
 
-        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
-        self.watering_programs_listener = doc_ref.on_snapshot(_update_values_on_receive_from_network)
+        fields_doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        self.watering_programs_fields_listener = fields_doc_ref.on_snapshot(_update_values_on_receive_from_network)
 
-        tmp = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id).collection(self.wateringProgramsCollectionNestedCollectionName)
-        tmp_query = tmp.where(filter=FieldFilter('name', '!=', ''))
-        self._temp = tmp_query.on_snapshot(_update_values_on_receive_from_network)
+        programs_collection = fields_doc_ref.collection(self.wateringProgramsCollectionNestedCollectionName)
+        programs_collection_query = programs_collection.where(filter=FieldFilter('name', '!=', ''))
+        self.watering_programs_collection_listener = programs_collection_query.on_snapshot(_update_values_on_receive_from_network)
