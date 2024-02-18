@@ -123,7 +123,7 @@ class WateringOptionsView(MDBoxLayout):
 
     def _update_values_on_receive_from_network(
             self,
-            new_programs=None,
+            new_programs={},
             new_active_program_id=None,
             new_is_watering_programs_active=None
     ):
@@ -134,18 +134,17 @@ class WateringOptionsView(MDBoxLayout):
         if new_active_program_id is not None:
             self.selected_program_id = new_active_program_id
 
-        if new_programs is not None:
+        if len(new_programs.keys()) > 0:
             if self.selected_program_id is None:
                 self.selected_program_id = self._watering_program_controller.get_active_watering_program_id()
 
-            if self.selected_program_id is not None:
-                for program in new_programs:
-                    if program.id == self.selected_program_id:
-                        self.current_program_name = program.name
-                        break
+            self.current_program_name = new_programs[self.selected_program_id].name
 
-            self.programs = {program.name: program for program in new_programs}
-            print("Programs keys: ", list(self.programs.keys()))
-            self.ids.watering_program_spinner.values = list(self.programs.keys())
-            self.ids.watering_program_spinner.text = self.current_program_name
-            self.ids.refresh_layout.refresh_done()
+            self.programs.clear()
+            for program in new_programs.values():
+                self.programs[program.name] = program
+
+            def refresh_callback(interval):
+                self.ids.watering_program_spinner.values = list(self.programs.keys())
+                self.ids.watering_program_spinner.text = self.current_program_name
+            Clock.schedule_once(refresh_callback, 0.5)

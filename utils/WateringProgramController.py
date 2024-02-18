@@ -2,6 +2,8 @@ import threading
 import time
 from datetime import datetime
 
+from google.cloud.firestore_v1.watch import ChangeType
+
 from domain.WateringProgram import WateringProgram
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
@@ -21,7 +23,7 @@ class WateringProgramController:
         return cls._self
 
     def __init__(self):
-        self._watering_programs = None
+        self._watering_programs = {}
         self._active_watering_program_id = None
         self._is_watering_programs_active = None
 
@@ -45,8 +47,9 @@ class WateringProgramController:
         )
 
     def get_watering_programs(self):
-        self._watering_programs = FirebaseController().get_watering_programs(self.raspberry_id)
-        return self._watering_programs
+        watering_programs_list = FirebaseController().get_watering_programs(self.raspberry_id)
+        self._watering_programs = {program.id: program for program in watering_programs_list}
+        return watering_programs_list
 
     def get_active_watering_program_id(self):
         self._active_watering_program_id = FirebaseController().get_active_watering_program_id(self.raspberry_id)
@@ -69,7 +72,9 @@ class WateringProgramController:
     def _get_active_watering_program(self):
         if self._active_watering_program_id is None or self._watering_programs is None:
             return None
-        return next((program for program in self._watering_programs if program.id == self._active_watering_program_id), None)
+        if self._active_watering_program_id not in self._watering_programs:
+            return None
+        return self._watering_programs[self._active_watering_program_id]
 
     def _compute_initial_delay_sec(self, program):
         current_time = datetime.now()
@@ -165,8 +170,6 @@ class WateringProgramController:
     ):
         print(f"Received new data from network in {read_time}")
 
-        # TODO: make more efficient by checking for changes, not just updating everything
-
         for change in changes:
             change_type = change.type
             changed_doc = change.document
@@ -177,38 +180,39 @@ class WateringProgramController:
             print(f"Changed doc id: {doc_id}")
             print(f"Changed doc data: {doc_data}")
 
-        for doc in doc_snapshot:
-            if doc.exists:
-                updated_data = doc.to_dict()
+            new_programs = {}
+            new_active_program_id = None
+            new_is_watering_programs_active = None
 
-                new_programs = None
-                new_active_program_id = None
-                new_is_watering_programs_active = None
+            if "name" in doc_data:  # this is a program
+                doc_data["id"] = doc_id
 
-                if "programs" in updated_data:
-                    new_programs = [WateringProgram().fromDict(program) for program in updated_data["programs"]]
+                if change_type == ChangeType.ADDED or change_type == ChangeType.MODIFIED:
+                    new_programs[doc_id] = WateringProgram().fromDict(doc_data)
+                elif change_type == ChangeType.REMOVED:
+                    new_programs.pop(doc_id, None)
 
-                if "activeProgramId" in updated_data:
-                    new_active_program_id = str(updated_data["activeProgramId"])
+            if "activeProgramId" in doc_data:
+                new_active_program_id = str(doc_data["activeProgramId"])
 
-                if "wateringProgramsEnabled" in updated_data:
-                    new_is_watering_programs_active = bool(updated_data["wateringProgramsEnabled"])
+            if "wateringProgramsEnabled" in doc_data:
+                new_is_watering_programs_active = bool(doc_data["wateringProgramsEnabled"])
 
-                if new_programs is not None:
-                    self._watering_programs = new_programs
-                if new_active_program_id is not None:
-                    self._active_watering_program_id = new_active_program_id
-                if new_is_watering_programs_active is not None:
-                    self._is_watering_programs_active = new_is_watering_programs_active
+            if new_programs is not None:
+                self._watering_programs = new_programs
+            if new_active_program_id is not None:
+                self._active_watering_program_id = new_active_program_id
+            if new_is_watering_programs_active is not None:
+                self._is_watering_programs_active = new_is_watering_programs_active
 
-                if new_active_program_id is not None or new_programs is not None:
-                    self._schedule_watering()
+            if new_active_program_id is not None or new_programs is not None:
+                self._schedule_watering()
 
-                if self._gui_update_callback is not None:
-                    self._gui_update_callback(
-                        new_programs=new_programs,
-                        new_active_program_id=new_active_program_id,
-                        new_is_watering_programs_active=new_is_watering_programs_active
-                    )
-                else:
-                    print("No callback set for updating the GUI")
+            if self._gui_update_callback is not None:
+                self._gui_update_callback(
+                    new_programs=new_programs,
+                    new_active_program_id=new_active_program_id,
+                    new_is_watering_programs_active=new_is_watering_programs_active
+                )
+            else:
+                print("No callback set for updating the GUI")
