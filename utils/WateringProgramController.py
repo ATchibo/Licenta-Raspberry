@@ -166,13 +166,13 @@ class WateringProgramController:
             self._run_watering_thread.set()
             return
 
-        self._watering_thread = threading.Timer(
-            interval=self._compute_watering_interval_sec(program),
-            function=self._watering_task,
-            args=(program,)
-        )
-        self._watering_thread.daemon = True
-        self._watering_thread.start()
+        # self._watering_thread = threading.Timer(
+        #     interval=self._compute_watering_interval_sec(program),
+        #     function=self._watering_task,
+        #     args=(program,)
+        # )
+        # self._watering_thread.daemon = True
+        # self._watering_thread.start()
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         if self._is_watering_programs_active:
