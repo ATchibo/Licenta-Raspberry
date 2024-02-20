@@ -22,6 +22,7 @@ class RaspberryController:
         self._max_watering_time_sec = 30
         self.watering_time = 0  # seconds
         self.liters_sent = 0  # liters
+        self.watering_time_start = 0  # time
         self._send_watering_updates_thread = None
         self._send_watering_updates_event = threading.Event()
         self._while_watering_callback_function = None
@@ -52,9 +53,12 @@ class RaspberryController:
         return False
 
     def water_for_liters(self, liters):
+        print("Watering for", liters, "liters")
         self.start_sending_watering_updates()
         self.pump_controller.start_watering_for_liters(liters)
         self.stop_sending_watering_updates()
+        self._send_stop_watering_message()
+        print("Watering finished - raspi controller")
 
     def start_listening_for_watering_now(self):
         FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback_for_incoming_messages)
@@ -101,20 +105,25 @@ class RaspberryController:
         self._send_watering_updates_thread.start()
 
     def stop_sending_watering_updates(self):
+        self.watering_time = time.time() - self.watering_time_start  # seconds
+        self.liters_sent = self.watering_time * self.pump_controller.pump_capacity  # seconds * liters/second -> liters
+
         self._send_watering_updates_event.clear()
         if self._send_watering_updates_thread is not None and self._send_watering_updates_thread.is_alive():
             self._send_watering_updates_thread.join()
 
+        self._update_info_for_watering_callback()
+
     def _send_watering_updates_worker(self):
-        watering_time_start = time.time()
+        self.watering_time_start = time.time()
         TIMEOUT = self._send_watering_updates_interval_ms / 1000.0
 
         while self._send_watering_updates_event.is_set():
-            self._send_watering_update_function(watering_time_start)
+            self._send_watering_update_function()
             time.sleep(TIMEOUT)
 
-    def _send_watering_update_function(self, watering_time_start):
-        self.watering_time = time.time() - watering_time_start  # seconds
+    def _send_watering_update_function(self):
+        self.watering_time = time.time() - self.watering_time_start  # seconds
         self.liters_sent = self.watering_time * self.pump_controller.pump_capacity  # seconds * liters/second -> liters
 
         if self.watering_time >= self._max_watering_time_sec:
@@ -146,6 +155,9 @@ class RaspberryController:
 
     def _update_info_for_watering_callback(self):
         if self._while_watering_callback_function is not None:
+
+            # print("is_watering:", self.pump_controller.is_watering)
+
             self._while_watering_callback_function(
                 is_watering=self.pump_controller.is_watering,
                 watering_time=round(self.watering_time),

@@ -103,7 +103,7 @@ class WateringOptionsView(MDBoxLayout):
                 self.ids.water_now_button.text = "Water now"
 
         self.pushed_water_now = is_watering
-        self.watering_label_variable = f"Water amount: {liters_sent}L\nTime running: {watering_time}s"
+        self.watering_label_variable = f"Last run:\nWater amount: {liters_sent}L\nTime running: {watering_time}s"
 
     def toggle_watering_program(self):
         self.are_programs_active = not self.are_programs_active

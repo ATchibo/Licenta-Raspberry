@@ -90,7 +90,7 @@ class WateringProgramController:
 
         # TODO: remove
         print(f"Time to wait: {time_to_wait_sec}")
-        time_to_wait_sec = 10
+        time_to_wait_sec = 5
 
         return time_to_wait_sec
 
@@ -127,9 +127,11 @@ class WateringProgramController:
     def _cancel_running_tasks(self):
         if self._watering_thread is not None:
             self._watering_thread.cancel()
+            self._watering_thread = None
 
         if self._moisture_check_thread is not None:
             self._moisture_check_thread.cancel()
+            self._moisture_check_thread = None
 
     def _watering_task(self, program):
         if self._is_watering_programs_active:
@@ -137,6 +139,7 @@ class WateringProgramController:
             if current_soil_moisture < program.max_moisture:
                 print("Starting watering")
                 self._raspberry_controller.water_for_liters(program.quantity_l)
+                print("Watering finished")
 
         self._watering_thread = threading.Timer(
             interval=self._compute_watering_interval_sec(program),
@@ -150,7 +153,9 @@ class WateringProgramController:
         if self._is_watering_programs_active:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
             if current_soil_moisture < program.min_moisture:
+                print("Starting watering - low moisture")
                 self._raspberry_controller.water_for_liters(program.quantity_l)
+                print("Watering finished - low moisture")
 
         self._moisture_check_thread = threading.Timer(
             interval=sleep_time_sec,
