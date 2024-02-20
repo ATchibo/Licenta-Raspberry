@@ -30,6 +30,7 @@ class WateringProgramController:
         self.raspberry_id = getserial()
         self._pump_controller = RaspberryController().pump_controller
         self._moisture_controller = RaspberryController().moisture_controller
+        self._raspberry_controller = RaspberryController()
 
         self._watering_thread = None
         self._moisture_check_thread = None
@@ -135,7 +136,7 @@ class WateringProgramController:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
             if current_soil_moisture < program.max_moisture:
                 print("Starting watering")
-                self._pump_controller.start_watering_for_liters(program.quantity_l)
+                self._raspberry_controller.water_for_liters(program.quantity_l)
 
         self._watering_thread = threading.Timer(
             interval=self._compute_watering_interval_sec(program),
@@ -149,7 +150,7 @@ class WateringProgramController:
         if self._is_watering_programs_active:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
             if current_soil_moisture < program.min_moisture:
-                self._pump_controller.start_watering_for_liters(program.quantity_l)
+                self._raspberry_controller.water_for_liters(program.quantity_l)
 
         self._moisture_check_thread = threading.Timer(
             interval=sleep_time_sec,
