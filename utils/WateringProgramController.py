@@ -119,6 +119,7 @@ class WateringProgramController:
         print("is run moisture check thread set", self._run_moisture_check_thread.is_set())
         while not self._run_watering_thread.is_set() or not self._run_moisture_check_thread.is_set():
             time.sleep(0.2)
+            initial_delay_sec -= 0.2
 
         if self._watering_thread is not None:
             self._watering_thread.cancel()
