@@ -34,17 +34,17 @@ class WateringProgramController:
 
         self._watering_thread = None
         self._moisture_check_thread = None
+
         self._run_watering_thread = threading.Event()
+        self._run_watering_thread.set()
+
         self._run_moisture_check_thread = threading.Event()
+        self._run_moisture_check_thread.set()
 
         self._gui_update_callback = None
 
     def perform_initial_setup(self):
         self.get_watering_programs()
-
-        self._run_watering_thread.set()
-        self._run_moisture_check_thread.set()
-
         self.get_is_watering_programs_active()
         self.get_active_watering_program_id()
 
@@ -114,8 +114,16 @@ class WateringProgramController:
 
         initial_delay_sec = self._compute_initial_delay_sec(active_program)
 
+        print("Scheduling watering")
+        print("is run watering thread set", self._run_watering_thread.is_set())
+        print("is run moisture check thread set", self._run_moisture_check_thread.is_set())
         while not self._run_watering_thread.is_set() or not self._run_moisture_check_thread.is_set():
             time.sleep(0.2)
+
+        if self._watering_thread is not None:
+            self._watering_thread.cancel()
+        if self._moisture_check_thread is not None:
+            self._moisture_check_thread.cancel()
 
         self._watering_thread = threading.Timer(
             interval=initial_delay_sec,
@@ -134,15 +142,15 @@ class WateringProgramController:
         self._moisture_check_thread.start()
 
     def _cancel_running_tasks(self):
-        self._run_watering_thread.clear()
-        self._run_moisture_check_thread.clear()
 
         if self._watering_thread is not None:
-            self._watering_thread.cancel()
+            # self._watering_thread.cancel()
+            self._run_watering_thread.clear()
             self._watering_thread = None
 
         if self._moisture_check_thread is not None:
-            self._moisture_check_thread.cancel()
+            self._run_moisture_check_thread.clear()
+            # self._moisture_check_thread.cancel()
             self._moisture_check_thread = None
 
     def _watering_task(self, program):
