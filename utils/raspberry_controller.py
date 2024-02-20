@@ -46,6 +46,8 @@ class RaspberryController:
         return False
 
     def stop_watering(self) -> bool:
+        self.pump_controller.stop_watering_event.set()
+
         if self.pump_controller.stop_watering():
             self.stop_sending_watering_updates()
             self._send_stop_watering_message()

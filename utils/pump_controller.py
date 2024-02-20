@@ -13,6 +13,7 @@ class PumpController:
         self.pump_capacity = liters_per_second
 
         self.is_watering = False
+        self.stop_watering_event = threading.Event()
 
         GPIO.setwarnings(False)
         # set the mode to BCM - refer to the pins by the GPIO number
@@ -25,10 +26,19 @@ class PumpController:
     def start_watering_for_seconds(self, seconds):
         """Start watering for the specified amount of seconds."""
 
-        time_end = time.time() + seconds
-        while time.time() < time_end:
-            self.start_watering()
+        # time_end = time.time() + seconds
+        # while time.time() < time_end:
+        #     if self.stop_watering_event.is_set():
+        #         break
+        #     self.start_watering()
+        #
+        # self.stop_watering()
+        # self.stop_watering_event.clear()
+
+        self.start_watering()
+        self.stop_watering_event.wait(seconds)
         self.stop_watering()
+        self.stop_watering_event.clear()
 
     def start_watering_for_liters(self, liters):
         """Start watering for the specified amount of minutes."""
