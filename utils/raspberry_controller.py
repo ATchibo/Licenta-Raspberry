@@ -71,7 +71,7 @@ class RaspberryController:
                 # Handle the updated data
                 updated_data = doc.to_dict()
                 # Update your UI or perform necessary actions
-                print(f"Document data: {updated_data}")
+                # print(f"Document data: {updated_data}")
 
                 if updated_data["command"] is not None:
                     if updated_data["command"] == "start_watering":
