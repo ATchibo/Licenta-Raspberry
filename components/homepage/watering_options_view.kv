@@ -33,13 +33,12 @@
 
                     MDSwitch:
                         id: watering_program_switch
-                        active: root.are_programs_active
+                        active: root.are_programs_active_variable
                         size_hint_y: None
                         icon_active: "check"
                         icon_active_color: "white"
                         icon_inactive: "close"
                         icon_inactive_color: "grey"
-                        on_active: root.toggle_watering_program()
 
             MDGridLayout:
                 cols: 2

@@ -19,6 +19,7 @@ Builder.load_file("components/homepage/watering_options_view.kv")
 # TODO: replace local variables with variables from watering program controller when necessary and if applicable
 class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
+    are_programs_active_variable = BooleanProperty(True)
 
     def __init__(self, **kwargs):
         super(WateringOptionsView, self).__init__(**kwargs)
@@ -33,7 +34,6 @@ class WateringOptionsView(MDBoxLayout):
         self.programs = {}
         self.current_program_name = ""
         self.selected_program_id = None
-        self.are_programs_active = True
 
         self.bind_raspberry_controller_properties()
         self.load_programs()
@@ -46,13 +46,15 @@ class WateringOptionsView(MDBoxLayout):
 
         self._watering_program_controller.set_on_receive_from_network_callback(self._update_values_on_receive_from_network)
 
+        self.ids.watering_program_switch.bind(active=self.toggle_watering_program)
+
     def change_program(self):
         self.current_program_name = self.ids.watering_program_spinner.text
         self._watering_program_controller.set_active_watering_program_id(self.programs[self.current_program_name].id)
 
     def load_programs(self):
         _programs = self._watering_program_controller.get_watering_programs()
-        self.are_programs_active = self._watering_program_controller.get_is_watering_programs_active()
+        self.are_programs_active_variable = self._watering_program_controller.get_is_watering_programs_active()
         self.selected_program_id = self._watering_program_controller.get_active_watering_program_id()
 
         if self.selected_program_id is not None:
@@ -105,16 +107,16 @@ class WateringOptionsView(MDBoxLayout):
         self.pushed_water_now = is_watering
         self.watering_label_variable = f"Last run:\nWater amount: {liters_sent}L\nTime running: {watering_time}s"
 
-    def toggle_watering_program(self):
-        self.are_programs_active = not self.are_programs_active
-        self._watering_program_controller.set_is_watering_programs_active(self.are_programs_active)
+    def toggle_watering_program(self, instance, value):
+        self.are_programs_active_variable = value
+        self._watering_program_controller.set_is_watering_programs_active(self.are_programs_active_variable)
 
     def refresh_callback(self, *args):
         def refresh_callback(interval):
             self.load_programs()
             self.ids.watering_program_spinner.values = list(self.programs.keys())
             self.ids.watering_program_spinner.text = self.current_program_name
-            self.are_programs_active = self._watering_program_controller.get_is_watering_programs_active()
+            self.are_programs_active_variable = self._watering_program_controller.get_is_watering_programs_active()
             self.ids.watering_program_switch.active = self.are_programs_active
 
             self.ids.refresh_layout.refresh_done()
@@ -129,9 +131,8 @@ class WateringOptionsView(MDBoxLayout):
     ):
         print("Updating values: ", new_programs, new_active_program_id, new_is_watering_programs_active)
 
-        if new_is_watering_programs_active is not None and new_is_watering_programs_active != self.are_programs_active:
-            self.are_programs_active = new_is_watering_programs_active
-            self.ids.watering_program_switch.active = self.are_programs_active
+        if new_is_watering_programs_active is not None and new_is_watering_programs_active != self.are_programs_active_variable:
+            self.are_programs_active_variable = new_is_watering_programs_active
 
         if new_active_program_id is not None and new_active_program_id != self.selected_program_id:
             self.selected_program_id = new_active_program_id

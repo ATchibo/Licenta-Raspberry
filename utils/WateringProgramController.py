@@ -69,6 +69,7 @@ class WateringProgramController:
         return self._is_watering_programs_active
 
     def set_is_watering_programs_active(self, is_active):
+        print("Setting is active")
         FirebaseController().set_is_watering_programs_active(self.raspberry_id, is_active)
         self._is_watering_programs_active = is_active
 
@@ -147,16 +148,25 @@ class WateringProgramController:
         water_interval_sec = self._compute_watering_interval_sec(program)
 
         while not self._watering_thread_finished.is_set():
+            print("Waiting for next watering")
+
             self._watering_thread_finished.wait(water_interval_sec)
             if self._watering_thread_finished.is_set():
                 return
 
+            print("Checking watering progrms active")
+
             if self._is_watering_programs_active:
+                print("Watering programs active")
+
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
                 if current_soil_moisture < program.max_moisture:
                     print("Starting watering")
                     self._raspberry_controller.water_for_liters(program.quantity_l)
                     print("Watering finished")
+
+            else:
+                print("Watering programs not active")
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         while not self._moisture_check_thread_finished.is_set():
@@ -181,7 +191,7 @@ class WateringProgramController:
             changes,
             read_time
     ):
-        # print(f"Received new data from network in {read_time}")
+        print(f"Received new data from network in {read_time}")
 
         for change in changes:
             change_type = change.type
@@ -189,9 +199,9 @@ class WateringProgramController:
             doc_id = changed_doc.id
             doc_data = changed_doc.to_dict()
 
-            # print(f"Change type: {change_type}")
-            # print(f"Changed doc id: {doc_id}")
-            # print(f"Changed doc data: {doc_data}")
+            print(f"Change type: {change_type}")
+            print(f"Changed doc id: {doc_id}")
+            print(f"Changed doc data: {doc_data}")
 
             new_programs = {}
             new_active_program_id = None
@@ -214,7 +224,7 @@ class WateringProgramController:
                 new_active_program_id = str(doc_data["activeProgramId"])
 
             if "wateringProgramsEnabled" in doc_data:
-                new_is_watering_programs_active = bool(doc_data["wateringProgramsEnabled"])
+                new_is_watering_programs_active = doc_data["wateringProgramsEnabled"]
 
             old_active_program_id = self._active_watering_program_id
 
@@ -222,8 +232,7 @@ class WateringProgramController:
                 self._watering_programs = new_programs
             if new_active_program_id is not None:
                 self._active_watering_program_id = new_active_program_id
-            if (new_is_watering_programs_active is not None and
-                    new_is_watering_programs_active != self._is_watering_programs_active):
+            if new_is_watering_programs_active is not None:
                 self._is_watering_programs_active = new_is_watering_programs_active
 
             if new_active_program_id != old_active_program_id or changed_active_program:
