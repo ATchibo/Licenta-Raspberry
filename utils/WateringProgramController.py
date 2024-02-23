@@ -181,7 +181,7 @@ class WateringProgramController:
             changes,
             read_time
     ):
-        print(f"Received new data from network in {read_time}")
+        # print(f"Received new data from network in {read_time}")
 
         for change in changes:
             change_type = change.type
@@ -189,9 +189,9 @@ class WateringProgramController:
             doc_id = changed_doc.id
             doc_data = changed_doc.to_dict()
 
-            print(f"Change type: {change_type}")
-            print(f"Changed doc id: {doc_id}")
-            print(f"Changed doc data: {doc_data}")
+            # print(f"Change type: {change_type}")
+            # print(f"Changed doc id: {doc_id}")
+            # print(f"Changed doc data: {doc_data}")
 
             new_programs = {}
             new_active_program_id = None
