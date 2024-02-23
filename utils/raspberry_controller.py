@@ -6,6 +6,7 @@ from utils.get_rasp_uuid import getserial
 from utils.moisture_controller import MoistureController
 from utils.pump_controller import PumpController
 
+
 class RaspberryController:
     _self = None
 
