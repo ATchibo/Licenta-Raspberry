@@ -40,6 +40,10 @@ class WateringProgramController:
 
         self._gui_update_callback = None
 
+        self._scheduling_counter = 0
+        self._watering_counter = 0
+        self.finished_counter = 0
+
     def perform_initial_setup(self):
         self.get_watering_programs()
         self.get_is_watering_programs_active()
@@ -108,6 +112,9 @@ class WateringProgramController:
         if active_program is None:
             return
 
+        self._scheduling_counter += 1
+        print(f"Scheduling watering: attempt {self._scheduling_counter}")
+
         initial_delay_sec = self._compute_initial_delay_sec(active_program)
 
         self._watering_thread_finished.clear()
@@ -157,11 +164,16 @@ class WateringProgramController:
             if self._is_watering_programs_active:
                 print("Watering programs active")
 
+                self._watering_counter += 1
+                print(f"Watering: attempt {self._watering_counter}")
+
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
                 if current_soil_moisture < program.max_moisture:
                     print("Starting watering")
                     self._raspberry_controller.water_for_liters(program.quantity_l)
-                    print("Watering finished")
+
+                    self.finished_counter += 1
+                    print(f"Watering finished: count {self.finished_counter}")
 
             else:
                 print("Watering programs not active")
