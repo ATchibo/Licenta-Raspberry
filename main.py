@@ -20,8 +20,8 @@ class ContentNavigationDrawer(MDScrollView):
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
-        # Window.size = (800, 480)
-        Window.fullscreen = 'auto'
+        Window.size = (800, 480)
+        # Window.fullscreen = 'auto'
         self.theme_cls.primary_palette = "Green"
 
 
