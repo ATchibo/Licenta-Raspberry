@@ -69,10 +69,8 @@ class WateringProgramController:
         return self._is_watering_programs_active
 
     def set_is_watering_programs_active(self, is_active):
-        print("Setting is active")
         FirebaseController().set_is_watering_programs_active(self.raspberry_id, is_active)
         self._is_watering_programs_active = is_active
-
 
     def _get_active_watering_program(self):
         if self._active_watering_program_id is None or self._watering_programs is None:
@@ -122,13 +120,13 @@ class WateringProgramController:
         )
         self._watering_thread.start()
 
-        self._moisture_check_thread = threading.Timer(
-            interval=0,
-            function=self._moisture_check_task,
-            args=(active_program, 3600,)
-        )
-        self._moisture_check_thread.daemon = True
-        self._moisture_check_thread.start()
+        # self._moisture_check_thread = threading.Timer(
+        #     interval=0,
+        #     function=self._moisture_check_task,
+        #     args=(active_program, 3600,)
+        # )
+        # self._moisture_check_thread.daemon = True
+        # self._moisture_check_thread.start()
 
     def _cancel_running_tasks(self):
 
