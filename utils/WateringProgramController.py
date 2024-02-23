@@ -222,7 +222,8 @@ class WateringProgramController:
                 self._watering_programs = new_programs
             if new_active_program_id is not None:
                 self._active_watering_program_id = new_active_program_id
-            if new_is_watering_programs_active is not None:
+            if (new_is_watering_programs_active is not None and
+                    new_is_watering_programs_active != self._is_watering_programs_active):
                 self._is_watering_programs_active = new_is_watering_programs_active
 
             if new_active_program_id != old_active_program_id or changed_active_program:

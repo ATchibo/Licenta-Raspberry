@@ -127,11 +127,13 @@ class WateringOptionsView(MDBoxLayout):
             new_active_program_id=None,
             new_is_watering_programs_active=None
     ):
-        if new_is_watering_programs_active is not None:
+        print("Updating values: ", new_programs, new_active_program_id, new_is_watering_programs_active)
+
+        if new_is_watering_programs_active is not None and new_is_watering_programs_active != self.are_programs_active:
             self.are_programs_active = new_is_watering_programs_active
             self.ids.watering_program_switch.active = self.are_programs_active
 
-        if new_active_program_id is not None:
+        if new_active_program_id is not None and new_active_program_id != self.selected_program_id:
             self.selected_program_id = new_active_program_id
 
         if len(new_programs.keys()) > 0:
