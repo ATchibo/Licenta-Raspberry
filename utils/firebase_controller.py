@@ -34,7 +34,9 @@ class FirebaseController:
         self.watering_programs_collection_listener = None
 
     def is_raspberry_registered(self, serial):
-        query_result = self.db.collection(self.raspberryInfoCollectionName).where('raspberryId', '==', serial).get()
+        query_result = self.db.collection(self.raspberryInfoCollectionName).where(
+            filter=FieldFilter('raspberryId', '==', serial)
+        ).get()
         return len(query_result) > 0
 
     def register_raspberry(self, serial):
@@ -56,9 +58,11 @@ class FirebaseController:
     def get_moisture_info_for_rasp_id(self, rpi_id, start_datetime, end_datetime):
         moisture_info_ref = self.db.collection(self.moistureInfoCollectionName)
 
-        query = moisture_info_ref.where('raspberryId', '==', rpi_id) \
-            .where(filter=FieldFilter('measurementTime', '>=', start_datetime)) \
-            .where(filter=FieldFilter('measurementTime', '<=', end_datetime))
+        query = (moisture_info_ref
+                 .where(filter=FieldFilter('raspberryId', '==', rpi_id))
+                 .where(filter=FieldFilter('measurementTime', '>=', start_datetime))
+                 .where(filter=FieldFilter('measurementTime', '<=', end_datetime))
+                 )
 
         docs = query.stream()
         moisture_info_list = [doc.to_dict() for doc in docs]
@@ -81,7 +85,8 @@ class FirebaseController:
             })
 
     def get_watering_programs(self, raspberry_id):
-        watering_programs_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id).collection(
+        watering_programs_ref = self.db.collection(self.wateringProgramsCollectionName).document(
+            raspberry_id).collection(
             self.wateringProgramsCollectionNestedCollectionName)
 
         watering_programs = []
@@ -137,4 +142,5 @@ class FirebaseController:
 
         programs_collection = fields_doc_ref.collection(self.wateringProgramsCollectionNestedCollectionName)
         programs_collection_query = programs_collection.where(filter=FieldFilter('name', '!=', ''))
-        self.watering_programs_collection_listener = programs_collection_query.on_snapshot(_update_values_on_receive_from_network)
+        self.watering_programs_collection_listener = programs_collection_query.on_snapshot(
+            _update_values_on_receive_from_network)
