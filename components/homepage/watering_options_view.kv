@@ -1,46 +1,87 @@
 <WateringOptionsView>:
     name: "watering_options_view"
 
-    MDBoxLayout:
+    MDScrollViewRefreshLayout:
+        id: refresh_layout
+        refresh_callback: root.refresh_callback
+        root_layout: main_layout
         size_hint: 1, 1
-        orientation: "vertical"
+        scroll_distance: 10
 
-        MDBoxLayout:
-            size_hint: 1, 0.4
-            orientation: "vertical"
-            padding: 10
+        MDGridLayout:
+            id: main_layout
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
 
-            MDLabel:
-                text: "Current watering program: "
-                halign: "center"
-                font_style: "H4"
+            MDGridLayout:
+                id: watering_programs_enable_grid
+                cols: 2
+                size_hint_y: None
+                height: dp(80)
+                padding: 10
+
+                MDLabel:
+                    text: "Enable watering programs"
+                    font_style: "H5"
+                    size_hint_x: 0.9
+
+                MDAnchorLayout:
+                    size_hint_x: 0.1
+                    height: watering_programs_enable_grid.height
+                    pos_hint: {"center_y": 0.5}
+
+                    MDSwitch:
+                        id: watering_program_switch
+                        active: root.are_programs_active_variable
+                        size_hint_y: None
+                        icon_active: "check"
+                        icon_active_color: "white"
+                        icon_inactive: "close"
+                        icon_inactive_color: "grey"
+
+            MDGridLayout:
+                cols: 2
+                size_hint_y: None
+                height: dp(80)
+                padding: 10
+
+                MDLabel:
+                    text: "Current watering program:"
+                    font_style: "H5"
+                    size_hint_x: 0.5
+
+                Spinner:
+                    id: watering_program_spinner
+                    text: "Select a program"
+                    values: root.programs.keys()
+                    size_hint_x: 0.3
+                    on_text: root.change_program()
+
+            MDGridLayout:
+                cols: 1
                 size_hint: 1, None
-                pos_hint: {"center_x": 0.5, "center_y": 0}
+                height: dp(150)
+                padding: [10, 30, 10, 10]
 
-            MDFillRoundFlatButton:
-                id: mainbutton
-                text: "Change"
-                font_size: 24
-                text_color: 1, 1, 1, 1
-                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                MDAnchorLayout:
+                    size_hint_y: None
+                    height: water_now_button.height
 
-        MDBoxLayout:
-            size_hint: 1, 0.6
-            padding: [10, 30, 10, 30]
-            orientation: "vertical"
+                    MDFillRoundFlatButton:
+                        id: water_now_button
+                        text: "Water now"
+                        font_style: "H5"
+                        text_color: 1, 1, 1, 1
+                        halign: "center"
+                        on_release: root.toggle_water_now()
 
-            MDFillRoundFlatButton:
-                id: water_now_button
-                text: "Water now"
-                font_size: 24
-                text_color: 1, 1, 1, 1
-                pos_hint: {"center_x": 0.5}
-                on_release: root.toggle_water_now()
+                MDAnchorLayout:
+                    size_hint_y: None
+                    height: water_now_label.height
 
-            MDLabel:
-                id: water_now_label
-                text: root.watering_label_variable
-                halign: "center"
-                font_style: "H5"
-                pos_hint: {"center_x": 0.5}
-                size_hint: 1, None
+                    MDLabel:
+                        id: water_now_label
+                        text: root.watering_label_variable
+                        halign: "center"
+                        font_style: "H5"

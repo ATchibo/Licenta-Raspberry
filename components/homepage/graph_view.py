@@ -82,6 +82,7 @@ class GraphView(MDBoxLayout):
         for item in self.dropdown_items:
             btn = Button(text=item, size_hint_y=None, height=44)
             btn.bind(on_release=lambda btn: self.select_item(self.dropdown_items.index(btn.text)))
+            btn.padding = (10, 0)
             self.dropdown.add_widget(btn)
 
         mainbutton = self.ids.mainbutton
