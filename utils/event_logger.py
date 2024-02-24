@@ -1,9 +1,12 @@
+import json
 import threading
 
+from domain.logging.LogMessage import LogMessage
 from domain.logging.ManualWateringCycleMessage import ManualWateringCycleMessage
 from domain.logging.MoistureMeasurementMessage import MoistureMeasurementMessage
 from utils.firebase_controller import FirebaseController
 from domain.logging.AutoWateringCycleMessage import AutoWateringCycleMessage
+from utils.get_rasp_uuid import getserial
 
 
 class EventLogger:
@@ -21,21 +24,40 @@ class EventLogger:
             return
         self._initialized = True
 
+        self._raspberry_id = getserial()
+
         self._log_messages = []
         self._notifiable_messages = {}
 
     def load_log_messages(self):
-        self._log_messages = FirebaseController().get_log_messages()
+        log_messages, success = FirebaseController().get_log_messages(self._raspberry_id)
+
+        print(f"Log messages: {log_messages}")
+
+        if not success:
+            return
+
+        for log_message_key, log_message_value in log_messages.items():
+            print(f"Log message key: {log_message_key}")
+            print(f"Log message value: {log_message_value}")
+            print("---------------------------------------------------")
+
+            self._log_messages.append(LogMessage(log_message_key, log_message_value))
 
     def load_notifiable_messages(self):
-        self._notifiable_messages = FirebaseController().get_notifiable_messages()
+        notifiable_messages, success = FirebaseController().get_notifiable_messages(self._raspberry_id)
+
+        if not success:
+            return
+
+        # TODO: Implement this
 
     def load_initial_data(self):
         self.load_log_messages()
         self.load_notifiable_messages()
 
     def _add_log_message(self, log_message):
-        if FirebaseController().add_log_message(log_message):
+        if FirebaseController().add_log_message(self._raspberry_id, log_message):
             self._log_messages.append(log_message)
 
             if self._notifiable_messages.get(log_message.get_level()) is True:

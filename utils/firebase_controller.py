@@ -33,6 +33,8 @@ class FirebaseController:
         self.wateringProgramsCollectionName = "watering_programs"
         self.wateringProgramsCollectionNestedCollectionName = "programs"
         self.globalWateringProgramsCollectionName = "global_watering_programs"
+        self.logsCollectionName = "logs"
+        self.deviceInfoCollectionName = "device_info"
 
         self.watering_now_callback = None
         self.watering_now_listener = None
@@ -152,3 +154,48 @@ class FirebaseController:
         programs_collection_query = programs_collection.where(filter=FieldFilter('name', '!=', ''))
         self.watering_programs_collection_listener = programs_collection_query.on_snapshot(
             _update_values_on_receive_from_network)
+
+    # Event logger methods
+    def get_log_messages(self, raspberry_id):
+        try:
+            log_messages_ref = self.db.collection(self.logsCollectionName).document(raspberry_id).get()
+            log_messages = log_messages_ref.get("messages")
+            return log_messages, True
+        except Exception as e:
+            print(f"Error getting log messages: {e}")
+            return None, False
+
+    def add_log_message(self, raspberry_id, log_message):
+        try:
+            data = {
+                log_message.get_timestamp(): log_message.get_message()
+            }
+
+            log_messages_ref = self.db.collection(self.logsCollectionName).document(raspberry_id)
+            log_messages_ref.update({"messages": data})
+            return True
+        except Exception as e:
+            print(f"Error adding log message: {e}")
+            return False
+
+    def get_notifiable_messages(self, raspberry_id):
+        try:
+            notifiable_messages_ref = self.db.collection(self.deviceInfoCollectionName).document(raspberry_id).get()
+            notifiable_messages = notifiable_messages_ref.get("notifiable_messages")
+            return notifiable_messages, True
+        except Exception as e:
+            print(f"Error getting notifiable messages: {e}")
+            return None, False
+
+    def update_notifiable_message(self, raspberry_id, notifiable_message, value):
+        try:
+            data = {
+                notifiable_message: value
+            }
+
+            notifiable_messages_ref = self.db.collection(self.deviceInfoCollectionName).document(raspberry_id)
+            notifiable_messages_ref.update({"notifiable_messages": data})
+            return True
+        except Exception as e:
+            print(f"Error updating notifiable message: {e}")
+            return False
