@@ -1,3 +1,5 @@
+import threading
+
 import firebase_admin
 from firebase_admin import credentials, firestore
 from google.cloud.firestore_v1 import FieldFilter
@@ -8,16 +10,22 @@ from domain.WateringProgram import WateringProgram
 
 class FirebaseController:
     _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls):
-        if not cls._instance:
-            cls._instance = super(FirebaseController, cls).__new__(cls)
-            cred = credentials.Certificate("serviceAccountKey.json")
-            firebase_admin.initialize_app(cred)
-            cls._instance.db = firestore.client()
+        with cls._lock:
+            if not cls._instance:
+                cls._instance = super(FirebaseController, cls).__new__(cls)
+                cred = credentials.Certificate("serviceAccountKey.json")
+                firebase_admin.initialize_app(cred)
+                cls._instance.db = firestore.client()
         return cls._instance
 
     def __init__(self):
+        if getattr(self, '_initialized', None):
+            return
+        self._initialized = True
+
         self.deviceLinksCollectionName = "device_links"
         self.raspberryInfoCollectionName = "raspberry_info"
         self.moistureInfoCollectionName = "humidity_readings"

@@ -8,14 +8,20 @@ from utils.pump_controller import PumpController
 
 
 class RaspberryController:
-    _self = None
+    _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls):
-        if cls._self is None:
-            cls._self = super().__new__(cls)
-        return cls._self
+        with cls._lock:
+            if not cls._instance:
+                cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self):
+        if getattr(self, '_initialized', None):
+            return
+        self._initialized = True
+
         self.moisture_controller = MoistureController(channel=1)
         self.pump_controller = PumpController(pin=4, liters_per_second=0.1)
 

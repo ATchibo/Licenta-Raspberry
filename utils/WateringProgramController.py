@@ -42,10 +42,6 @@ class WateringProgramController:
 
         self._gui_update_callback = None
 
-        self._scheduling_counter = 0
-        self._watering_counter = 0
-        self.finished_counter = 0
-
     def perform_initial_setup(self):
         self.get_watering_programs()
         self.get_is_watering_programs_active()
@@ -114,9 +110,6 @@ class WateringProgramController:
         if active_program is None:
             return
 
-        self._scheduling_counter += 1
-        print(f"Scheduling watering: attempt {self._scheduling_counter}")
-
         initial_delay_sec = self._compute_initial_delay_sec(active_program)
 
         self._watering_thread_finished.clear()
@@ -129,13 +122,13 @@ class WateringProgramController:
         )
         self._watering_thread.start()
 
-        # self._moisture_check_thread = threading.Timer(
-        #     interval=0,
-        #     function=self._moisture_check_task,
-        #     args=(active_program, 3600,)
-        # )
-        # self._moisture_check_thread.daemon = True
-        # self._moisture_check_thread.start()
+        self._moisture_check_thread = threading.Timer(
+            interval=0,
+            function=self._moisture_check_task,
+            args=(active_program, 3600,)
+        )
+        self._moisture_check_thread.daemon = True
+        self._moisture_check_thread.start()
 
     def _cancel_running_tasks(self):
         if self._watering_thread is not None:
@@ -154,30 +147,15 @@ class WateringProgramController:
         water_interval_sec = self._compute_watering_interval_sec(program)
 
         while not self._watering_thread_finished.is_set():
-            print(f"Waiting for next watering: wait time {water_interval_sec}")
-
             self._watering_thread_finished.wait(water_interval_sec)
             if self._watering_thread_finished.is_set():
                 return
 
-            print("Checking watering progrms active")
-
             if self._is_watering_programs_active:
-                print("Watering programs active")
-
-                self._watering_counter += 1
-                print(f"Watering: attempt {self._watering_counter}")
-
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
+
                 if current_soil_moisture < program.max_moisture:
-                    print("Starting watering")
                     self._raspberry_controller.water_for_liters(program.quantity_l)
-
-                    self.finished_counter += 1
-                    print(f"Watering finished: count {self.finished_counter}")
-
-            else:
-                print("Watering programs not active")
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         while not self._moisture_check_thread_finished.is_set():
@@ -187,11 +165,9 @@ class WateringProgramController:
 
             if self._is_watering_programs_active:
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
-                if current_soil_moisture < program.min_moisture:
-                    print("Starting watering - low moisture")
-                    self._raspberry_controller.water_for_liters(program.quantity_l)
-                    print("Watering finished - low moisture")
 
+                if current_soil_moisture < program.min_moisture:
+                    self._raspberry_controller.water_for_liters(program.quantity_l)
 
     def set_on_receive_from_network_callback(self, _update_values_on_receive_from_network):
         self._gui_update_callback = _update_values_on_receive_from_network
