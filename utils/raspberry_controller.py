@@ -130,8 +130,12 @@ class RaspberryController:
         self.liters_sent = self.watering_time * self.pump_controller.pump_capacity  # seconds * liters/second -> liters
 
         if self.watering_time >= self._max_watering_time_sec:
-            self._send_stop_watering_message()
-            self._update_info_for_watering_callback()
+            def _stop_watering():
+                self._send_stop_watering_message()
+                self._update_info_for_watering_callback()
+
+            threading.Thread(target=_stop_watering()).start()
+
             return
         else:
             self._update_current_watering_info()
