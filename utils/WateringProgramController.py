@@ -153,7 +153,7 @@ class WateringProgramController:
         water_interval_sec = self._compute_watering_interval_sec(program)
 
         while not self._watering_thread_finished.is_set():
-            print("Waiting for next watering")
+            print(f"Waiting for next watering: wait time {water_interval_sec}")
 
             self._watering_thread_finished.wait(water_interval_sec)
             if self._watering_thread_finished.is_set():
