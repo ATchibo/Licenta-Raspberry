@@ -9,20 +9,22 @@ from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.raspberry_controller import RaspberryController
 
-# TODO :
-# add listener in firebase controller - look for changes in selected active program
-# add listener to look for enabled watering programs
-# add listener to look for updates to the watering program list
 
 class WateringProgramController:
-    _self = None
+    _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls):
-        if cls._self is None:
-            cls._self = super().__new__(cls)
-        return cls._self
+        with cls._lock:
+            if not cls._instance:
+                cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self):
+        if getattr(self, '_initialized', None):
+            return
+        self._initialized = True
+
         self._watering_programs = {}
         self._active_watering_program_id = None
         self._is_watering_programs_active = None
@@ -150,9 +152,11 @@ class WateringProgramController:
             return
 
         water_interval_sec = self._compute_watering_interval_sec(program)
-        print(f"Waiting for next watering: wait time {water_interval_sec}")
 
-        while self._watering_thread_finished.wait(water_interval_sec):
+        while not self._watering_thread_finished.is_set():
+            print(f"Waiting for next watering: wait time {water_interval_sec}")
+
+            self._watering_thread_finished.wait(water_interval_sec)
             if self._watering_thread_finished.is_set():
                 return
 
@@ -174,8 +178,6 @@ class WateringProgramController:
 
             else:
                 print("Watering programs not active")
-
-            print(f"Waiting for next watering: wait time {water_interval_sec}")
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         while not self._moisture_check_thread_finished.is_set():
