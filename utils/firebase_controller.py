@@ -70,6 +70,8 @@ class FirebaseController:
         return moisture_info_list
 
     def update_watering_info(self, serial, command, liters_sent, watering_time):
+        pass
+
         doc_ref = self.db.collection(self.wateringNowCollectionName).document(serial)
 
         if command != '':
