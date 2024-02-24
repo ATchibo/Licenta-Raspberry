@@ -44,9 +44,6 @@ class WateringProgramController:
         self._watering_counter = 0
         self.finished_counter = 0
 
-        self._watering_thread_counter = 0
-        self._counter_lock = threading.Lock()
-
     def perform_initial_setup(self):
         self.get_watering_programs()
         self.get_is_watering_programs_active()
@@ -139,33 +136,23 @@ class WateringProgramController:
         # self._moisture_check_thread.start()
 
     def _cancel_running_tasks(self):
-
         if self._watering_thread is not None:
             self._watering_thread_finished.set()
             self._watering_thread.join()
-            self._watering_thread_counter -= 1
 
         if self._moisture_check_thread is not None:
             self._moisture_check_thread_finished.set()
             self._moisture_check_thread.join()
 
     def _watering_task(self, program, initial_delay_sec=0):
-        with self._counter_lock:
-            self._watering_thread_counter += 1
-            thread_id = self._watering_thread_counter
-
-        print(f"Thread id: {thread_id}")
-
         self._watering_thread_finished.wait(initial_delay_sec)
         if self._watering_thread_finished.is_set():
             return
 
         water_interval_sec = self._compute_watering_interval_sec(program)
+        print(f"Waiting for next watering: wait time {water_interval_sec}")
 
-        while not self._watering_thread_finished.is_set():
-            print(f"Thread {thread_id} Waiting for next watering: wait time {water_interval_sec}")
-
-            self._watering_thread_finished.wait(water_interval_sec)
+        while self._watering_thread_finished.wait(water_interval_sec):
             if self._watering_thread_finished.is_set():
                 return
 
@@ -187,6 +174,8 @@ class WateringProgramController:
 
             else:
                 print("Watering programs not active")
+
+            print(f"Waiting for next watering: wait time {water_interval_sec}")
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         while not self._moisture_check_thread_finished.is_set():
