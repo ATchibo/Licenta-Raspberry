@@ -45,6 +45,7 @@ class WateringProgramController:
         self.finished_counter = 0
 
         self._watering_thread_counter = 0
+        self._counter_lock = threading.Lock()
 
     def perform_initial_setup(self):
         self.get_watering_programs()
@@ -149,8 +150,9 @@ class WateringProgramController:
             self._moisture_check_thread.join()
 
     def _watering_task(self, program, initial_delay_sec=0):
-        self._watering_thread_counter += 1
-        thread_id = self._watering_thread_counter
+        with self._counter_lock:
+            self._watering_thread_counter += 1
+            thread_id = self._watering_thread_counter
 
         print(f"Thread id: {thread_id}")
 
