@@ -1,14 +1,27 @@
+import json
+import os
 import threading
 
-import firebase_admin
-from firebase_admin import credentials, firestore
+from dotenv import load_dotenv
+# import firebase_admin
+from firebase_admin import firestore
+# from firebase_admin import credentials
 from google.cloud.firestore_v1 import FieldFilter
+from requests import HTTPError
 
 from domain.RaspberryInfo import RaspberryInfo
 from domain.WateringProgram import WateringProgram
 
+import requests
+import google.oauth2.credentials
+from google.cloud import firestore
+
 
 class FirebaseController:
+    __project_id = None
+    __api_key = None
+    __refresh_token = None
+    __token = None
     _instance = None
     _lock = threading.Lock()
 
@@ -16,9 +29,39 @@ class FirebaseController:
         with cls._lock:
             if not cls._instance:
                 cls._instance = super(FirebaseController, cls).__new__(cls)
-                cred = credentials.Certificate("serviceAccountKey.json")
-                firebase_admin.initialize_app(cred)
-                cls._instance.db = firestore.client()
+
+                # cred = credentials.Certificate("serviceAccountKey.json")
+                # firebase_admin.initialize_app(cred)
+                # cls._instance.db = firestore.client()
+
+                load_dotenv()
+                cls.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+                cls.__project_id = os.getenv("PROJECT_ID")
+
+                request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={cls.__api_key}"
+                headers = {"Content-Type": "application/json; charset=UTF-8"}
+                data = json.dumps({"returnSecureToken": True})
+                response = requests.post(request_url, headers=headers, data=data)
+                try:
+                    response.raise_for_status()
+                except (HTTPError, Exception):
+                    content = response.json()
+                    error = f"error: {content['error']['message']}"
+                    raise Exception(error)
+
+                json_response = response.json()
+                cls.__token = json_response["idToken"]
+                cls.__refresh_token = json_response["refreshToken"]
+
+                credentials = google.oauth2.credentials.Credentials(cls.__token,
+                                                                    cls.__refresh_token,
+                                                                    client_id="",
+                                                                    client_secret="",
+                                                                    token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
+                                                                    )
+
+                cls._instance.db = firestore.Client(cls.__project_id, credentials)
+
         return cls._instance
 
     def __init__(self):
