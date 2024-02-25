@@ -38,10 +38,6 @@ class EventLogger:
             return
 
         for log_message_key, log_message_value in log_messages.items():
-            print(f"Log message key: {log_message_key}")
-            print(f"Log message value: {log_message_value}")
-            print("---------------------------------------------------")
-
             self._log_messages.append(LogMessage(log_message_key, log_message_value))
 
     def load_notifiable_messages(self):
