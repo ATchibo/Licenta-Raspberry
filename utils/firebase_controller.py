@@ -4,7 +4,7 @@ import threading
 
 from dotenv import load_dotenv
 # import firebase_admin
-from firebase_admin import firestore
+# from firebase_admin import firestore
 # from firebase_admin import credentials
 from google.cloud.firestore_v1 import FieldFilter
 from requests import HTTPError
@@ -53,14 +53,14 @@ class FirebaseController:
                 cls.__token = json_response["idToken"]
                 cls.__refresh_token = json_response["refreshToken"]
 
-                credentials = google.oauth2.credentials.Credentials(cls.__token,
+                _credentials = google.oauth2.credentials.Credentials(cls.__token,
                                                                     cls.__refresh_token,
                                                                     client_id="",
                                                                     client_secret="",
                                                                     token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
                                                                     )
 
-                cls._instance.db = firestore.Client(cls.__project_id, credentials)
+                cls._instance.db = firestore.Client(cls.__project_id, _credentials)
 
         return cls._instance
 
