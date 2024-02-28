@@ -69,15 +69,14 @@ class FirebaseController:
             return
         self._initialized = True
 
-        self.deviceLinksCollectionName = "device_links"
-        self.raspberryInfoCollectionName = "raspberry_info"
-        self.moistureInfoCollectionName = "humidity_readings"
-        self.wateringNowCollectionName = "watering_info"
-        self.wateringProgramsCollectionName = "watering_programs"
-        self.wateringProgramsCollectionNestedCollectionName = "programs"
-        self.globalWateringProgramsCollectionName = "global_watering_programs"
-        self.logsCollectionName = "logs"
-        self.deviceInfoCollectionName = "device_info"
+        self._ownerInfoCollectionName = "owner_info"
+        self._raspberryInfoCollectionName = "raspberry_info"
+        self._moistureInfoCollectionName = "humidity_readings"
+        self._wateringNowCollectionName = "watering_info"
+        self._wateringProgramsCollectionName = "watering_programs"
+        self._wateringProgramsCollectionNestedCollectionName = "programs"
+        self._globalWateringProgramsCollectionName = "global_watering_programs"
+        self._logsCollectionName = "logs"
 
         self.watering_now_callback = None
         self.watering_now_listener = None
@@ -87,29 +86,36 @@ class FirebaseController:
         self.watering_programs_collection_listener = None
 
     def is_raspberry_registered(self, serial):
-        query_result = self.db.collection(self.raspberryInfoCollectionName).where(
-            filter=FieldFilter('raspberryId', '==', serial)
-        ).get()
-        return len(query_result) > 0
+        query_result = self.db.collection(self._raspberryInfoCollectionName).document(serial)
+        return query_result is not None
 
     def register_raspberry(self, serial):
         if not self.is_raspberry_registered(serial):
             rpi_info = RaspberryInfo(raspberryId=serial)
 
-            self.db.collection(self.raspberryInfoCollectionName).add(
-                rpi_info.getInfoDict()
+            # TODO: check how can i set the document id
+            self.db.collection(self._raspberryInfoCollectionName).add(
+                rpi_info.get_info_dict()
             )
         else:
             raise Exception("Raspberry Pi already registered")
 
+    def get_raspberry_info(self, serial) -> RaspberryInfo:
+        doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
+        doc_dict = doc_ref.get().to_dict()
+
+        rasp_info = RaspberryInfo()
+        rasp_info.from_dict(doc_dict)
+        return rasp_info
+
     def add_watering_now_listener(self, serial, callback):
         self.watering_now_callback = callback
 
-        doc_ref = self.db.collection(self.wateringNowCollectionName).document(serial)
+        doc_ref = self.db.collection(self._wateringNowCollectionName).document(serial)
         self.watering_now_listener = doc_ref.on_snapshot(callback)
 
     def get_moisture_info_for_rasp_id(self, rpi_id, start_datetime, end_datetime):
-        moisture_info_ref = self.db.collection(self.moistureInfoCollectionName)
+        moisture_info_ref = self.db.collection(self._moistureInfoCollectionName)
 
         query = (moisture_info_ref
                  .where(filter=FieldFilter('raspberryId', '==', rpi_id))
@@ -123,7 +129,7 @@ class FirebaseController:
         return moisture_info_list
 
     def update_watering_info(self, serial, command, liters_sent, watering_time):
-        doc_ref = self.db.collection(self.wateringNowCollectionName).document(serial)
+        doc_ref = self.db.collection(self._wateringNowCollectionName).document(serial)
 
         if command != '':
             doc_ref.update({
@@ -138,9 +144,9 @@ class FirebaseController:
             })
 
     def get_watering_programs(self, raspberry_id):
-        watering_programs_ref = self.db.collection(self.wateringProgramsCollectionName).document(
+        watering_programs_ref = self.db.collection(self._wateringProgramsCollectionName).document(
             raspberry_id).collection(
-            self.wateringProgramsCollectionNestedCollectionName)
+            self._wateringProgramsCollectionNestedCollectionName)
 
         watering_programs = []
 
@@ -151,7 +157,7 @@ class FirebaseController:
                 watering_program_data["id"] = doc_snapshot.id
                 watering_programs.append(WateringProgram().fromDict(watering_program_data))
 
-        global_watering_programs_ref = self.db.collection(self.globalWateringProgramsCollectionName)
+        global_watering_programs_ref = self.db.collection(self._globalWateringProgramsCollectionName)
 
         global_watering_programs = []
 
@@ -166,7 +172,7 @@ class FirebaseController:
         return watering_programs
 
     def get_active_watering_program_id(self, raspberry_id):
-        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc = doc_ref.get()
 
         try:
@@ -175,25 +181,25 @@ class FirebaseController:
             return None
 
     def set_active_watering_program_id(self, raspberry_id, program_id):
-        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc_ref.update({"activeProgramId": program_id})
 
     def get_is_watering_programs_active(self, raspberry_id):
-        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc = doc_ref.get()
         return doc.get("wateringProgramsEnabled")
 
     def set_is_watering_programs_active(self, raspberry_id, is_active):
-        doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc_ref.update({"wateringProgramsEnabled": is_active})
 
     def add_listener_for_watering_programs_changes(self, raspberry_id, _update_values_on_receive_from_network):
         self.watering_programs_callback = _update_values_on_receive_from_network
 
-        fields_doc_ref = self.db.collection(self.wateringProgramsCollectionName).document(raspberry_id)
+        fields_doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         self.watering_programs_fields_listener = fields_doc_ref.on_snapshot(_update_values_on_receive_from_network)
 
-        programs_collection = fields_doc_ref.collection(self.wateringProgramsCollectionNestedCollectionName)
+        programs_collection = fields_doc_ref.collection(self._wateringProgramsCollectionNestedCollectionName)
         programs_collection_query = programs_collection.where(filter=FieldFilter('name', '!=', ''))
         self.watering_programs_collection_listener = programs_collection_query.on_snapshot(
             _update_values_on_receive_from_network)
@@ -201,7 +207,7 @@ class FirebaseController:
     # Event logger methods
     def get_log_messages(self, raspberry_id):
         try:
-            log_messages_ref = self.db.collection(self.logsCollectionName).document(raspberry_id).get()
+            log_messages_ref = self.db.collection(self._logsCollectionName).document(raspberry_id).get()
             log_messages = log_messages_ref.get("messages")
             return log_messages, True
         except Exception as e:
@@ -211,10 +217,10 @@ class FirebaseController:
     def add_log_message(self, raspberry_id, log_message):
         try:
             data = {
-                log_message.get_timestamp(): log_message.get_message()
+                str(log_message.get_timestamp()): log_message.get_message()
             }
 
-            log_messages_ref = self.db.collection(self.logsCollectionName).document(raspberry_id)
+            log_messages_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
             log_messages_ref.update({"messages": data})
             return True
         except Exception as e:
@@ -222,23 +228,27 @@ class FirebaseController:
             return False
 
     def get_notifiable_messages(self, raspberry_id):
-        try:
-            notifiable_messages_ref = self.db.collection(self.deviceInfoCollectionName).document(raspberry_id).get()
-            notifiable_messages = notifiable_messages_ref.get("notifiable_messages")
-            return notifiable_messages, True
-        except Exception as e:
-            print(f"Error getting notifiable messages: {e}")
-            return None, False
+        return None, True
+
+        # try:
+        #     notifiable_messages_ref = self.db.collection(self._deviceInfoCollectionName).document(raspberry_id).get()
+        #     notifiable_messages = notifiable_messages_ref.get("notifiable_messages")
+        #     return notifiable_messages, True
+        # except Exception as e:
+        #     print(f"Error getting notifiable messages: {e}")
+        #     return None, False
 
     def update_notifiable_message(self, raspberry_id, notifiable_message, value):
-        try:
-            data = {
-                notifiable_message: value
-            }
+        return True
 
-            notifiable_messages_ref = self.db.collection(self.deviceInfoCollectionName).document(raspberry_id)
-            notifiable_messages_ref.update({"notifiable_messages": data})
-            return True
-        except Exception as e:
-            print(f"Error updating notifiable message: {e}")
-            return False
+        # try:
+        #     data = {
+        #         notifiable_message: value
+        #     }
+        #
+        #     notifiable_messages_ref = self.db.collection(self._deviceInfoCollectionName).document(raspberry_id)
+        #     notifiable_messages_ref.update({"notifiable_messages": data})
+        #     return True
+        # except Exception as e:
+        #     print(f"Error updating notifiable message: {e}")
+        #     return False

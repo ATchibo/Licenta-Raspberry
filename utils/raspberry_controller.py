@@ -1,6 +1,7 @@
 import threading
 import time
 
+from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.moisture_controller import MoistureController
@@ -52,12 +53,15 @@ class RaspberryController:
             return True
         return False
 
-    def stop_watering(self) -> bool:
+    def manual_stop_watering(self) -> bool:
         self.pump_controller.stop_watering_event.set()
 
         if self.pump_controller.stop_watering():
             self.stop_sending_watering_updates()
             self._send_stop_watering_message()
+
+            EventLogger().add_manual_watering_cycle_message(10, 12, "sapte litri")
+
             return True
         return False
 

@@ -34,3 +34,6 @@ class LogMessage:
 
     def set_message(self, message):
         self.message = message
+
+    def get_timestamp(self):
+        return self.timestamp

@@ -4,6 +4,7 @@ import threading
 from domain.logging.LogMessage import LogMessage
 from domain.logging.ManualWateringCycleMessage import ManualWateringCycleMessage
 from domain.logging.MoistureMeasurementMessage import MoistureMeasurementMessage
+from utils.backend_controller import BackendController
 from utils.firebase_controller import FirebaseController
 from domain.logging.AutoWateringCycleMessage import AutoWateringCycleMessage
 from utils.get_rasp_uuid import getserial
@@ -56,8 +57,8 @@ class EventLogger:
         if FirebaseController().add_log_message(self._raspberry_id, log_message):
             self._log_messages.append(log_message)
 
-            if self._notifiable_messages.get(log_message.get_level()) is True:
-                FirebaseController().send_notification(log_message.get_message())
+            if self._notifiable_messages.get(log_message.get_level()) is True or len(self._notifiable_messages.keys()) == 0:
+                BackendController().send_notification(self._raspberry_id, log_message.get_message())
 
     def add_auto_watering_cycle_message(self, start_time, end_time, water_amount):
         self._add_log_message(AutoWateringCycleMessage(start_time, end_time, water_amount))
