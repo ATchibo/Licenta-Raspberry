@@ -1,5 +1,6 @@
 import threading
 import time
+from datetime import datetime
 
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
@@ -37,6 +38,8 @@ class RaspberryController:
 
         self.raspberry_id = getserial()
 
+        self._watering_cycle_start_time = None
+
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
 
@@ -60,7 +63,11 @@ class RaspberryController:
             self.stop_sending_watering_updates()
             self._send_stop_watering_message()
 
-            EventLogger().add_manual_watering_cycle_message(10, 12, "sapte litri")
+            EventLogger().add_manual_watering_cycle_message(
+                self._watering_cycle_start_time,
+                datetime.now(),
+                self.liters_sent
+            )
 
             return True
         return False
@@ -113,6 +120,8 @@ class RaspberryController:
         FirebaseController().watering_now_listener.unsubscribe()
 
     def start_sending_watering_updates(self):
+        self._watering_cycle_start_time = datetime.now()
+
         self._send_watering_updates_event.set()
         self._send_watering_updates_thread = threading.Thread(target=self._send_watering_updates_worker)
         self._send_watering_updates_thread.start()

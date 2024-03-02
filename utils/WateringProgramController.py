@@ -42,6 +42,9 @@ class WateringProgramController:
 
         self._gui_update_callback = None
 
+        self._watering_cycle_start_time = None
+        self._watering_cycle_end_time = None
+
     def perform_initial_setup(self):
         self.get_watering_programs()
         self.get_is_watering_programs_active()
