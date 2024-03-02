@@ -25,6 +25,7 @@ class WateringHistoryView(MDBoxLayout):
 
         self._logs = {}
         self._raspberry_id = getserial()
+        self.refreshing = False
 
         Clock.schedule_once(self.populate_list, 0.1)
 
@@ -54,8 +55,8 @@ class WateringHistoryView(MDBoxLayout):
 
     def refresh_data(self, *args):
         def refresh_callback(interval):
-            print("Refreshing data")
+            self.refreshing = True
             self.populate_list()
-            self.ids.refresh_layout.refresh_done()
+            self.refreshing = False
 
         Clock.schedule_once(refresh_callback, 0.5)

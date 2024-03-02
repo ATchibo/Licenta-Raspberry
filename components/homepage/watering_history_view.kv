@@ -2,8 +2,6 @@
     name: 'watering_history'
     padding: dp(10)
 
-
-
     MDRecycleView:
         id: rv
         viewclass: 'MDLabel'
@@ -13,3 +11,9 @@
             size_hint_y: None
             height: self.minimum_height
             orientation: 'vertical'
+
+    MDFloatingActionButton:
+        icon: "refresh"
+        style: "small"
+        pos_hint: {"right": 1}
+        on_release: root.refresh_data()
