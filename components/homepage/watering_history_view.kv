@@ -1,17 +1,15 @@
 <WateringHistoryView>:
-    name: "watering_history_view"
+    name: 'watering_history'
+    padding: dp(10)
 
-    MDScrollViewRefreshLayout:
-        id: refresh_layout
-        refresh_callback: root.refresh_data
-        root_layout: scroll_view
-        size_hint: 1, 1
-        scroll_distance: 5
 
-        MDScrollView:
-            id: scroll_view
-            size_hint: 1, 1
-            padding: dp(10)
 
-            MDList:
-                id: watering_history_list
+    MDRecycleView:
+        id: rv
+        viewclass: 'MDLabel'
+        RecycleBoxLayout:
+            default_size: None, dp(56)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'

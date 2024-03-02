@@ -3,6 +3,7 @@ from datetime import datetime
 from kivy.clock import Clock
 from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
+from kivy.uix.recycleview import RecycleView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.list import MDList, OneLineListItem, TwoLineListItem
 from kivymd.uix.scrollview import MDScrollView
@@ -15,6 +16,7 @@ Builder.load_file("components/homepage/watering_history_view.kv")
 
 
 class WateringHistoryView(MDBoxLayout):
+
     def __init__(self, **kwargs):
         super(WateringHistoryView, self).__init__(**kwargs)
 
@@ -27,38 +29,28 @@ class WateringHistoryView(MDBoxLayout):
         Clock.schedule_once(self.populate_list, 0.1)
 
     def populate_list(self, *args):
-        ml = self.ids.watering_history_list
+        rv = self.ids.rv
 
         self._logs, success = FirebaseController().get_log_messages(self._raspberry_id)
 
         if not success:
-            ml.add_widget(
-                OneLineListItem(
-                    text="Error fetching logs"
-                )
-            )
+            rv.data = [{"text": "Error fetching logs"}]
             return
 
         if len(self._logs) == 0:
-            ml.add_widget(
-                OneLineListItem(
-                    text="No logs found"
-                )
-            )
+            rv.data = [{"text": "No logs available"}]
             return
+
+        _data = []
 
         for key in self._logs:
             datetime_object = datetime.strptime(key, "%Y-%m-%d %H:%M:%S.%f")
             formatted_date_time = datetime_object.strftime("%d-%m-%Y %H:%M")
             text = f"{formatted_date_time}: {self._logs[key]}"
 
-            # TODO: maybe convert to a recyclerview when im bored
+            _data.append({"text": text})
 
-            ml.add_widget(
-                TwoLineListItem(
-                    text=text
-                )
-            )
+        rv.data = _data
 
     def refresh_data(self, *args):
         def refresh_callback(interval):
