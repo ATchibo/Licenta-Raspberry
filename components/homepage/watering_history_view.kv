@@ -1,10 +1,17 @@
 <WateringHistoryView>:
     name: "watering_history_view"
 
-    MDScrollView:
-        id: scroll_view
+    MDScrollViewRefreshLayout:
+        id: refresh_layout
+        refresh_callback: root.refresh_data
+        root_layout: scroll_view
         size_hint: 1, 1
-        padding: dp(10)
+        scroll_distance: 5
 
-        MDList:
-            id: watering_history_list
+        MDScrollView:
+            id: scroll_view
+            size_hint: 1, 1
+            padding: dp(10)
+
+            MDList:
+                id: watering_history_list
