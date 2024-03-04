@@ -1,4 +1,5 @@
 # from gpiozero import MCP3008
+import random
 
 
 class MoistureController:
@@ -15,5 +16,5 @@ class MoistureController:
         # return self.sensor.value
 
     def get_moisture_percentage(self):
-        return 50
+        return random.randint(0, 100)
         # return round(1 - (self.get_moisture() - self.absolute_wet) / self.interval, 2) * 100

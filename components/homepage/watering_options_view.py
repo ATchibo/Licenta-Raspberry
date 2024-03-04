@@ -19,6 +19,7 @@ Builder.load_file("components/homepage/watering_options_view.kv")
 # TODO: replace local variables with variables from watering program controller when necessary and if applicable
 class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
+    moisture_variable = StringProperty()
     are_programs_active_variable = BooleanProperty(True)
 
     def __init__(self, **kwargs):
@@ -28,7 +29,8 @@ class WateringOptionsView(MDBoxLayout):
 
         self.raspberry_controller = RaspberryController()
         self._watering_program_controller = WateringProgramController()
-        self.watering_label_variable = f"Water amount: 0L\nTime running: 0s"
+        self.watering_label_variable = ""
+        self.moisture_variable = "Moisture: None"
         self.pushed_water_now = False
 
         self.programs = {}
@@ -37,6 +39,7 @@ class WateringOptionsView(MDBoxLayout):
 
         self.bind_raspberry_controller_properties()
         self.load_programs()
+        self.check_moisture()
 
         Clock.schedule_once(self.init, 0.1)
 
@@ -151,3 +154,7 @@ class WateringOptionsView(MDBoxLayout):
                 self.ids.watering_program_spinner.values = list(self.programs.keys())
                 self.ids.watering_program_spinner.text = self.current_program_name
             Clock.schedule_once(refresh_callback, 0.5)
+
+    def check_moisture(self):
+        moisture_percentage = self.raspberry_controller.get_moisture_percentage()
+        self.moisture_variable = f"Moisture: {moisture_percentage}%"

@@ -45,7 +45,8 @@ class WateringHistoryView(MDBoxLayout):
         _data = []
 
         for key in self._logs:
-            datetime_object = datetime.strptime(key, "%Y-%m-%d %H:%M:%S.%f")
+            # TODO: take utc into account
+            datetime_object = datetime.strptime(key[:-6], "%Y-%m-%d %H:%M:%S.%f")
             formatted_date_time = datetime_object.strftime("%d-%m-%Y %H:%M")
             text = f"{formatted_date_time}: {self._logs[key]}"
 

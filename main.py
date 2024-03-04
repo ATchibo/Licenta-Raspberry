@@ -10,6 +10,7 @@ from pages.settings_page import SettingsPage
 from utils.WateringProgramController import WateringProgramController
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
+from utils.moisture_measurement_controller import MoistureMeasurementController
 from utils.raspberry_controller import RaspberryController
 
 
@@ -21,8 +22,8 @@ class ContentNavigationDrawer(MDScrollView):
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
-        Window.size = (800, 480)
-        # Window.fullscreen = 'auto'
+        # Window.size = (800, 480)
+        Window.fullscreen = 'auto'
         self.theme_cls.primary_palette = "Green"
 
 
@@ -32,5 +33,6 @@ if __name__ == '__main__':
     RaspberryController().start_listening_for_watering_now()
     WateringProgramController().perform_initial_setup()
     EventLogger().load_initial_data()
+    MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 
     PlantBuddyApp().run()

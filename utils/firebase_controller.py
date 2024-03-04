@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # import firebase_admin
 # from firebase_admin import firestore
 # from firebase_admin import credentials
-from google.cloud.firestore_v1 import FieldFilter
+from google.cloud.firestore_v1 import FieldFilter, WriteOption
 from requests import HTTPError
 
 from domain.RaspberryInfo import RaspberryInfo
@@ -221,7 +221,7 @@ class FirebaseController:
             }
 
             log_messages_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
-            log_messages_ref.update({"messages": data})
+            log_messages_ref.set({"messages": data}, merge=True)
             return True
         except Exception as e:
             print(f"Error adding log message: {e}")
@@ -252,3 +252,25 @@ class FirebaseController:
         # except Exception as e:
         #     print(f"Error updating notifiable message: {e}")
         #     return False
+
+    def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> bool:
+        try:
+            # data = {
+            #     str(timestamp): moisture_perc
+            # }
+            #
+            # self.db.collection(self._moistureInfoCollectionName).document(_raspberry_id).set(data, merge=True)
+
+            data = {
+                "raspberryId": _raspberry_id,
+                "measurementTime": timestamp,
+                "measurementValuePercent": moisture_perc
+            }
+
+            self.db.collection(self._moistureInfoCollectionName).add(data)
+
+            return True
+
+        except Exception as e:
+            print(f"Error adding moisture percentage measurement: {e}")
+            return False

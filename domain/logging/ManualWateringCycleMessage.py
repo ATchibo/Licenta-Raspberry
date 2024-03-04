@@ -2,6 +2,7 @@ from datetime import datetime
 
 from domain.logging.LogMessage import LogMessage
 from domain.logging.MessageType import MessageType
+from utils.datetime_utils import get_current_datetime
 
 
 class ManualWateringCycleMessage(LogMessage):
@@ -14,4 +15,4 @@ class ManualWateringCycleMessage(LogMessage):
         message = (f"Manual watering cycle started at {_start_time} and lasted {_duration} seconds. "
                    f"Watered {_water_amount} liters.")
 
-        super().__init__(message, MessageType.MANUAL_WATERING_CYCLE, datetime.now())
+        super().__init__(message, MessageType.MANUAL_WATERING_CYCLE, get_current_datetime())

@@ -1,0 +1,65 @@
+import threading
+from datetime import datetime
+
+from utils.datetime_utils import get_current_datetime
+from utils.event_logger import EventLogger
+from utils.firebase_controller import FirebaseController
+from utils.get_rasp_uuid import getserial
+from utils.moisture_controller import MoistureController
+
+
+class MoistureMeasurementController:
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        with cls._lock:
+            if not cls._instance:
+                cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        if getattr(self, '_initialized', None):
+            return
+        self._initialized = True
+
+        self._raspberry_id = getserial()
+
+        self._moisture_controller = MoistureController(channel=1)
+
+        self._moisture_check_thread = None
+        self._moisture_check_thread_finished = threading.Event()
+
+    def get_current_moisture_percentage(self):
+        return self._moisture_controller.get_moisture_percentage()
+
+    def start_moisture_check_thread(self, interval_ms=1000*10):
+        self._stop_moisture_check_thread()
+
+        self._moisture_check_thread_finished.clear()
+
+        self._moisture_check_thread = threading.Thread(
+            target=self._moisture_check_thread_function,
+            args=(interval_ms,),
+            daemon=True
+        )
+
+        self._moisture_check_thread.start()
+
+    def _stop_moisture_check_thread(self):
+        self._moisture_check_thread_finished.set()
+        if self._moisture_check_thread is not None:
+            self._moisture_check_thread.join()
+
+    def _moisture_check_thread_function(self, interval_ms):
+        while not self._moisture_check_thread_finished.is_set():
+            self._moisture_check_thread_finished.wait(interval_ms / 1000)
+            if self._moisture_check_thread_finished.is_set():
+                return
+
+            _moisture_perc = self._moisture_controller.get_moisture_percentage()
+            _measurement_time = get_current_datetime()
+
+            FirebaseController().add_moisture_percentage_measurement(self._raspberry_id, _moisture_perc, _measurement_time)
+
+            EventLogger().add_moisture_measurement_message(_moisture_perc, _measurement_time)
