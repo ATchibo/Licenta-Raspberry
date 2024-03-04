@@ -50,6 +50,20 @@ class RaspberryController:
         if self.get_moisture_percentage() < self._watering_program.get_min_moisture():
             self.pump_controller.start_watering_for_liters(self._watering_program.get_liters_needed())
 
+    def _log_manual_watering_cycle(self):
+        EventLogger().add_manual_watering_cycle_message(
+            self._watering_cycle_start_time,
+            self._watering_cycle_start_time + self.watering_time,
+            self.liters_sent
+        )
+
+    def _log_auto_watering_cycle(self):
+        EventLogger().add_auto_watering_cycle_message(
+            self._watering_cycle_start_time,
+            self._watering_cycle_start_time + self.watering_time,
+            self.liters_sent
+        )
+
     def start_watering(self) -> bool:
         if self.pump_controller.start_watering():
             self.start_sending_watering_updates()
@@ -63,22 +77,21 @@ class RaspberryController:
             self.stop_sending_watering_updates()
             self._send_stop_watering_message()
 
-            EventLogger().add_manual_watering_cycle_message(
-                self._watering_cycle_start_time,
-                datetime.now(),
-                self.liters_sent
-            )
+            self._log_manual_watering_cycle()
 
             return True
         return False
 
     def water_for_liters(self, liters):
-        print("Watering for", liters, "liters")
+        # print("Watering for", liters, "liters")
         self.start_sending_watering_updates()
         self.pump_controller.start_watering_for_liters(liters)
         self.stop_sending_watering_updates()
         self._send_stop_watering_message()
-        print("Watering finished - raspi controller")
+
+        self._log_manual_watering_cycle()
+
+        # print("Watering finished - raspi controller")
 
     def start_listening_for_watering_now(self):
         FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback_for_incoming_messages)
@@ -112,6 +125,8 @@ class RaspberryController:
                                 watering_time=round(self.watering_time),
                                 liters_sent=round(self.liters_sent, 2)
                             )
+
+                        self._log_manual_watering_cycle()
 
             else:
                 print("Current data: null")
