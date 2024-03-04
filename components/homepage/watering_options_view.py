@@ -86,7 +86,7 @@ class WateringOptionsView(MDBoxLayout):
             self.ids.water_now_label.text = "Could not start watering"
 
     def stop_watering(self):
-        res = self.raspberry_controller.stop_watering()
+        res = self.raspberry_controller.manual_stop_watering()
 
         if res:
             self.ids.water_now_button.text = "Water now"
@@ -117,7 +117,7 @@ class WateringOptionsView(MDBoxLayout):
             self.ids.watering_program_spinner.values = list(self.programs.keys())
             self.ids.watering_program_spinner.text = self.current_program_name
             self.are_programs_active_variable = self._watering_program_controller.get_is_watering_programs_active()
-            self.ids.watering_program_switch.active = self.are_programs_active
+            self.ids.watering_program_switch.active = self.are_programs_active_variable
 
             self.ids.refresh_layout.refresh_done()
 

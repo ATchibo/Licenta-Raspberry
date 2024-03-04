@@ -1,6 +1,8 @@
 import threading
 import time
+from datetime import datetime
 
+from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.moisture_controller import MoistureController
@@ -36,6 +38,8 @@ class RaspberryController:
 
         self.raspberry_id = getserial()
 
+        self._watering_cycle_start_time = None
+
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
 
@@ -46,28 +50,48 @@ class RaspberryController:
         if self.get_moisture_percentage() < self._watering_program.get_min_moisture():
             self.pump_controller.start_watering_for_liters(self._watering_program.get_liters_needed())
 
+    def _log_manual_watering_cycle(self):
+        EventLogger().add_manual_watering_cycle_message(
+            self._watering_cycle_start_time,
+            self.watering_time,
+            self.liters_sent
+        )
+
+    def _log_auto_watering_cycle(self):
+        EventLogger().add_auto_watering_cycle_message(
+            self._watering_cycle_start_time,
+            self.watering_time,
+            self.liters_sent
+        )
+
     def start_watering(self) -> bool:
         if self.pump_controller.start_watering():
             self.start_sending_watering_updates()
             return True
         return False
 
-    def stop_watering(self) -> bool:
+    def manual_stop_watering(self) -> bool:
         self.pump_controller.stop_watering_event.set()
 
         if self.pump_controller.stop_watering():
             self.stop_sending_watering_updates()
             self._send_stop_watering_message()
+
+            self._log_manual_watering_cycle()
+
             return True
         return False
 
     def water_for_liters(self, liters):
-        print("Watering for", liters, "liters")
+        # print("Watering for", liters, "liters")
         self.start_sending_watering_updates()
         self.pump_controller.start_watering_for_liters(liters)
         self.stop_sending_watering_updates()
         self._send_stop_watering_message()
-        print("Watering finished - raspi controller")
+
+        self._log_manual_watering_cycle()
+
+        # print("Watering finished - raspi controller")
 
     def start_listening_for_watering_now(self):
         FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback_for_incoming_messages)
@@ -102,6 +126,8 @@ class RaspberryController:
                                 liters_sent=round(self.liters_sent, 2)
                             )
 
+                        self._log_manual_watering_cycle()
+
             else:
                 print("Current data: null")
 
@@ -109,6 +135,8 @@ class RaspberryController:
         FirebaseController().watering_now_listener.unsubscribe()
 
     def start_sending_watering_updates(self):
+        self._watering_cycle_start_time = datetime.now()
+
         self._send_watering_updates_event.set()
         self._send_watering_updates_thread = threading.Thread(target=self._send_watering_updates_worker)
         self._send_watering_updates_thread.start()
