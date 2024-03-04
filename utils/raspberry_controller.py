@@ -53,14 +53,14 @@ class RaspberryController:
     def _log_manual_watering_cycle(self):
         EventLogger().add_manual_watering_cycle_message(
             self._watering_cycle_start_time,
-            self._watering_cycle_start_time + self.watering_time,
+            self.watering_time,
             self.liters_sent
         )
 
     def _log_auto_watering_cycle(self):
         EventLogger().add_auto_watering_cycle_message(
             self._watering_cycle_start_time,
-            self._watering_cycle_start_time + self.watering_time,
+            self.watering_time,
             self.liters_sent
         )
 

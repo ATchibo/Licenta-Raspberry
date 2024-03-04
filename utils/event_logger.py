@@ -60,11 +60,11 @@ class EventLogger:
             if self._notifiable_messages.get(log_message.get_level()) is True or len(self._notifiable_messages.keys()) == 0:
                 BackendController().send_notification(self._raspberry_id, log_message.get_message())
 
-    def add_auto_watering_cycle_message(self, start_time, end_time, water_amount):
-        self._add_log_message(AutoWateringCycleMessage(start_time, end_time, water_amount))
+    def add_auto_watering_cycle_message(self, start_time, duration, water_amount):
+        self._add_log_message(AutoWateringCycleMessage(start_time, duration, water_amount))
 
-    def add_manual_watering_cycle_message(self, start_time, end_time, water_amount):
-        self._add_log_message(ManualWateringCycleMessage(start_time, end_time, water_amount))
+    def add_manual_watering_cycle_message(self, start_time, duration, water_amount):
+        self._add_log_message(ManualWateringCycleMessage(start_time, duration, water_amount))
 
     def add_moisture_measurement_message(self, moisture_level, date_time):
         self._add_log_message(MoistureMeasurementMessage(moisture_level, date_time))
