@@ -2,7 +2,9 @@ import json
 import os
 import threading
 
+import firebase_admin
 from dotenv import load_dotenv
+from firebase_admin import auth
 # import firebase_admin
 # from firebase_admin import firestore
 # from firebase_admin import credentials
@@ -29,38 +31,7 @@ class FirebaseController:
         with cls._lock:
             if not cls._instance:
                 cls._instance = super(FirebaseController, cls).__new__(cls)
-
-                # cred = credentials.Certificate("serviceAccountKey.json")
-                # firebase_admin.initialize_app(cred)
-                # cls._instance.db = firestore.client()
-
-                load_dotenv()
-                cls.__api_key = os.getenv("PROJECT_WEB_API_KEY")
-                cls.__project_id = os.getenv("PROJECT_ID")
-
-                request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={cls.__api_key}"
-                headers = {"Content-Type": "application/json; charset=UTF-8"}
-                data = json.dumps({"returnSecureToken": True})
-                response = requests.post(request_url, headers=headers, data=data)
-                try:
-                    response.raise_for_status()
-                except (HTTPError, Exception):
-                    content = response.json()
-                    error = f"error: {content['error']['message']}"
-                    raise Exception(error)
-
-                json_response = response.json()
-                cls.__token = json_response["idToken"]
-                cls.__refresh_token = json_response["refreshToken"]
-
-                _credentials = google.oauth2.credentials.Credentials(cls.__token,
-                                                                    cls.__refresh_token,
-                                                                    client_id="",
-                                                                    client_secret="",
-                                                                    token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
-                                                                    )
-
-                cls._instance.db = firestore.Client(cls.__project_id, _credentials)
+                # cls.attempt_login()
 
         return cls._instance
 
@@ -69,6 +40,7 @@ class FirebaseController:
             return
         self._initialized = True
 
+        self.db = None
         self._ownerInfoCollectionName = "owner_info"
         self._raspberryInfoCollectionName = "raspberry_info"
         self._moistureInfoCollectionName = "humidity_readings"
@@ -86,10 +58,16 @@ class FirebaseController:
         self.watering_programs_collection_listener = None
 
     def is_raspberry_registered(self, serial):
+        if self.db is None:
+            return False
+
         query_result = self.db.collection(self._raspberryInfoCollectionName).document(serial)
         return query_result is not None
 
     def register_raspberry(self, serial):
+        if self.db is None:
+            return False
+
         if not self.is_raspberry_registered(serial):
             rpi_info = RaspberryInfo(raspberryId=serial)
 
@@ -101,6 +79,9 @@ class FirebaseController:
             raise Exception("Raspberry Pi already registered")
 
     def get_raspberry_info(self, serial) -> RaspberryInfo:
+        if self.db is None:
+            return False
+
         doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
         doc_dict = doc_ref.get().to_dict()
 
@@ -109,12 +90,18 @@ class FirebaseController:
         return rasp_info
 
     def add_watering_now_listener(self, serial, callback):
+        if self.db is None:
+            return False
+
         self.watering_now_callback = callback
 
         doc_ref = self.db.collection(self._wateringNowCollectionName).document(serial)
         self.watering_now_listener = doc_ref.on_snapshot(callback)
 
     def get_moisture_info_for_rasp_id(self, rpi_id, start_datetime, end_datetime):
+        if self.db is None:
+            return []
+
         moisture_info_ref = self.db.collection(self._moistureInfoCollectionName)
 
         query = (moisture_info_ref
@@ -129,6 +116,9 @@ class FirebaseController:
         return moisture_info_list
 
     def update_watering_info(self, serial, command, liters_sent, watering_time):
+        if self.db is None:
+            return False
+
         doc_ref = self.db.collection(self._wateringNowCollectionName).document(serial)
 
         if command != '':
@@ -144,6 +134,9 @@ class FirebaseController:
             })
 
     def get_watering_programs(self, raspberry_id):
+        if self.db is None:
+            return []
+
         watering_programs_ref = self.db.collection(self._wateringProgramsCollectionName).document(
             raspberry_id).collection(
             self._wateringProgramsCollectionNestedCollectionName)
@@ -172,6 +165,9 @@ class FirebaseController:
         return watering_programs
 
     def get_active_watering_program_id(self, raspberry_id):
+        if self.db is None:
+            return False
+
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc = doc_ref.get()
 
@@ -181,19 +177,31 @@ class FirebaseController:
             return None
 
     def set_active_watering_program_id(self, raspberry_id, program_id):
+        if self.db is None:
+            return False
+
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc_ref.update({"activeProgramId": program_id})
 
     def get_is_watering_programs_active(self, raspberry_id):
+        if self.db is None:
+            return False
+
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc = doc_ref.get()
         return doc.get("wateringProgramsEnabled")
 
     def set_is_watering_programs_active(self, raspberry_id, is_active):
+        if self.db is None:
+            return False
+
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc_ref.update({"wateringProgramsEnabled": is_active})
 
     def add_listener_for_watering_programs_changes(self, raspberry_id, _update_values_on_receive_from_network):
+        if self.db is None:
+            return False
+
         self.watering_programs_callback = _update_values_on_receive_from_network
 
         fields_doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
@@ -206,6 +214,9 @@ class FirebaseController:
 
     # Event logger methods
     def get_log_messages(self, raspberry_id):
+        if self.db is None:
+            return None, False
+
         try:
             log_messages_ref = self.db.collection(self._logsCollectionName).document(raspberry_id).get()
             log_messages = log_messages_ref.get("messages")
@@ -215,6 +226,9 @@ class FirebaseController:
             return None, False
 
     def add_log_message(self, raspberry_id, log_message):
+        if self.db is None:
+            return False
+
         try:
             data = {
                 str(log_message.get_timestamp()): log_message.get_message()
@@ -254,6 +268,9 @@ class FirebaseController:
         #     return False
 
     def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> bool:
+        if self.db is None:
+            return False
+
         try:
             # data = {
             #     str(timestamp): moisture_perc
@@ -273,4 +290,94 @@ class FirebaseController:
 
         except Exception as e:
             print(f"Error adding moisture percentage measurement: {e}")
+            return False
+
+
+    @classmethod
+    def anonymous_login(cls):
+        # cred = credentials.Certificate("serviceAccountKey.json")
+        # firebase_admin.initialize_app(cred)
+        # cls._instance.db = firestore.client()
+
+        load_dotenv()
+        cls.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+        cls.__project_id = os.getenv("PROJECT_ID")
+
+        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={cls.__api_key}"
+        headers = {"Content-Type": "application/json; charset=UTF-8"}
+        data = json.dumps({"returnSecureToken": True})
+        response = requests.post(request_url, headers=headers, data=data)
+        try:
+            response.raise_for_status()
+        except (HTTPError, Exception):
+            content = response.json()
+            error = f"error: {content['error']['message']}"
+
+            cls._instance.db = None
+
+            raise Exception(error)
+
+        json_response = response.json()
+        cls.__token = json_response["idToken"]
+        cls.__refresh_token = json_response["refreshToken"]
+
+        _credentials = google.oauth2.credentials.Credentials(cls.__token,
+                                                             cls.__refresh_token,
+                                                             client_id="",
+                                                             client_secret="",
+                                                             token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
+                                                             )
+
+        cls._instance.db = firestore.Client(cls.__project_id, _credentials)
+
+    def attempt_login(self, token=None):
+        print("Attempting login")
+
+        self.db = None
+
+        if token is None:
+            return False
+
+        load_dotenv()
+        self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+        self.__project_id = os.getenv("PROJECT_ID")
+
+        firebase_admin.initialize_app()
+
+        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={self.__api_key}"
+        headers = {"Content-Type": "application/json; charset=UTF-8"}
+        data = json.dumps({"token": token, "returnSecureToken": True})
+        response = requests.post(request_url, headers=headers, data=data)
+        try:
+            response.raise_for_status()
+        except (HTTPError, Exception):
+            content = response.json()
+            error = f"error: {content['error']['message']}"
+
+            self.db = None
+
+            raise Exception(error)
+
+        json_response = response.json()
+        _token = json_response["idToken"]
+        _refresh_token = json_response["refreshToken"]
+
+        print("Sunt la credentiale")
+
+        _credentials = (google.oauth2.credentials
+                        .Credentials(_token,
+                                     _refresh_token,
+                                     client_id="",
+                                     client_secret="",
+                                     token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
+                                     )
+                        )
+        try:
+            self._instance.db = firestore.Client(self.__project_id, _credentials)
+
+            print("Am reusit sa ma conectez")
+
+            return True
+        except Exception as e:
+            print(f"Error attempting login: {e}")
             return False
