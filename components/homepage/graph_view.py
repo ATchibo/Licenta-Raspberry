@@ -11,7 +11,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-from utils.datetime_utils import get_current_datetime
+from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 
@@ -32,7 +32,7 @@ class GraphView(MDBoxLayout):
 
         # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
 
-        self.end_datetime = get_current_datetime()
+        self.end_datetime = get_current_datetime_tz()
         self.start_datetime = self.end_datetime - timedelta(days=1)
 
         Clock.schedule_once(self.add_graph, 0.1)
@@ -97,7 +97,7 @@ class GraphView(MDBoxLayout):
         # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
         # self.end_datetime = datetime.now(local_tz)
 
-        self.end_datetime = get_current_datetime()
+        self.end_datetime = get_current_datetime_tz()
 
         if index == 0:
             self.start_datetime = self.end_datetime - timedelta(days=1)

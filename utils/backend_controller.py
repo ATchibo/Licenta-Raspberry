@@ -1,5 +1,6 @@
 import os
 import threading
+from typing import Tuple, Any
 
 import requests
 from dotenv import load_dotenv
@@ -36,3 +37,12 @@ class BackendController:
         }
 
         requests.post(f"{self._backend_url}/api/send-notification", json=message)
+
+    def get_qr_data(self, rasp_id) -> tuple[str, str, str]:
+        res = requests.post(f"{self._backend_url}/api/auth/request-qr-info/{rasp_id}")
+
+        if res.ok:
+            res = res.json()
+            return "", res['token'], res['expirationTime']
+        else:
+            return res.text, "", ""
