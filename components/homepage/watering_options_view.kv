@@ -59,29 +59,63 @@
                     on_text: root.change_program()
 
             MDGridLayout:
-                cols: 1
+                cols: 2
                 size_hint: 1, None
                 height: dp(150)
-                padding: [10, 30, 10, 10]
+                padding: [10, 20, 10, 10]
 
-                MDAnchorLayout:
-                    size_hint_y: None
-                    height: water_now_button.height
+                MDGridLayout:
+                    cols: 1
+                    size_hint: 1, None
+                    height: dp(150)
+                    padding: [10, 10, 10, 10]
 
-                    MDFillRoundFlatButton:
-                        id: water_now_button
-                        text: "Water now"
-                        font_style: "H5"
-                        text_color: 1, 1, 1, 1
-                        halign: "center"
-                        on_release: root.toggle_water_now()
+                    MDAnchorLayout:
+                        size_hint_y: None
+                        height: check_moisture_button.height
 
-                MDAnchorLayout:
-                    size_hint_y: None
-                    height: water_now_label.height
+                        MDFillRoundFlatButton:
+                            id: check_moisture_button
+                            text: "Check moisture"
+                            font_style: "H5"
+                            text_color: 1, 1, 1, 1
+                            halign: "center"
+                            on_release: root.check_moisture()
 
-                    MDLabel:
-                        id: water_now_label
-                        text: root.watering_label_variable
-                        halign: "center"
-                        font_style: "H5"
+                    MDAnchorLayout:
+                        size_hint_y: None
+                        height: moisture_label.height
+
+                        MDLabel:
+                            id: moisture_label
+                            text: root.moisture_variable
+                            halign: "center"
+                            font_style: "H5"
+
+                MDGridLayout:
+                    cols: 1
+                    size_hint: 1, None
+                    height: dp(150)
+                    padding: [10, 10, 10, 10]
+
+                    MDAnchorLayout:
+                        size_hint_y: None
+                        height: water_now_button.height
+
+                        MDFillRoundFlatButton:
+                            id: water_now_button
+                            text: "Water now"
+                            font_style: "H5"
+                            text_color: 1, 1, 1, 1
+                            halign: "center"
+                            on_release: root.toggle_water_now()
+
+                    MDAnchorLayout:
+                        size_hint_y: None
+                        height: water_now_label.height
+
+                        MDLabel:
+                            id: water_now_label
+                            text: root.watering_label_variable
+                            halign: "center"
+                            font_style: "H5"

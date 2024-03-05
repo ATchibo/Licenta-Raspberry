@@ -5,6 +5,7 @@ from datetime import datetime
 from google.cloud.firestore_v1.watch import ChangeType
 
 from domain.WateringProgram import WateringProgram
+from utils.datetime_utils import get_current_datetime
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.raspberry_controller import RaspberryController
@@ -85,7 +86,7 @@ class WateringProgramController:
         return self._watering_programs[self._active_watering_program_id]
 
     def _compute_initial_delay_sec(self, program):
-        current_time = datetime.now()
+        current_time = get_current_datetime()
         seconds_passed_today = (current_time.time().hour * 24 * 60
                                 + current_time.time().minute * 60
                                 + current_time.time().second)

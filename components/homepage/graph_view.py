@@ -11,6 +11,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
+from utils.datetime_utils import get_current_datetime
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 
@@ -29,9 +30,9 @@ class GraphView(MDBoxLayout):
         self.dropdown = None
         self.dropdown_items = ["Last 24h", "Last 7 days", "Last 30 days"]
 
-        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
 
-        self.end_datetime = datetime.now(local_tz)
+        self.end_datetime = get_current_datetime()
         self.start_datetime = self.end_datetime - timedelta(days=1)
 
         Clock.schedule_once(self.add_graph, 0.1)
@@ -93,8 +94,10 @@ class GraphView(MDBoxLayout):
         print(f"Selected item: {index}")
         self.dropdown.select(index)
 
-        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
-        self.end_datetime = datetime.now(local_tz)
+        # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        # self.end_datetime = datetime.now(local_tz)
+
+        self.end_datetime = get_current_datetime()
 
         if index == 0:
             self.start_datetime = self.end_datetime - timedelta(days=1)

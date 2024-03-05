@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from utils.datetime_utils import get_current_datetime
+
 
 class LogMessage:
     def __init__(self, message, level, timestamp=None):
@@ -9,7 +11,7 @@ class LogMessage:
         if timestamp is not None:
             self.timestamp = timestamp
         else:
-            self.timestamp = datetime.now()
+            self.timestamp = get_current_datetime()
 
     def __str__(self):
         return self.message
