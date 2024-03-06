@@ -21,13 +21,14 @@
 
             MDFillRoundFlatButton:
                 id: connect_button
-                text: "Register"
+                text: "Start connect"
                 font_size: 20
                 elevation: 1
                 size_hint: 0.5, 0.1
                 text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5, "center_y": 0.35}
-                on_release: root.connect()
+                # on_release: root.connect()
+                on_release: root.start_connect()
 
             MDFillRoundFlatButton:
                 text: "Back"

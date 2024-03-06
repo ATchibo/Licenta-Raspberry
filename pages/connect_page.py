@@ -36,11 +36,13 @@ class ConnectPage(MDScreen):
 
         self._token = None
 
-        self.start_connect()
+        # self.start_connect()
 
         # Clock.schedule_once(self.connect, 0.1)
 
     def start_connect(self):
+        print("Starting to connect")
+
         if self.backend_thread is not None:
             self._is_logged_in.set()
             self.backend_thread.join()
