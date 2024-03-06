@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 from typing import Tuple, Any
@@ -63,3 +64,10 @@ class BackendController:
         if self._ws:
             self._ws.close()
             self._ws = None
+
+    def send_message_to_ws(self, param):
+        if self._ws:
+            data = {
+                "body": param
+            }
+            self._ws.send(json.dumps(data))

@@ -87,10 +87,13 @@ class ConnectPage(MDScreen):
 
             _expiry_datetime, token = self._backend_request()
             self._connect_to_ws(token)
+            print("Connected to WS")
             _wait_time = self._compute_wait_time(_expiry_datetime)
 
             if _wait_time > 20:
                 _wait_time = 19
+
+            print("Wait time:", _wait_time)
 
     def _connect_to_ws(self, token):
         if self._is_logged_in.is_set():
@@ -129,13 +132,17 @@ class ConnectPage(MDScreen):
         if FirebaseController().attempt_login(auth_token):
             self._is_logged_in.set()
             self.info_text = "Connected to " + message_json["email"]
+            BackendController().send_message_to_ws("OK")
+        else:
+            self.info_text = "Failed to login"
+            BackendController().send_message_to_ws("FAIL")
 
     def _on_connection_closed(self, ws, stat_code, reason):
         print("Connection closed: ", stat_code, reason)
 
     def _on_connection_error(self, ws, error):
         print("Connection error:", error)
-        self.info_text = "Connection error: " + error
+        self.info_text = "Connection error"
 
     def _disconnect_from_ws(self):
         BackendController().close_ws()
