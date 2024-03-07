@@ -30,8 +30,8 @@ class PlantBuddyApp(MDApp):
 if __name__ == '__main__':
     FirebaseController()
 
-    RaspberryController().start_listening_for_watering_now()
-    WateringProgramController().perform_initial_setup()
+    # RaspberryController().start_listening_for_watering_now()
+    # WateringProgramController().perform_initial_setup()
     EventLogger().load_initial_data()
     MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 
