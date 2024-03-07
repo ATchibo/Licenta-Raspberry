@@ -342,7 +342,7 @@ class FirebaseController:
         self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
         self.__project_id = os.getenv("PROJECT_ID")
 
-        firebase_admin.initialize_app()
+        # firebase_admin.initialize_app()
 
         request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={self.__api_key}"
         headers = {"Content-Type": "application/json; charset=UTF-8"}

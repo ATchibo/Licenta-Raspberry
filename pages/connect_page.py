@@ -101,7 +101,7 @@ class ConnectPage(MDScreen):
         if self._is_logged_in.is_set():
             return
 
-        if self._token is not None:
+        if self._token is not None or self._token is not token:
             self._disconnect_from_ws()
 
         self._token = token
