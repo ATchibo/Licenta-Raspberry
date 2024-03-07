@@ -354,8 +354,6 @@ class FirebaseController:
             content = response.json()
             error = f"error: {content['error']['message']}"
 
-            self.db = None
-
             raise Exception(error)
 
         json_response = response.json()
@@ -373,7 +371,7 @@ class FirebaseController:
                                      )
                         )
         try:
-            self._instance.db = firestore.Client(self.__project_id, _credentials)
+            self.db = firestore.Client(self.__project_id, _credentials)
 
             print("Am reusit sa ma conectez")
 

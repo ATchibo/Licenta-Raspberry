@@ -10,10 +10,12 @@ from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivymd.uix.screen import MDScreen
 
+from utils.WateringProgramController import WateringProgramController
 from utils.backend_controller import BackendController
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
+from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("pages/connect_page.kv")
 
@@ -135,6 +137,10 @@ class ConnectPage(MDScreen):
             self._is_logged_in.set()
             self.info_text = "Connected to " + message_json["email"]
             BackendController().send_message_to_ws("OK")
+
+            RaspberryController().start_listening_for_watering_now()
+            WateringProgramController().perform_initial_setup()
+
         else:
             self.info_text = "Failed to login"
             BackendController().send_message_to_ws("FAIL")
