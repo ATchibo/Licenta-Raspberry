@@ -1,18 +1,14 @@
 import datetime
 import json
-import random
 import threading
 from datetime import datetime
-from typing import Tuple
 
-from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, Clock
 from kivymd.uix.screen import MDScreen
 
 from utils.WateringProgramController import WateringProgramController
 from utils.backend_controller import BackendController
-from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.raspberry_controller import RaspberryController
@@ -37,10 +33,20 @@ class ConnectPage(MDScreen):
         self._is_logged_in = threading.Event()
 
         self._token = None
+        self.qr_data = ""
 
-        # self.start_connect()
+        # Clock.schedule_once(self._try_initial_login, 0.1)
 
-        # Clock.schedule_once(self.connect, 0.1)
+    def _try_initial_login(self, *args):
+
+        if FirebaseController().try_initial_login():
+            self._is_logged_in.set()
+            self.info_text = "Connected!"
+            self.ids.connect_button.text = "Log out and connect again"
+            self.qr_data = ""
+
+            RaspberryController().start_listening_for_watering_now()
+            WateringProgramController().perform_initial_setup()
 
     def start_connect(self):
         print("Starting to connect")
@@ -49,6 +55,8 @@ class ConnectPage(MDScreen):
             self._is_logged_in.set()
             self.backend_thread.join()
             self.backend_thread = None
+
+        self.ids.qr_code.disabled = False
 
         self._is_logged_in.clear()
         self.backend_thread = threading.Thread(target=self._backend_ops)
@@ -131,19 +139,7 @@ class ConnectPage(MDScreen):
                 or message_json["email"] == ""):
             return
 
-        auth_token = message_json["token"]
-
-        if FirebaseController().attempt_login(auth_token):
-            self._is_logged_in.set()
-            self.info_text = "Connected to " + message_json["email"]
-            BackendController().send_message_to_ws("OK")
-
-            RaspberryController().start_listening_for_watering_now()
-            WateringProgramController().perform_initial_setup()
-
-        else:
-            self.info_text = "Failed to login"
-            BackendController().send_message_to_ws("FAIL")
+        self._try_login(message_json["token"], message_json["email"])
 
     def _on_connection_closed(self, ws, stat_code, reason):
         print("Connection closed: ", stat_code, reason)
@@ -154,6 +150,23 @@ class ConnectPage(MDScreen):
 
     def _disconnect_from_ws(self):
         BackendController().close_ws()
+
+    def _try_login(self, auth_token: str, email: str):
+        if FirebaseController().attempt_login(auth_token):
+            self._is_logged_in.set()
+            self.info_text = "Connected to " + email
+            BackendController().send_message_to_ws("OK")
+
+            self.ids.qr_code.disabled = True
+            self.ids.connect_button.text = "Log out and connect again"
+            self.qr_data = ""
+
+            RaspberryController().start_listening_for_watering_now()
+            WateringProgramController().perform_initial_setup()
+
+        else:
+            self.info_text = "Failed to login"
+            BackendController().send_message_to_ws("FAIL")
 
     def check_registered(self):
         if self.firebase_controller.is_raspberry_registered(serial=self.qr_data):
@@ -171,16 +184,16 @@ class ConnectPage(MDScreen):
         self.ids.connect_button.disabled = False
         return False
 
-    def connect(self, *args):
-        if self.check_registered():
-            return
-        try:
-            self.firebase_controller.register_raspberry(serial=self.qr_data)
-            self.ids.info_label.text = self.info_text
-            self.ids.qr_code.opacity = 1
-            self.ids.qr_code.disabled = False
-            self.ids.connect_button.opacity = 0
-            self.ids.connect_button.disabled = True
-        except Exception as e:
-            self.ids.info_label.text = "Failed to register Raspberry Pi"
-            print(e)
+    # def connect(self, *args):
+    #     if self.check_registered():
+    #         return
+    #     try:
+    #         self.firebase_controller.register_raspberry(serial=self.qr_data)
+    #         self.ids.info_label.text = self.info_text
+    #         self.ids.qr_code.opacity = 1
+    #         self.ids.qr_code.disabled = False
+    #         self.ids.connect_button.opacity = 0
+    #         self.ids.connect_button.disabled = True
+    #     except Exception as e:
+    #         self.ids.info_label.text = "Failed to register Raspberry Pi"
+    #         print(e)

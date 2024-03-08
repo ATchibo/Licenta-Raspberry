@@ -57,6 +57,18 @@ class FirebaseController:
         self.watering_programs_fields_listener = None
         self.watering_programs_collection_listener = None
 
+
+    def try_initial_login(self):
+        try:
+            cred = firebase_admin.credentials.Certificate("data.json")
+            firebase_admin.initialize_app(cred)
+            self.db = firestore.Client()
+
+            return True
+        except Exception as e:
+            print(f"Error attempting login: {e}")
+            return False
+
     def is_raspberry_registered(self, serial):
         if self.db is None:
             return False
@@ -371,6 +383,19 @@ class FirebaseController:
                                      )
                         )
         try:
+            # my_json = _credentials.to_json()
+            # my_obj = json.loads(my_json)
+            # my_obj["type"] = "service_account"
+            #
+            # with open('data.json', 'w') as f:
+            #     f.write(_credentials.to_json())
+            #
+            # print(_credentials.to_json())
+
+            # cred = firebase_admin.credentials.Certificate("data.json")
+            # firebase_admin.initialize_app(cred)
+            # self.db = firestore.Client()
+
             self.db = firestore.Client(self.__project_id, _credentials)
 
             print("Am reusit sa ma conectez")
