@@ -94,7 +94,7 @@ class RaspberryController:
         self.stop_sending_watering_updates()
         self._send_stop_watering_message()
 
-        self._log_manual_watering_cycle()
+        self._log_auto_watering_cycle()
 
         # print("Watering finished - raspi controller")
 
