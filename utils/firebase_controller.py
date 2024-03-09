@@ -67,6 +67,9 @@ class FirebaseController:
     def try_initial_login(self):
         try:
             _token, _refresh_token = self._load_credentials_from_keyring()
+            if _token is None or _refresh_token is None:
+                return False
+
             _credentials = (google.oauth2.credentials
                             .Credentials(_token,
                                          _refresh_token,
@@ -76,12 +79,13 @@ class FirebaseController:
                                          )
                             )
             self.db = firestore.Client(self.__project_id, _credentials)
-            self._save_credentials_to_keyring(_token, _refresh_token)
+            self._save_credentials_to_keyring(_credentials.token, _credentials.refresh_token)
 
             print("Am reusit sa ma conectez")
 
             return True
         except Exception as e:
+            self.db = None
             return False
 
     def is_raspberry_registered(self, serial):
@@ -397,7 +401,8 @@ class FirebaseController:
                         )
         try:
             self.db = firestore.Client(self.__project_id, _credentials)
-            self._save_credentials_to_keyring(_token, _refresh_token)
+            # self._save_credentials_to_keyring(_token, _refresh_token)
+            self._save_credentials_to_keyring(_credentials.token, _credentials.refresh_token)
 
             print("Am reusit sa ma conectez")
 
