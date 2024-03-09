@@ -3,12 +3,9 @@ import os
 import threading
 
 import firebase_admin
+import keyring
 from dotenv import load_dotenv
-from firebase_admin import auth
-# import firebase_admin
-# from firebase_admin import firestore
-# from firebase_admin import credentials
-from google.cloud.firestore_v1 import FieldFilter, WriteOption
+from google.cloud.firestore_v1 import FieldFilter
 from requests import HTTPError
 
 from domain.RaspberryInfo import RaspberryInfo
@@ -31,7 +28,6 @@ class FirebaseController:
         with cls._lock:
             if not cls._instance:
                 cls._instance = super(FirebaseController, cls).__new__(cls)
-                # cls.attempt_login()
 
         return cls._instance
 
@@ -58,15 +54,34 @@ class FirebaseController:
         self.watering_programs_collection_listener = None
 
 
+    def _save_credentials_to_keyring(self, token, refresh_token):
+        keyring.set_password("firebase", "idToken", token)
+        keyring.set_password("firebase", "refreshToken", refresh_token)
+
+    def _load_credentials_from_keyring(self) -> tuple[str | None, str | None]:
+        token = keyring.get_password("firebase", "idToken")
+        refresh_token = keyring.get_password("firebase", "refreshToken")
+
+        return token, refresh_token
+
     def try_initial_login(self):
         try:
-            cred = firebase_admin.credentials.Certificate("data.json")
-            firebase_admin.initialize_app(cred)
-            self.db = firestore.Client()
+            _token, _refresh_token = self._load_credentials_from_keyring()
+            _credentials = (google.oauth2.credentials
+                            .Credentials(_token,
+                                         _refresh_token,
+                                         client_id="",
+                                         client_secret="",
+                                         token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
+                                         )
+                            )
+            self.db = firestore.Client(self.__project_id, _credentials)
+            self._save_credentials_to_keyring(_token, _refresh_token)
+
+            print("Am reusit sa ma conectez")
 
             return True
         except Exception as e:
-            print(f"Error attempting login: {e}")
             return False
 
     def is_raspberry_registered(self, serial):
@@ -354,8 +369,6 @@ class FirebaseController:
         self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
         self.__project_id = os.getenv("PROJECT_ID")
 
-        # firebase_admin.initialize_app()
-
         request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={self.__api_key}"
         headers = {"Content-Type": "application/json; charset=UTF-8"}
         data = json.dumps({"token": token, "returnSecureToken": True})
@@ -383,20 +396,8 @@ class FirebaseController:
                                      )
                         )
         try:
-            # my_json = _credentials.to_json()
-            # my_obj = json.loads(my_json)
-            # my_obj["type"] = "service_account"
-            #
-            # with open('data.json', 'w') as f:
-            #     f.write(_credentials.to_json())
-            #
-            # print(_credentials.to_json())
-
-            # cred = firebase_admin.credentials.Certificate("data.json")
-            # firebase_admin.initialize_app(cred)
-            # self.db = firestore.Client()
-
             self.db = firestore.Client(self.__project_id, _credentials)
+            self._save_credentials_to_keyring(_token, _refresh_token)
 
             print("Am reusit sa ma conectez")
 

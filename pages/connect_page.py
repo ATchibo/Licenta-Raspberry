@@ -35,19 +35,6 @@ class ConnectPage(MDScreen):
         self._token = None
         self.qr_data = ""
 
-        # Clock.schedule_once(self._try_initial_login, 0.1)
-
-    def _try_initial_login(self, *args):
-
-        if FirebaseController().try_initial_login():
-            self._is_logged_in.set()
-            self.info_text = "Connected!"
-            self.ids.connect_button.text = "Log out and connect again"
-            self.qr_data = ""
-
-            RaspberryController().start_listening_for_watering_now()
-            WateringProgramController().perform_initial_setup()
-
     def start_connect(self):
         print("Starting to connect")
 
