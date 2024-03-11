@@ -50,10 +50,11 @@ class BackendController:
         else:
             return res.text, "", ""
 
-    def connect_to_ws(self, token, on_message: Any, on_error: Any, on_close: Any):
+    def connect_to_ws(self, token, on_message: Any, on_error: Any, on_close: Any, on_open: Any = None):
         ws_url = f"{self._ws_url}/api/ws/register/{token}"
 
         self._ws = WebSocketApp(ws_url,
+                          on_open=on_open,
                           on_message=on_message,
                           on_error=on_error,
                           on_close=on_close)
@@ -71,3 +72,28 @@ class BackendController:
                 "body": param
             }
             self._ws.send(json.dumps(data))
+
+    def request_login_id(self, rasp_id) -> Tuple[str, str]:
+        res = requests.post(f"{self._backend_url}/api/auth/request-login/{rasp_id}")
+
+        if res.ok:
+            res = res.json()
+            return "", res['token']
+        else:
+            return res.text, ""
+
+    def send_notification_for_login(self, rasp_id, message, ws_token):
+        _data = {
+            "wsToken": ws_token,
+        }
+
+        _message = {
+            "title": "One of your devices requested login",
+            "body": message,
+            "raspberryId": rasp_id,
+            "data": json.dumps(_data)
+        }
+
+        res = requests.post(f"{self._backend_url}/api/send-notification", json=_message)
+
+        print(res.text)

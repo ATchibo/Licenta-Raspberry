@@ -54,36 +54,9 @@ class FirebaseController:
         self.watering_programs_collection_listener = None
 
 
-    def _save_credentials_to_keyring(self, token, refresh_token):
-        keyring.set_password("firebase", "idToken", token)
-        keyring.set_password("firebase", "refreshToken", refresh_token)
-
-    def _load_credentials_from_keyring(self) -> tuple[str | None, str | None]:
-        token = keyring.get_password("firebase", "idToken")
-        refresh_token = keyring.get_password("firebase", "refreshToken")
-
-        return token, refresh_token
-
     def try_initial_login(self):
         try:
-            _token, _refresh_token = self._load_credentials_from_keyring()
-            if _token is None or _refresh_token is None:
-                return False
-
-            _credentials = (google.oauth2.credentials
-                            .Credentials(_token,
-                                         _refresh_token,
-                                         client_id="",
-                                         client_secret="",
-                                         token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
-                                         )
-                            )
-            self.db = firestore.Client(self.__project_id, _credentials)
-            self._save_credentials_to_keyring(_credentials.token, _credentials.refresh_token)
-
-            print("Am reusit sa ma conectez")
-
-            return True
+            pass
         except Exception as e:
             self.db = None
             return False
@@ -109,9 +82,9 @@ class FirebaseController:
         else:
             raise Exception("Raspberry Pi already registered")
 
-    def get_raspberry_info(self, serial) -> RaspberryInfo:
+    def get_raspberry_info(self, serial) -> RaspberryInfo | None:
         if self.db is None:
-            return False
+            return None
 
         doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
         doc_dict = doc_ref.get().to_dict()
@@ -395,7 +368,6 @@ class FirebaseController:
                         )
         try:
             self.db = firestore.Client(self.__project_id, _credentials)
-            self._save_credentials_to_keyring(_credentials.token, _credentials.refresh_token)
 
             print("Am reusit sa ma conectez")
 
