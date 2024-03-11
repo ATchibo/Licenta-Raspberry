@@ -247,18 +247,38 @@ class FirebaseController:
         if self.db is None:
             return False
 
-        docs_ref = (self.db.collection(self._raspberryInfoCollectionName)
-                    .where(filter=FieldFilter("raspberry_ids", "array-contains", raspberry_id)))
+        query = (self.db.collection(self._ownerInfoCollectionName)
+                 .where(filter=FieldFilter("raspberry_ids", "array_contains", raspberry_id)))
 
-        for doc in docs_ref.stream():
-            doc.update({"raspberry_ids": firestore.ArrayRemove([raspberry_id])})
+        docs = query.stream()
+
+        my_doc = None
+
+        for doc in docs:
+            if my_doc is not None:
+                print("More than one document found for the same raspberry id")
+                return
+
+            my_doc = doc
+
+        if my_doc is None:
+            print("No document found for the raspberry id")
+            return
+
+        owner_id = my_doc.id
+
+        print(f"Owner id: {owner_id}")
+
+        self.db.collection(self._ownerInfoCollectionName).document(owner_id).update({
+            "raspberry_ids": firestore.ArrayRemove([raspberry_id])
+        })
 
     def register_raspberry_to_device(self, raspberry_id, device_id):
         if self.db is None:
             return False
 
         doc_ref = self.db.collection(self._ownerInfoCollectionName).document(device_id)
-        doc_ref.set({"raspberry_ids": [raspberry_id]}, merge=True)
+        doc_ref.update({"raspberry_ids": firestore.ArrayUnion([raspberry_id])})
 
     # Event logger methods
     def get_log_messages(self, raspberry_id):
