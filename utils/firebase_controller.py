@@ -2,7 +2,7 @@ import json
 import os
 import threading
 
-import firebase_admin
+# import firebase_admin
 import keyring
 from dotenv import load_dotenv
 from google.cloud.firestore_v1 import FieldFilter
@@ -243,6 +243,23 @@ class FirebaseController:
         self.watering_programs_collection_listener = programs_collection_query.on_snapshot(
             _update_values_on_receive_from_network)
 
+    def unregister_raspberry(self, raspberry_id):
+        if self.db is None:
+            return False
+
+        docs_ref = (self.db.collection(self._raspberryInfoCollectionName)
+                    .where(filter=FieldFilter("raspberry_ids", "array-contains", raspberry_id)))
+
+        for doc in docs_ref.stream():
+            doc.update({"raspberry_ids": firestore.ArrayRemove([raspberry_id])})
+
+    def register_raspberry_to_device(self, raspberry_id, device_id):
+        if self.db is None:
+            return False
+
+        doc_ref = self.db.collection(self._ownerInfoCollectionName).document(device_id)
+        doc_ref.set({"raspberry_ids": [raspberry_id]}, merge=True)
+
     # Event logger methods
     def get_log_messages(self, raspberry_id):
         if self.db is None:
@@ -303,12 +320,6 @@ class FirebaseController:
             return False
 
         try:
-            # data = {
-            #     str(timestamp): moisture_perc
-            # }
-            #
-            # self.db.collection(self._moistureInfoCollectionName).document(_raspberry_id).set(data, merge=True)
-
             data = {
                 "raspberryId": _raspberry_id,
                 "measurementTime": timestamp,
@@ -323,43 +334,6 @@ class FirebaseController:
             print(f"Error adding moisture percentage measurement: {e}")
             return False
 
-
-    @classmethod
-    def anonymous_login(cls):
-        # cred = credentials.Certificate("serviceAccountKey.json")
-        # firebase_admin.initialize_app(cred)
-        # cls._instance.db = firestore.client()
-
-        load_dotenv()
-        cls.__api_key = os.getenv("PROJECT_WEB_API_KEY")
-        cls.__project_id = os.getenv("PROJECT_ID")
-
-        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={cls.__api_key}"
-        headers = {"Content-Type": "application/json; charset=UTF-8"}
-        data = json.dumps({"returnSecureToken": True})
-        response = requests.post(request_url, headers=headers, data=data)
-        try:
-            response.raise_for_status()
-        except (HTTPError, Exception):
-            content = response.json()
-            error = f"error: {content['error']['message']}"
-
-            cls._instance.db = None
-
-            raise Exception(error)
-
-        json_response = response.json()
-        cls.__token = json_response["idToken"]
-        cls.__refresh_token = json_response["refreshToken"]
-
-        _credentials = google.oauth2.credentials.Credentials(cls.__token,
-                                                             cls.__refresh_token,
-                                                             client_id="",
-                                                             client_secret="",
-                                                             token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
-                                                             )
-
-        cls._instance.db = firestore.Client(cls.__project_id, _credentials)
 
     def attempt_login(self, token=None):
         print("Attempting login")
@@ -401,7 +375,6 @@ class FirebaseController:
                         )
         try:
             self.db = firestore.Client(self.__project_id, _credentials)
-            # self._save_credentials_to_keyring(_token, _refresh_token)
             self._save_credentials_to_keyring(_credentials.token, _credentials.refresh_token)
 
             print("Am reusit sa ma conectez")
@@ -410,3 +383,42 @@ class FirebaseController:
         except Exception as e:
             print(f"Error attempting login: {e}")
             return False
+
+
+    #
+    # @classmethod
+    # def anonymous_login(cls):
+    #     # cred = credentials.Certificate("serviceAccountKey.json")
+    #     # firebase_admin.initialize_app(cred)
+    #     # cls._instance.db = firestore.client()
+    #
+    #     load_dotenv()
+    #     cls.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+    #     cls.__project_id = os.getenv("PROJECT_ID")
+    #
+    #     request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={cls.__api_key}"
+    #     headers = {"Content-Type": "application/json; charset=UTF-8"}
+    #     data = json.dumps({"returnSecureToken": True})
+    #     response = requests.post(request_url, headers=headers, data=data)
+    #     try:
+    #         response.raise_for_status()
+    #     except (HTTPError, Exception):
+    #         content = response.json()
+    #         error = f"error: {content['error']['message']}"
+    #
+    #         cls._instance.db = None
+    #
+    #         raise Exception(error)
+    #
+    #     json_response = response.json()
+    #     cls.__token = json_response["idToken"]
+    #     cls.__refresh_token = json_response["refreshToken"]
+    #
+    #     _credentials = google.oauth2.credentials.Credentials(cls.__token,
+    #                                                          cls.__refresh_token,
+    #                                                          client_id="",
+    #                                                          client_secret="",
+    #                                                          token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
+    #                                                          )
+    #
+    #     cls._instance.db = firestore.Client(cls.__project_id, _credentials)

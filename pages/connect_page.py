@@ -43,7 +43,7 @@ class ConnectPage(MDScreen):
             self.backend_thread.join()
             self.backend_thread = None
 
-        self.ids.qr_code.disabled = False
+        FirebaseController().unregister_raspberry(self._raspberry_id)
 
         self._is_logged_in.clear()
         self.backend_thread = threading.Thread(target=self._backend_ops)
@@ -142,11 +142,13 @@ class ConnectPage(MDScreen):
         if FirebaseController().attempt_login(auth_token):
             self._is_logged_in.set()
             self.info_text = "Connected to " + email
-            BackendController().send_message_to_ws("OK")
 
             self.ids.qr_code.disabled = True
             self.ids.connect_button.text = "Log out and connect again"
             self.qr_data = ""
+
+            FirebaseController().register_raspberry_to_device(self._raspberry_id, email)
+            BackendController().send_message_to_ws("OK")
 
             RaspberryController().start_listening_for_watering_now()
             WateringProgramController().perform_initial_setup()
@@ -155,21 +157,21 @@ class ConnectPage(MDScreen):
             self.info_text = "Failed to login"
             BackendController().send_message_to_ws("FAIL")
 
-    def check_registered(self):
-        if self.firebase_controller.is_raspberry_registered(serial=self.qr_data):
-            self.ids.qr_code.opacity = 1
-            self.ids.qr_code.disabled = False
-            self.ids.connect_button.opacity = 0
-            self.ids.connect_button.disabled = True
-            self.ids.info_label.text = self.info_text
-            return True
-
-        self.ids.info_label.text = "This Raspberry Pi is not registered to any account"
-        self.ids.qr_code.opacity = 0
-        self.ids.qr_code.disabled = True
-        self.ids.connect_button.opacity = 1
-        self.ids.connect_button.disabled = False
-        return False
+    # def check_registered(self):
+    #     if self.firebase_controller.is_raspberry_registered(serial=self.qr_data):
+    #         self.ids.qr_code.opacity = 1
+    #         self.ids.qr_code.disabled = False
+    #         self.ids.connect_button.opacity = 0
+    #         self.ids.connect_button.disabled = True
+    #         self.ids.info_label.text = self.info_text
+    #         return True
+    #
+    #     self.ids.info_label.text = "This Raspberry Pi is not registered to any account"
+    #     self.ids.qr_code.opacity = 0
+    #     self.ids.qr_code.disabled = True
+    #     self.ids.connect_button.opacity = 1
+    #     self.ids.connect_button.disabled = False
+    #     return False
 
     # def connect(self, *args):
     #     if self.check_registered():
