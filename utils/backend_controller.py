@@ -88,8 +88,8 @@ class BackendController:
         }
 
         _message = {
-            "title": "One of your devices requested login",
-            "body": message,
+            "title": "Login request",
+            "body": message if message else "A linked device is requesting to log in",
             "raspberryId": rasp_id,
             "data": json.dumps(_data)
         }

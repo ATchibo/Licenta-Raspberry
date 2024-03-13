@@ -72,7 +72,7 @@ class LoginController:
 
     def _on_connection_opened(self, ws):
         print("Connection opened")
-        self._send_notification_for_login("Login request", self._ws_code)
+        self._send_notification_for_login(None, self._ws_code)
 
     def _on_connection_closed(self, ws, stat_code, reason):
         print("Connection closed: ", stat_code, reason)
