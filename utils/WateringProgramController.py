@@ -97,8 +97,8 @@ class WateringProgramController:
             time_to_wait_sec += 24 * 60 * 60
 
         # TODO: remove
-        print(f"Time to wait: {time_to_wait_sec}")
-        time_to_wait_sec = 5
+        # print(f"Time to wait: {time_to_wait_sec}")
+        # time_to_wait_sec = 5
 
         return time_to_wait_sec
 

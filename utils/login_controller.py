@@ -3,6 +3,7 @@ import threading
 
 from utils.WateringProgramController import WateringProgramController
 from utils.backend_controller import BackendController
+from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.raspberry_controller import RaspberryController
@@ -95,8 +96,7 @@ class LoginController:
             FirebaseController().register_raspberry_to_device(self._raspberry_id, email)
             BackendController().send_message_to_ws("OK")
 
-            RaspberryController().start_listening_for_watering_now()
-            WateringProgramController().perform_initial_setup()
+            self._setup_after_login()
 
             print("Logged in hehehehe")
 
@@ -113,3 +113,8 @@ class LoginController:
         print("Ws code: ", self._ws_code)
 
         self._connect_to_ws(self._ws_code)
+
+    def _setup_after_login(self):
+        RaspberryController().start_listening_for_watering_now()
+        WateringProgramController().perform_initial_setup()
+        EventLogger().load_initial_data()
