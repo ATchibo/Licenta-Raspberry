@@ -54,7 +54,7 @@ class LoginController:
                 self._on_connection_opened
             )
 
-        threading.Thread(target=_temp, daemon=True).start()
+        threading.Thread(target=_temp).start()
 
         print("Connected to WS")
 
@@ -62,6 +62,11 @@ class LoginController:
         print(message)
 
         message_json = json.loads(message)
+
+        if message_json["message"] == "REJECT_CONN":
+            BackendController().close_ws()
+            return
+
         if (message_json["token"] is None
                 or message_json["token"] == ""
                 or message_json["email"] is None
