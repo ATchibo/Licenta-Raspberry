@@ -23,8 +23,8 @@ class ContentNavigationDrawer(MDScrollView):
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
-        # Window.size = (800, 480)
-        Window.fullscreen = 'auto'
+        Window.size = (800, 480)
+        # Window.fullscreen = 'auto'
         self.theme_cls.primary_palette = "Green"
 
 
@@ -50,5 +50,3 @@ if __name__ == '__main__':
     MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 
     PlantBuddyApp().run()
-
-    # TODO: add listener and sorting for logs
