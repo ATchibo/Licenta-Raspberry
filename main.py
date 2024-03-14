@@ -33,7 +33,7 @@ if __name__ == '__main__':
         if FirebaseController().anonymous_login():
             RaspberryController().start_listening_for_watering_now()
             WateringProgramController().perform_initial_setup()
-            EventLogger().load_initial_data()
+            EventLogger().perform_initial_setup()
             print("Logged in")
         else:
             print("Not logged in")

@@ -30,7 +30,20 @@ class EventLogger:
         self._log_messages = []
         self._notifiable_messages = {}
 
-    def load_log_messages(self):
+    def perform_initial_setup(self):
+        FirebaseController().add_listener_for_log_messages_changes(
+            self._raspberry_id,
+            self._update_logs_on_receive_from_network
+        )
+
+        FirebaseController().add_listener_for_notifiable_messages_changes(
+            self._raspberry_id,
+            self._update_notifiables_on_receive_from_network
+        )
+
+        # self.load_initial_data()
+
+    def _load_log_messages(self):
         log_messages, success = FirebaseController().get_log_messages(self._raspberry_id)
 
         print(f"Log messages: {log_messages}")
@@ -41,7 +54,7 @@ class EventLogger:
         for log_message_key, log_message_value in log_messages.items():
             self._log_messages.append(LogMessage(log_message_key, log_message_value))
 
-    def load_notifiable_messages(self):
+    def _load_notifiable_messages(self):
         notifiable_messages, success = FirebaseController().get_notifiable_messages(self._raspberry_id)
 
         if not success:
@@ -50,8 +63,8 @@ class EventLogger:
         # TODO: Implement this
 
     def load_initial_data(self):
-        self.load_log_messages()
-        self.load_notifiable_messages()
+        self._load_log_messages()
+        self._load_notifiable_messages()
 
     def _add_log_message(self, log_message):
         if FirebaseController().add_log_message(self._raspberry_id, log_message):
