@@ -290,6 +290,7 @@ class FirebaseController:
 
     def update_raspberry_notifiable_message(self, raspberry_id, message_type, value):
         if self.db is None:
+            print("DB is None")
             return False
 
         data = {

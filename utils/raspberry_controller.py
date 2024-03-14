@@ -44,21 +44,14 @@ class RaspberryController:
         self._watering_cycle_start_time = None
         self._watering_manually = False
 
-        self._raspberry_info = (RaspberryInfoBuilder()
-                                .with_id(self.raspberry_id)
-                                .with_name("Raspberry" + str(hash(self.raspberry_id))[0:6])
-                                .with_location("Not set")
-                                .with_description("Not set")
-                                .with_notifiable_messages({})
-                                .build()
-                                )
-
-        self._get_intial_raspberry_info()
-
-    def _get_intial_raspberry_info(self):
-        _raspberry_info = FirebaseController().get_raspberry_info(self.raspberry_id)
-        if _raspberry_info is not None:
-            self._raspberry_info = _raspberry_info
+        self._default_raspberry_info = (RaspberryInfoBuilder()
+                                        .with_id(self.raspberry_id)
+                                        .with_name("Raspberry" + str(hash(self.raspberry_id))[0:6])
+                                        .with_location("Not set")
+                                        .with_description("Not set")
+                                        .with_notifiable_messages({})
+                                        .build()
+                                        )
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -232,8 +225,11 @@ class RaspberryController:
         self._while_watering_callback_function = callback
 
     def get_raspberry_info(self) -> RaspberryInfo:
-        return self._raspberry_info
+        _raspberry_info = FirebaseController().get_raspberry_info(self.raspberry_id)
+        if _raspberry_info is not None:
+            return _raspberry_info
+        return self._default_raspberry_info
 
     def update_raspberry_notification_info(self, message_type: MessageType, value):
-        self._raspberry_info.notifiableMessages[message_type] = value
+        self._default_raspberry_info.notifiableMessages[message_type] = value
         FirebaseController().update_raspberry_notifiable_message(self.raspberry_id, message_type, value)

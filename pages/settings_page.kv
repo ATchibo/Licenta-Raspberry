@@ -1,170 +1,178 @@
 <SettingsPage>:
     name: "settings"
 
-    MDGridLayout:
-        id: main_layout
-        cols: 2
+    FloatLayout:
         size_hint: 1, 1
 
         MDGridLayout:
-            cols: 1
-            size_hint: 0.5, 1
-
-            MDBoxLayout:
-                orientation: "vertical"
-                size_hint: 1, None
-                padding: 10
-
-                MDLabel:
-                    text: "Device name"
-                    bold: True
-                    halign: "left"
-                    size_hint_x: 1
-
-                MDLabel:
-                    text: root.device_name_variable
-                    halign: "left"
-                    size_hint_x: 1
-
-            MDBoxLayout:
-                orientation: "vertical"
-                size_hint: 1, None
-                padding: 10
-
-                MDLabel:
-                    text: "Device location"
-                    bold: True
-                    halign: "left"
-                    size_hint_x: 1
-
-                MDLabel:
-                    text: root.device_location_variable
-                    halign: "left"
-                    size_hint_x: 1
-
-            MDBoxLayout:
-                orientation: "vertical"
-                size_hint: 1, None
-                padding: 10
-
-                MDLabel:
-                    text: "Device description"
-                    bold: True
-                    halign: "left"
-                    size_hint_x: 1
-
-                MDLabel:
-                    text: root.device_description_variable
-                    halign: "left"
-                    size_hint_x: 1
-
-        MDGridLayout:
-            cols: 1
-            size_hint: 0.5, 1
-
-            MDLabel:
-                text: "Receive notifications"
-                bold: True
-                halign: "center"
-                size_hint: 1, None
+            id: main_layout
+            cols: 2
+            size_hint: 1, 1
 
             MDGridLayout:
                 cols: 1
-                size_hint: 1, None
-                padding: 10
+                size_hint: 0.5, 1
 
-# Auto cycle
-
-                MDGridLayout:
-                    id: auto_watering_enable_grid
-                    cols: 2
-                    size_hint_y: None
-                    height: dp(60)
+                MDBoxLayout:
+                    orientation: "vertical"
+                    size_hint: 1, None
                     padding: 10
 
                     MDLabel:
-                        text: "Auto watering cycle"
-                        size_hint_x: 0.8
-                        pos_hint: {"center_y": 0.5}
+                        text: "Device name"
+                        bold: True
+                        halign: "left"
+                        size_hint_x: 1
 
-                    MDAnchorLayout:
-                        size_hint_x: 0.2
-                        height: auto_watering_enable_grid.height
-                        pos_hint: {"center_y": 0.5}
-                        anchor_x: "center"
-                        anchor_y: "center"
-                        padding: -sw1.width, 0, 0, -sw1.height / 3
+                    MDLabel:
+                        text: root.device_name_variable
+                        halign: "left"
+                        size_hint_x: 1
 
-                        MDSwitch:
-                            id: sw1
-                            active: root.auto_watering_active_variable
-                            size_hint: None, None
-                            icon_active: "check"
-                            icon_active_color: "white"
-                            icon_inactive: "close"
-                            icon_inactive_color: "grey"
-                            on_active: root.toggle_auto_watering()
-
-# Manual Cycle
-
-                MDGridLayout:
-                    id: manual_watering_enable_grid
-                    cols: 2
-                    size_hint_y: None
-                    height: dp(60)
+                MDBoxLayout:
+                    orientation: "vertical"
+                    size_hint: 1, None
                     padding: 10
 
                     MDLabel:
-                        text: "Manual watering cycle"
-                        size_hint_x: 0.8
-                        pos_hint: {"center_y": 0.5}
+                        text: "Device location"
+                        bold: True
+                        halign: "left"
+                        size_hint_x: 1
 
-                    MDAnchorLayout:
-                        size_hint_x: 0.2
-                        height: manual_watering_enable_grid.height
-                        pos_hint: {"center_y": 0.5}
-                        anchor_x: "center"
-                        anchor_y: "center"
-                        padding: -sw2.width, 0, 0, -sw2.height / 3
+                    MDLabel:
+                        text: root.device_location_variable
+                        halign: "left"
+                        size_hint_x: 1
 
-                        MDSwitch:
-                            id: sw2
-                            active: root.manual_watering_active_variable
-                            size_hint: None, None
-                            icon_active: "check"
-                            icon_active_color: "white"
-                            icon_inactive: "close"
-                            icon_inactive_color: "grey"
-                            on_active: root.toggle_manual_watering()
-
-# Moisture Measurement
-
-                MDGridLayout:
-                    id: moisture_measurement_enable_grid
-                    cols: 2
-                    size_hint_y: None
-                    height: dp(60)
+                MDBoxLayout:
+                    orientation: "vertical"
+                    size_hint: 1, None
                     padding: 10
 
                     MDLabel:
-                        text: "Moisture measurement"
-                        size_hint_x: 0.8
-                        pos_hint: {"center_y": 0.5}
+                        text: "Device description"
+                        bold: True
+                        halign: "left"
+                        size_hint_x: 1
 
-                    MDAnchorLayout:
-                        size_hint_x: 0.2
-                        height: moisture_measurement_enable_grid.height
-                        pos_hint: {"center_y": 0.5}
-                        anchor_x: "center"
-                        anchor_y: "center"
-                        padding: -sw3.width, 0, 0, -sw3.height / 3
+                    MDLabel:
+                        text: root.device_description_variable
+                        halign: "left"
+                        size_hint_x: 1
 
-                        MDSwitch:
-                            id: sw3
-                            active: root.moisture_measurement_active_variable
-                            size_hint: None, None
-                            icon_active: "check"
-                            icon_active_color: "white"
-                            icon_inactive: "close"
-                            icon_inactive_color: "grey"
-                            on_active: root.toggle_moisture_measurement()
+            MDGridLayout:
+                cols: 1
+                size_hint: 0.5, 1
+
+                MDLabel:
+                    text: "Receive notifications"
+                    bold: True
+                    halign: "center"
+                    size_hint: 1, None
+
+                MDGridLayout:
+                    cols: 1
+                    size_hint: 1, None
+                    padding: 10
+
+    # Auto cycle
+
+                    MDGridLayout:
+                        id: auto_watering_enable_grid
+                        cols: 2
+                        size_hint_y: None
+                        height: dp(60)
+                        padding: 10
+
+                        MDLabel:
+                            text: "Auto watering cycle"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_y": 0.5}
+
+                        MDAnchorLayout:
+                            size_hint_x: 0.2
+                            height: auto_watering_enable_grid.height
+                            pos_hint: {"center_y": 0.5}
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            padding: -sw1.width, 0, 0, -sw1.height / 3
+
+                            MDSwitch:
+                                id: sw1
+                                active: root.auto_watering_active_variable
+                                size_hint: None, None
+                                icon_active: "check"
+                                icon_active_color: "white"
+                                icon_inactive: "close"
+                                icon_inactive_color: "grey"
+
+    # Manual Cycle
+
+                    MDGridLayout:
+                        id: manual_watering_enable_grid
+                        cols: 2
+                        size_hint_y: None
+                        height: dp(60)
+                        padding: 10
+
+                        MDLabel:
+                            text: "Manual watering cycle"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_y": 0.5}
+
+                        MDAnchorLayout:
+                            size_hint_x: 0.2
+                            height: manual_watering_enable_grid.height
+                            pos_hint: {"center_y": 0.5}
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            padding: -sw2.width, 0, 0, -sw2.height / 3
+
+                            MDSwitch:
+                                id: sw2
+                                active: root.manual_watering_active_variable
+                                size_hint: None, None
+                                icon_active: "check"
+                                icon_active_color: "white"
+                                icon_inactive: "close"
+                                icon_inactive_color: "grey"
+
+    # Moisture Measurement
+
+                    MDGridLayout:
+                        id: moisture_measurement_enable_grid
+                        cols: 2
+                        size_hint_y: None
+                        height: dp(60)
+                        padding: 10
+
+                        MDLabel:
+                            text: "Moisture measurement"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_y": 0.5}
+
+                        MDAnchorLayout:
+                            size_hint_x: 0.2
+                            height: moisture_measurement_enable_grid.height
+                            pos_hint: {"center_y": 0.5}
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            padding: -sw3.width, 0, 0, -sw3.height / 3
+
+                            MDSwitch:
+                                id: sw3
+                                active: root.moisture_measurement_active_variable
+                                size_hint: None, None
+                                icon_active: "check"
+                                icon_active_color: "white"
+                                icon_inactive: "close"
+                                icon_inactive_color: "grey"
+
+    # Reload button
+        MDFloatingActionButton:
+            icon: "refresh"
+            style: "small"
+            pos_hint: {"right": 0.98}
+            y: 10
+            on_release: root.refresh_data()
