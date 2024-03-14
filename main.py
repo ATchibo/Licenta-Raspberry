@@ -26,19 +26,24 @@ class PlantBuddyApp(MDApp):
         Window.size = (800, 480)
         # Window.fullscreen = 'auto'
         self.theme_cls.primary_palette = "Green"
+        self.theme_cls.primary_hue = "400"
 
 
 if __name__ == '__main__':
-    try:
-        if FirebaseController().anonymous_login():
-            RaspberryController().start_listening_for_watering_now()
-            WateringProgramController().perform_initial_setup()
-            EventLogger().perform_initial_setup()
-            print("Logged in")
-        else:
-            print("Not logged in")
-    except Exception as e:
-        print("Failed to auto login: " + str(e))
+    # try:
+    #     if FirebaseController().anonymous_login():
+    #         RaspberryController().start_listening_for_watering_now()
+    #         WateringProgramController().perform_initial_setup()
+    #         EventLogger().perform_initial_setup()
+    #         print("Logged in")
+    #     else:
+    #         print("Not logged in")
+    # except Exception as e:
+    #     print("Failed to auto login: " + str(e))
+
+    RaspberryController().start_listening_for_watering_now()
+    WateringProgramController().perform_initial_setup()
+    EventLogger().perform_initial_setup()
 
     #TODO: revert to try login
 

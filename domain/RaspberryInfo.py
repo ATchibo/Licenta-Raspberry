@@ -1,3 +1,5 @@
+from domain.logging.MessageType import MessageType
+
 
 class RaspberryInfo:
     def __init__(self,
@@ -5,29 +7,33 @@ class RaspberryInfo:
                  raspberryName = "___",
                  raspberryLocation = "",
                  raspberryDescription = "",
-                 raspberryStatus = "OFFLINE",
                  notifiableMessages = {}):
         self.raspberryId = raspberryId
         self.raspberryName = raspberryName
         self.raspberryLocation = raspberryLocation
         self.raspberryDescription = raspberryDescription
-        self.raspberryStatus = raspberryStatus
-        self.notifiableMessages = {}
+
+        if len(notifiableMessages.keys()) == 0:
+            self.notifiableMessages = {
+                MessageType.AUTO_WATERING_CYCLE.value: False,
+                MessageType.MANUAL_WATERING_CYCLE.value: False,
+                MessageType.MOISTURE_LEVEL_MEASUREMENT.value: False
+            }
+        else:
+            self.notifiableMessages = notifiableMessages
 
     def __str__(self):
         return f"Id: {self.raspberryId}\n" \
                f"Name: {self.raspberryName}\n" \
                f"Location: {self.raspberryLocation}\n" \
                f"Description: {self.raspberryDescription}\n" \
-               f"Status: {self.raspberryStatus}\n" \
                f"Notifiable messages: {self.notifiableMessages}"
 
-    def get_info_dict(self):
+    def to_dict(self):
         return {
             "name": self.raspberryName,
             "location": self.raspberryLocation,
             "description": self.raspberryDescription,
-            "status": self.raspberryStatus,
             "notifiable_messages": self.notifiableMessages
         }
 
@@ -35,5 +41,46 @@ class RaspberryInfo:
         self.raspberryName = info_dict["name"]
         self.raspberryLocation = info_dict["location"]
         self.raspberryDescription = info_dict["description"]
-        self.raspberryStatus = info_dict["status"]
-        self.notifiableMessages = info_dict["notifiable_messages"]
+        self.notifiableMessages = {}
+        for key, value in info_dict["notifiable_messages"].items():
+            self.notifiableMessages[key] = value
+
+        return self
+
+
+class RaspberryInfoBuilder:
+    def __init__(self):
+        self.raspberry_id = ""
+        self.raspberry_name = "___"
+        self.raspberry_location = ""
+        self.raspberry_description = ""
+        self.notifiable_messages = {}
+
+    def with_id(self, raspberry_id):
+        self.raspberry_id = raspberry_id
+        return self
+
+    def with_name(self, raspberry_name):
+        self.raspberry_name = raspberry_name
+        return self
+
+    def with_location(self, raspberry_location):
+        self.raspberry_location = raspberry_location
+        return self
+
+    def with_description(self, raspberry_description):
+        self.raspberry_description = raspberry_description
+        return self
+
+    def with_notifiable_messages(self, notifiable_messages):
+        self.notifiable_messages = notifiable_messages
+        return self
+
+    def build(self):
+        return RaspberryInfo(
+            self.raspberry_id,
+            self.raspberry_name,
+            self.raspberry_location,
+            self.raspberry_description,
+            self.notifiable_messages
+        )

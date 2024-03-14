@@ -77,9 +77,11 @@ class EventLogger:
         if not success:
             return
 
-        return self._notifiable_messages
+        self._notifiable_messages = {}
+        for notifiable_message_key, notifiable_message_value in notifiable_messages.items():
+            self._notifiable_messages[notifiable_message_key] = notifiable_message_value
 
-        # TODO: Implement this
+        return self._notifiable_messages
 
     # def load_initial_data(self):
     #     self._load_log_messages()
