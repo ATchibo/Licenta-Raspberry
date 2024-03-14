@@ -216,6 +216,13 @@ class FirebaseController:
         self.watering_programs_collection_listener = programs_collection_query.on_snapshot(
             _update_values_on_receive_from_network)
 
+    def add_listener_for_log_messages_changes(self, raspberry_id, _update_values_on_receive_from_network):
+        if self.db is None:
+            return False
+
+        doc_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
+        doc_ref.on_snapshot(_update_values_on_receive_from_network)
+
     def unregister_raspberry(self, raspberry_id):
         if self.db is None:
             return False
@@ -404,10 +411,12 @@ class FirebaseController:
                                                                  self.__refresh_token,
                                                                  client_id="",
                                                                  client_secret="",
-                                                                 token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
+                                                                 token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
                                                                  )
 
             self._instance.db = firestore.Client(self.__project_id, _credentials)
+
+            return True
 
         except Exception as e:
             print(f"Error attempting anonymous login: {e}")
