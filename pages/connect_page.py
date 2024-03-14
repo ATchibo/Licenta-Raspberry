@@ -11,6 +11,7 @@ from utils.WateringProgramController import WateringProgramController
 from utils.backend_controller import BackendController
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
+from utils.login_controller import LoginController
 from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("pages/connect_page.kv")
@@ -25,7 +26,7 @@ class ConnectPage(MDScreen):
 
         self._raspberry_id = getserial()
 
-        self.info_text = "Scan this QR code to connect to your account"
+        self.info_text = ""
         self.qr_data = getserial()
         self.firebase_controller = FirebaseController()
 
@@ -34,6 +35,20 @@ class ConnectPage(MDScreen):
 
         self._token = None
         self.qr_data = ""
+        self._user_email = None
+
+        LoginController().set_login_page_on_try_login_callback(self._on_login_controller_login_attempt)
+        Clock.schedule_once(self._init_setup, 0.1)
+
+    def _init_setup(self, *args):
+        if self._is_logged_in.is_set():
+            self.info_text = "Connected as " + self._user_email
+            self.ids.connect_button.text = "Log out and connect again"
+            self.qr_data = ""
+            return
+
+        self.info_text = "Device not logged in"
+        self.ids.connect_button.text = "Connect"
 
     def start_connect(self):
         print("Starting to connect")
@@ -157,32 +172,30 @@ class ConnectPage(MDScreen):
             self.info_text = "Failed to login"
             BackendController().send_message_to_ws("FAIL")
 
-    # def check_registered(self):
-    #     if self.firebase_controller.is_raspberry_registered(serial=self.qr_data):
-    #         self.ids.qr_code.opacity = 1
-    #         self.ids.qr_code.disabled = False
-    #         self.ids.connect_button.opacity = 0
-    #         self.ids.connect_button.disabled = True
-    #         self.ids.info_label.text = self.info_text
+    # def _check_registered(self, *args):
+    #     if not self.firebase_controller.is_raspberry_registered(serial=self.qr_data):
+    #         self.info_text = "This Raspberry Pi is not registered to any account"
+    #         self.ids.connect_button.text = "Register"
+    #         self.qr_data = ""
+    #         return False
+    #
+    #     if self._is_logged_in.is_set():
+    #         self.info_text = "Connected as " + self._user_email
+    #         self.ids.connect_button.text = "Log out and connect again"
+    #         self.qr_data = ""
     #         return True
     #
-    #     self.ids.info_label.text = "This Raspberry Pi is not registered to any account"
-    #     self.ids.qr_code.opacity = 0
-    #     self.ids.qr_code.disabled = True
-    #     self.ids.connect_button.opacity = 1
-    #     self.ids.connect_button.disabled = False
-    #     return False
+    #     self.info_text = "Device not logged in"
+    #     self.ids.connect_button.text = "Connect"
 
-    # def connect(self, *args):
-    #     if self.check_registered():
-    #         return
-    #     try:
-    #         self.firebase_controller.register_raspberry(serial=self.qr_data)
-    #         self.ids.info_label.text = self.info_text
-    #         self.ids.qr_code.opacity = 1
-    #         self.ids.qr_code.disabled = False
-    #         self.ids.connect_button.opacity = 0
-    #         self.ids.connect_button.disabled = True
-    #     except Exception as e:
-    #         self.ids.info_label.text = "Failed to register Raspberry Pi"
-    #         print(e)
+    def _on_login_controller_login_attempt(self, login_success, owner_email):
+        if login_success:
+            self.info_text = "Connected to " + owner_email
+            self.ids.connect_button.text = "Log out and connect again"
+            self.qr_data = ""
+            self._is_logged_in.set()
+        else:
+            self.info_text = "Failed to login"
+            self.qr_data = ""
+            self.ids.connect_button.text = "Try again"
+            self._is_logged_in.clear()

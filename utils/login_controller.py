@@ -29,6 +29,11 @@ class LoginController:
         self._user_email = None
         self._ws_code = None
 
+        self._login_page_on_try_login_callback = None
+
+    def set_login_page_on_try_login_callback(self, callback):
+        self._login_page_on_try_login_callback = callback
+
     def _backend_request(self):
         error, response = BackendController().request_login_id(self._raspberry_id)
 
@@ -96,13 +101,22 @@ class LoginController:
             FirebaseController().register_raspberry_to_device(self._raspberry_id, email)
             BackendController().send_message_to_ws("OK")
 
-            self._setup_after_login()
+            self._setup_after_login(True, email)
 
             print("Logged in hehehehe")
 
         else:
             BackendController().send_message_to_ws("FAIL")
+            self._login_page_on_try_login_callback(False, None)
+
             print("Failed to login hehehehe")
+
+    def _setup_after_login(self, login_success, email):
+        RaspberryController().start_listening_for_watering_now()
+        WateringProgramController().perform_initial_setup()
+        EventLogger().load_initial_data()
+
+        self._login_page_on_try_login_callback(login_success, email)
 
     def try_initial_login(self):
         self._ws_code = self._backend_request()
@@ -113,8 +127,3 @@ class LoginController:
         print("Ws code: ", self._ws_code)
 
         self._connect_to_ws(self._ws_code)
-
-    def _setup_after_login(self):
-        RaspberryController().start_listening_for_watering_now()
-        WateringProgramController().perform_initial_setup()
-        EventLogger().load_initial_data()
