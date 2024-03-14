@@ -10,6 +10,7 @@ from pages.settings_page import SettingsPage
 from utils.WateringProgramController import WateringProgramController
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
+from utils.login_controller import LoginController
 from utils.moisture_measurement_controller import MoistureMeasurementController
 from utils.raspberry_controller import RaspberryController
 
@@ -28,11 +29,24 @@ class PlantBuddyApp(MDApp):
 
 
 if __name__ == '__main__':
-    FirebaseController()
+    # try:
+    #     if FirebaseController().try_initial_login():
+    #         RaspberryController().start_listening_for_watering_now()
+    #         WateringProgramController().perform_initial_setup()
+    #         print("Logged in")
+    #     else:
+    #         print("Not logged in")
+    # except Exception as e:
+    #     print("Failed to auto login: " + str(e))
 
-    RaspberryController().start_listening_for_watering_now()
-    WateringProgramController().perform_initial_setup()
+    try:
+        LoginController().try_initial_login()
+    except Exception as e:
+        print("Failed to auto login: " + str(e))
+
     EventLogger().load_initial_data()
     MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 
     PlantBuddyApp().run()
+
+    # TODO: add listener and sorting for logs

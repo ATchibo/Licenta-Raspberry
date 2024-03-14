@@ -53,7 +53,9 @@ class WateringOptionsView(MDBoxLayout):
 
     def change_program(self):
         self.current_program_name = self.ids.watering_program_spinner.text
-        self._watering_program_controller.set_active_watering_program_id(self.programs[self.current_program_name].id)
+
+        if self.current_program_name in self.programs.keys():
+            self._watering_program_controller.set_active_watering_program_id(self.programs[self.current_program_name].id)
 
     def load_programs(self):
         _programs = self._watering_program_controller.get_watering_programs()
@@ -141,10 +143,13 @@ class WateringOptionsView(MDBoxLayout):
             self.selected_program_id = new_active_program_id
 
         if len(new_programs.keys()) > 0:
-            if self.selected_program_id is None:
+            if self.selected_program_id is None or self.selected_program_id not in new_programs.keys():
                 self.selected_program_id = self._watering_program_controller.get_active_watering_program_id()
 
-            self.current_program_name = new_programs[self.selected_program_id].name
+            if self.selected_program_id in new_programs.keys():
+                self.current_program_name = new_programs[self.selected_program_id].name
+            else:
+                print("Cucumucu")
 
             self.programs.clear()
             for program in new_programs.values():
