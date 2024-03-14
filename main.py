@@ -29,22 +29,24 @@ class PlantBuddyApp(MDApp):
 
 
 if __name__ == '__main__':
-    # try:
-    #     if FirebaseController().try_initial_login():
-    #         RaspberryController().start_listening_for_watering_now()
-    #         WateringProgramController().perform_initial_setup()
-    #         print("Logged in")
-    #     else:
-    #         print("Not logged in")
-    # except Exception as e:
-    #     print("Failed to auto login: " + str(e))
-
     try:
-        LoginController().try_initial_login()
+        if FirebaseController().anonymous_login():
+            RaspberryController().start_listening_for_watering_now()
+            WateringProgramController().perform_initial_setup()
+            EventLogger().load_initial_data()
+            print("Logged in")
+        else:
+            print("Not logged in")
     except Exception as e:
         print("Failed to auto login: " + str(e))
 
-    EventLogger().load_initial_data()
+    #TODO: revert to try login
+
+    # try:
+    #     LoginController().try_initial_login()
+    # except Exception as e:
+    #     print("Failed to auto login: " + str(e))
+
     MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 
     PlantBuddyApp().run()
