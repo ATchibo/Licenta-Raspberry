@@ -44,11 +44,7 @@ class EventLogger:
         self._load_initial_data()
 
     def load_log_messages(self):
-        log_messages, success = RemoteRequests().get_log_messages()
-
-        if not success:
-            return None, False
-
+        log_messages = RemoteRequests().get_log_messages()
         self._log_messages = []
 
         for log_message_key, log_message_value in log_messages.items():

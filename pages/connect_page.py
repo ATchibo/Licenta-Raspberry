@@ -37,7 +37,7 @@ class ConnectPage(MDScreen):
         self.qr_data = ""
         self._user_email = None
 
-        RemoteRequests().set_login_page_on_try_login_callback(self._on_login_controller_login_attempt)
+        LoginController().set_login_page_on_try_login_callback(self._on_login_controller_login_attempt)
         Clock.schedule_once(self._init_setup, 0.1)
 
     def _init_setup(self, *args):

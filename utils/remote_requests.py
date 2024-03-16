@@ -7,7 +7,6 @@ from domain.logging.MessageType import MessageType
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.local_storage_controller import LocalStorageController
-from utils.login_controller import LoginController
 
 
 class RemoteRequests:
@@ -29,10 +28,9 @@ class RemoteRequests:
 
         self._firebase_controller = FirebaseController()
         self._local_storage_controller = LocalStorageController()
-        self._login_controller = LoginController()
 
-    def try_initial_login(self) -> bool:
-        return self._login_controller.try_initial_login()
+    # def try_initial_login(self) -> bool:
+    #     return self._login_controller.try_initial_login()
 
     def attempt_login(self, auth_token: str) -> bool:
         return self._firebase_controller.attempt_login_with_custom_token(auth_token)
@@ -131,7 +129,7 @@ class RemoteRequests:
         except Exception as e:
             return False
 
-    def get_log_messages(self) -> list[dict]:
+    def get_log_messages(self) -> dict:
         try:
             _result = self._firebase_controller.get_log_messages(self._raspberry_id)
             self._local_storage_controller.save_log_messages(_result)
@@ -170,8 +168,8 @@ class RemoteRequests:
         except Exception as e:
             return False
 
-    def set_login_page_on_try_login_callback(self, callback):
-        self._login_controller.set_login_page_on_try_login_callback(callback)
+    # def set_login_page_on_try_login_callback(self, callback):
+    #     self._login_controller.set_login_page_on_try_login_callback(callback)
 
     def unsubscribe_watering_now_listener(self):
         self._firebase_controller.unsubscribe_watering_now_listener()

@@ -107,13 +107,13 @@ class LocalStorageController:
             print(f'File not found: {self._is_watering_programs_active_file}')
             pass
 
-    def get_log_messages(self):
+    def get_log_messages(self) -> dict:
         try:
             with open(self._log_messages_file, 'rb') as file:
                 _log_messages = pickle.load(file)
                 return _log_messages
         except FileNotFoundError:
-            return []
+            return {}
 
     def save_log_messages(self, log_messages):
         try:

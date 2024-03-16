@@ -50,7 +50,7 @@ if __name__ == '__main__':
     #TODO: revert to try login
 
     try:
-        RemoteRequests().try_initial_login()
+        LoginController().try_initial_login()
     except Exception as e:
         print("Failed to auto login: " + str(e))
 

@@ -263,7 +263,7 @@ class FirebaseController:
         return True
 
     # Event logger methods
-    def get_log_messages(self, raspberry_id) -> list[dict]:
+    def get_log_messages(self, raspberry_id) -> dict:
         if self.db is None:
             raise FirebaseUninitializedException()
 
