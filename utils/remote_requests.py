@@ -34,6 +34,9 @@ class RemoteRequests:
     def try_initial_login(self) -> bool:
         return self._login_controller.try_initial_login()
 
+    def attempt_login(self, auth_token: str) -> bool:
+        return self._firebase_controller.attempt_login_with_custom_token(auth_token)
+
     def register_raspberry(self, raspberry_info: RaspberryInfo) -> bool:
         return self._firebase_controller.register_raspberry(raspberry_info)
 
@@ -48,9 +51,9 @@ class RemoteRequests:
     def add_watering_now_listener(self, callback):
         self._firebase_controller.add_watering_now_listener(self._raspberry_id, callback)
 
-    def get_moisture_info(self) -> list[dict]:
+    def get_moisture_info(self, start_date: datetime, end_date: datetime) -> list[dict]:
         try:
-            _result = self._firebase_controller.get_moisture_info(self._raspberry_id)
+            _result = self._firebase_controller.get_moisture_info_for_rasp_id(self._raspberry_id, start_date, end_date)
             self._local_storage_controller.save_moisture_info(_result)
             return _result
         except Exception as e:
@@ -166,3 +169,9 @@ class RemoteRequests:
             return _result
         except Exception as e:
             return False
+
+    def set_login_page_on_try_login_callback(self, callback):
+        self._login_controller.set_login_page_on_try_login_callback(callback)
+
+    def unsubscribe_watering_now_listener(self):
+        self._firebase_controller.unsubscribe_watering_now_listener()

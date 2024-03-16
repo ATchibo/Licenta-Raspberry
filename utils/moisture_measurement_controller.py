@@ -6,6 +6,7 @@ from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.moisture_controller import MoistureController
+from utils.remote_requests import RemoteRequests
 
 
 class MoistureMeasurementController:
@@ -60,6 +61,6 @@ class MoistureMeasurementController:
             _moisture_perc = self._moisture_controller.get_moisture_percentage()
             _measurement_time = get_current_datetime_tz()
 
-            FirebaseController().add_moisture_percentage_measurement(self._raspberry_id, _moisture_perc, _measurement_time)
+            RemoteRequests().add_moisture_percentage_measurement(_moisture_perc, _measurement_time)
 
             EventLogger().add_moisture_measurement_message(_moisture_perc, _measurement_time)

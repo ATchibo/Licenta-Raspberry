@@ -14,6 +14,7 @@ import matplotlib.dates as mdates
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
+from utils.remote_requests import RemoteRequests
 
 Builder.load_file("components/homepage/graph_view.kv")
 
@@ -23,8 +24,6 @@ class GraphView(MDBoxLayout):
         super(GraphView, self).__init__(**kwargs)
         self.orientation = "vertical"
         self.size_hint = (1, 1)
-
-        self.firebase_controller = FirebaseController()
 
         self.menu = None
         self.dropdown = None
@@ -47,8 +46,8 @@ class GraphView(MDBoxLayout):
 
         fig, ax = plt.subplots()
 
-        moisture_info_list = self.firebase_controller.get_moisture_info_for_rasp_id(getserial(), self.start_datetime,
-                                                                                    self.end_datetime)
+        moisture_info_list = RemoteRequests().get_moisture_info(self.start_datetime,
+                                                                self.end_datetime)
 
         timestamps = [moisture_info["measurementTime"] for moisture_info in moisture_info_list]
         # local_tz = datetime.now(timezone.utc).astimezone().tzinfo

@@ -326,7 +326,7 @@ class FirebaseController:
         except Exception as e:
             raise Exception(f"Error adding moisture percentage measurement: {e}")
 
-    def attempt_login(self, token=None):
+    def attempt_login_with_custom_token(self, token=None):
         print("Attempting login")
 
         self.db = None
@@ -413,3 +413,6 @@ class FirebaseController:
             print(f"Error attempting anonymous login: {e}")
             self._instance.db = None
             return False
+
+    def unsubscribe_watering_now_listener(self):
+        self.watering_now_listener.unsubscribe()

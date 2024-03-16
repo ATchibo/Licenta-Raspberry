@@ -10,6 +10,9 @@ from websocket import WebSocketApp
 from utils.firebase_controller import FirebaseController
 import rel
 
+from utils.remote_requests import RemoteRequests
+
+
 class BackendController:
     _instance = None
     _lock = threading.Lock()
@@ -31,7 +34,7 @@ class BackendController:
         self._ws = None
 
     def send_notification(self, rasp_id, message):
-        rasp_info = FirebaseController().get_raspberry_info(rasp_id)
+        rasp_info = RemoteRequests().get_raspberry_info()
 
         message = {
             "raspberryId": rasp_id,
