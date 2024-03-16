@@ -70,7 +70,7 @@ class GraphView(MDBoxLayout):
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
         plt.xticks(rotation=45, ha="right")
 
-        plt.tight_layout()
+        plt.tight_layout(pad=3.0)
 
         graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
 
@@ -105,4 +105,7 @@ class GraphView(MDBoxLayout):
         elif index == 2:
             self.start_datetime = self.end_datetime - timedelta(days=30)
 
+        self.update_plot()
+
+    def refresh_data(self, *args):
         self.update_plot()
