@@ -31,6 +31,7 @@ class RaspberryInfo:
 
     def to_dict(self):
         return {
+            "id": self.raspberryId,
             "name": self.raspberryName,
             "location": self.raspberryLocation,
             "description": self.raspberryDescription,

@@ -36,7 +36,10 @@ class RemoteRequests:
         return self._firebase_controller.attempt_login_with_custom_token(auth_token)
 
     def register_raspberry(self, raspberry_info: RaspberryInfo) -> bool:
-        return self._firebase_controller.register_raspberry(raspberry_info)
+        try:
+            return self._firebase_controller.register_raspberry(raspberry_info)
+        except Exception as e:
+            return False
 
     def get_raspberry_info(self) -> RaspberryInfo | None:
         try:

@@ -58,22 +58,27 @@ class FirebaseController:
         self.watering_programs_fields_listener = None
         self.watering_programs_collection_listener = None
 
-    def _is_raspberry_registered(self, serial):
+    def _is_raspberry_registered(self, serial) -> bool:
         if self.db is None:
             raise FirebaseUninitializedException()
 
-        query_result = self.db.collection(self._raspberryInfoCollectionName).document(serial)
-        return query_result is not None
+        print("Checking if raspberry is registered")
+        doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
+        query_result = doc_ref.get()
+        print("Raspberry registered query result: " + str(query_result.exists))
+        return query_result.exists
 
     def register_raspberry(self, rpi_info: RaspberryInfo) -> bool:
+        print("Registering raspberry with id: " + rpi_info.raspberryId)
+
         if self.db is None:
             raise FirebaseUninitializedException()
 
+        print("Registering raspberry: db is not none")
+
         if not self._is_raspberry_registered(rpi_info.raspberryId):
-            # TODO: check how can i set the document id
-            self.db.collection(self._raspberryInfoCollectionName).add(
-                rpi_info.to_dict()
-            )
+            print("Registering raspberry: " + rpi_info.raspberryId)
+            self.db.collection(self._raspberryInfoCollectionName).document(rpi_info.raspberryId).set(rpi_info.to_dict())
 
             return True
         else:
