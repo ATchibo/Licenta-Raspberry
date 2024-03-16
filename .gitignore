@@ -151,3 +151,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 /serviceAccountKey.json
+/raspberry_info
+/is_watering_programs_active
+/log_messages
+/watering_programs
+/watering_programs_active_id

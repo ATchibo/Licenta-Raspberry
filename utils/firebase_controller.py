@@ -17,6 +17,8 @@ import requests
 import google.oauth2.credentials
 from google.cloud import firestore
 
+from utils.get_rasp_uuid import getserial
+
 
 class FirebaseController:
     __project_id = None
@@ -47,6 +49,7 @@ class FirebaseController:
         self._wateringProgramsCollectionNestedCollectionName = "programs"
         self._globalWateringProgramsCollectionName = "global_watering_programs"
         self._logsCollectionName = "logs"
+        self._wsCollectionName = "general_purpose_ws"
 
         self.watering_now_callback = None
         self.watering_now_listener = None
@@ -369,6 +372,8 @@ class FirebaseController:
 
             print("Am reusit sa ma conectez")
 
+            self._start_listening_for_ping()
+
             return True
         except Exception as e:
             print(f"Error attempting login: {e}")
@@ -407,6 +412,8 @@ class FirebaseController:
 
             self._instance.db = firestore.Client(self.__project_id, _credentials)
 
+            self._start_listening_for_ping()
+
             return True
 
         except Exception as e:
@@ -416,3 +423,24 @@ class FirebaseController:
 
     def unsubscribe_watering_now_listener(self):
         self.watering_now_listener.unsubscribe()
+
+    def _start_listening_for_ping(self):
+        if self.db is None:
+            return
+
+        doc_ref = self.db.collection(self._wsCollectionName).document(getserial())
+        doc_ref.set({"message": "+"})
+        doc_ref.on_snapshot(self._on_ping_from_phone)
+
+    def _on_ping_from_phone(self,
+        doc_snapshot,
+        changes,
+        read_time):
+
+        for change in changes:
+            changed_doc = change.document
+            doc_data = changed_doc.to_dict()
+
+            if "message" in doc_data.keys():
+                if doc_data["message"] == "PING":
+                    self.db.collection(self._wsCollectionName).document(getserial()).set({"message": "PONG"})

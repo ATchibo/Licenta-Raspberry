@@ -48,11 +48,11 @@ if __name__ == '__main__':
     # EventLogger().perform_initial_setup()
 
     #TODO: revert to try login
-
-    try:
-        LoginController().try_initial_login()
-    except Exception as e:
-        print("Failed to auto login: " + str(e))
+    #
+    # try:
+    #     LoginController().try_initial_login()
+    # except Exception as e:
+    #     print("Failed to auto login: " + str(e))
 
     MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 

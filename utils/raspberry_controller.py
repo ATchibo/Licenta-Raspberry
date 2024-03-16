@@ -55,7 +55,8 @@ class RaspberryController:
                                         .build()
                                         )
 
-        LocalStorageController().save_raspberry_info(self._default_raspberry_info)
+        if LocalStorageController().get_raspberry_info() is None:
+            LocalStorageController().save_raspberry_info(self._default_raspberry_info)
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -233,5 +234,5 @@ class RaspberryController:
         return self._default_raspberry_info
 
     def update_raspberry_notification_info(self, message_type: MessageType, value):
-        self._default_raspberry_info.notifiableMessages[message_type] = value
+        self._default_raspberry_info.set_notifiable_message(message_type, value)
         RemoteRequests().update_raspberry_notifiable_message(message_type, value)

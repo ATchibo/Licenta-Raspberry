@@ -122,8 +122,6 @@ class WateringOptionsView(MDBoxLayout):
             self.are_programs_active_variable = self._watering_program_controller.get_is_watering_programs_active()
             self.ids.watering_program_switch.active = self.are_programs_active_variable
 
-            self.ids.refresh_layout.refresh_done()
-
         Clock.schedule_once(refresh_callback, 0.5)
 
     def _update_values_on_receive_from_network(
@@ -146,8 +144,6 @@ class WateringOptionsView(MDBoxLayout):
 
             if self.selected_program_id in new_programs.keys():
                 self.current_program_name = new_programs[self.selected_program_id].name
-            else:
-                print("Cucumucu")
 
             self.programs.clear()
             for program in new_programs.values():
