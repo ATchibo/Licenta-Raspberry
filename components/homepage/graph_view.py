@@ -62,8 +62,7 @@ class GraphView(MDBoxLayout):
         ax.set_xlabel('Time')
         ax.set_ylabel('Moisture (%)')
 
-        # Set minimum and maximum values for the y-axis
-        ax.set_ylim(0, 100)  # Adjust the values as needed
+        ax.set_ylim(0, 100)
 
         xfmt = mdates.DateFormatter('%d %b\n%H:%M')
         ax.xaxis.set_major_formatter(xfmt)

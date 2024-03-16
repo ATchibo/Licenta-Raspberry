@@ -156,3 +156,4 @@ cython_debug/
 /log_messages
 /watering_programs
 /watering_programs_active_id
+/moisture_info
