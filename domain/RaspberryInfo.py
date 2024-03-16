@@ -47,6 +47,9 @@ class RaspberryInfo:
 
         return self
 
+    def set_notifiable_message(self, message_type: MessageType, value):
+        self.notifiableMessages[message_type.value] = value
+
 
 class RaspberryInfoBuilder:
     def __init__(self):

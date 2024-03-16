@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+from typing import List, Any
 
 # import firebase_admin
 import keyring
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 from google.cloud.firestore_v1 import FieldFilter
 from requests import HTTPError
 
+from components.exceptions.FirebaseUninitializedException import FirebaseUninitializedException
 from domain.RaspberryInfo import RaspberryInfo
 from domain.WateringProgram import WateringProgram
 
@@ -53,38 +55,30 @@ class FirebaseController:
         self.watering_programs_fields_listener = None
         self.watering_programs_collection_listener = None
 
-
-    def try_initial_login(self):
-        try:
-            pass
-        except Exception as e:
-            self.db = None
-            return False
-
-    def is_raspberry_registered(self, serial):
+    def _is_raspberry_registered(self, serial):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         query_result = self.db.collection(self._raspberryInfoCollectionName).document(serial)
         return query_result is not None
 
-    def register_raspberry(self, serial):
+    def register_raspberry(self, rpi_info: RaspberryInfo) -> bool:
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
-        if not self.is_raspberry_registered(serial):
-            rpi_info = RaspberryInfo(raspberryId=serial)
-
+        if not self._is_raspberry_registered(rpi_info.raspberryId):
             # TODO: check how can i set the document id
             self.db.collection(self._raspberryInfoCollectionName).add(
                 rpi_info.to_dict()
             )
+
+            return True
         else:
             raise Exception("Raspberry Pi already registered")
 
     def get_raspberry_info(self, serial) -> RaspberryInfo | None:
         if self.db is None:
-            return None
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
         doc_dict = doc_ref.get().to_dict()
@@ -94,16 +88,16 @@ class FirebaseController:
 
     def add_watering_now_listener(self, serial, callback):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         self.watering_now_callback = callback
 
         doc_ref = self.db.collection(self._wateringNowCollectionName).document(serial)
         self.watering_now_listener = doc_ref.on_snapshot(callback)
 
-    def get_moisture_info_for_rasp_id(self, rpi_id, start_datetime, end_datetime):
+    def get_moisture_info_for_rasp_id(self, rpi_id, start_datetime, end_datetime) -> list[Any] | None:
         if self.db is None:
-            return []
+            raise FirebaseUninitializedException()
 
         moisture_info_ref = self.db.collection(self._moistureInfoCollectionName)
 
@@ -120,7 +114,7 @@ class FirebaseController:
 
     def update_watering_info(self, serial, command, liters_sent, watering_time):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._wateringNowCollectionName).document(serial)
 
@@ -136,9 +130,11 @@ class FirebaseController:
                 'water_volume': liters_sent
             })
 
-    def get_watering_programs(self, raspberry_id):
+        return True
+
+    def get_watering_programs(self, raspberry_id) -> list[WateringProgram] | None:
         if self.db is None:
-            return []
+            raise FirebaseUninitializedException()
 
         watering_programs_ref = self.db.collection(self._wateringProgramsCollectionName).document(
             raspberry_id).collection(
@@ -167,9 +163,9 @@ class FirebaseController:
         watering_programs.extend(global_watering_programs)
         return watering_programs
 
-    def get_active_watering_program_id(self, raspberry_id):
+    def get_active_watering_program_id(self, raspberry_id) -> str | None:
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc = doc_ref.get()
@@ -177,33 +173,36 @@ class FirebaseController:
         try:
             return doc.get("activeProgramId")
         except Exception as e:
-            return None
+            raise Exception(f"Error getting active watering program id: {e}")
 
     def set_active_watering_program_id(self, raspberry_id, program_id):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc_ref.update({"activeProgramId": program_id})
 
-    def get_is_watering_programs_active(self, raspberry_id):
+    def get_is_watering_programs_active(self, raspberry_id) -> bool:
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc = doc_ref.get()
-        return doc.get("wateringProgramsEnabled")
+        try:
+            return doc.get("wateringProgramsEnabled")
+        except Exception as e:
+            raise Exception(f"Error getting is watering programs active: {e}")
 
     def set_is_watering_programs_active(self, raspberry_id, is_active):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
         doc_ref.update({"wateringProgramsEnabled": is_active})
 
     def add_listener_for_watering_programs_changes(self, raspberry_id, _update_values_on_receive_from_network):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         self.watering_programs_callback = _update_values_on_receive_from_network
 
@@ -217,14 +216,14 @@ class FirebaseController:
 
     def add_listener_for_log_messages_changes(self, raspberry_id, _update_values_on_receive_from_network):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
         doc_ref.on_snapshot(_update_values_on_receive_from_network)
 
     def unregister_raspberry(self, raspberry_id):
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         query = (self.db.collection(self._ownerInfoCollectionName)
                  .where(filter=FieldFilter("raspberry_ids", "array_contains", raspberry_id)))
@@ -252,29 +251,32 @@ class FirebaseController:
             "raspberry_ids": firestore.ArrayRemove([raspberry_id])
         })
 
-    def register_raspberry_to_device(self, raspberry_id, device_id):
+        return True
+
+    def register_raspberry_to_device(self, raspberry_id, device_id) -> bool:
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._ownerInfoCollectionName).document(device_id)
         doc_ref.update({"raspberry_ids": firestore.ArrayUnion([raspberry_id])})
 
+        return True
+
     # Event logger methods
-    def get_log_messages(self, raspberry_id):
+    def get_log_messages(self, raspberry_id) -> list[dict]:
         if self.db is None:
-            return None, False
+            raise FirebaseUninitializedException()
 
         try:
             log_messages_ref = self.db.collection(self._logsCollectionName).document(raspberry_id).get()
             log_messages = log_messages_ref.get("messages")
-            return log_messages, True
+            return log_messages
         except Exception as e:
-            print(f"Error getting log messages: {e}")
-            return None, False
+            raise Exception(f"Error getting log messages: {e}")
 
-    def add_log_message(self, raspberry_id, log_message):
+    def add_log_message(self, raspberry_id, log_message) -> bool:
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         try:
             data = {
@@ -285,13 +287,11 @@ class FirebaseController:
             log_messages_ref.set({"messages": data}, merge=True)
             return True
         except Exception as e:
-            print(f"Error adding log message: {e}")
-            return False
+            raise Exception(f"Error adding log message: {e}")
 
     def update_raspberry_notifiable_message(self, raspberry_id, message_type, value):
         if self.db is None:
-            print("DB is None")
-            return False
+            raise FirebaseUninitializedException()
 
         data = {
             message_type.value: value
@@ -307,12 +307,11 @@ class FirebaseController:
             return notifiable_messages, True
 
         except Exception as e:
-            print(f"Error getting notifiable messages: {e}")
-            return None, False
+            raise Exception(f"Error getting notifiable messages: {e}")
 
     def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> bool:
         if self.db is None:
-            return False
+            raise FirebaseUninitializedException()
 
         try:
             data = {
@@ -322,13 +321,10 @@ class FirebaseController:
             }
 
             self.db.collection(self._moistureInfoCollectionName).add(data)
-
             return True
 
         except Exception as e:
-            print(f"Error adding moisture percentage measurement: {e}")
-            return False
-
+            raise Exception(f"Error adding moisture percentage measurement: {e}")
 
     def attempt_login(self, token=None):
         print("Attempting login")
