@@ -1,18 +1,13 @@
 <WateringOptionsView>:
     name: "watering_options_view"
 
-    MDScrollViewRefreshLayout:
-        id: refresh_layout
-        refresh_callback: root.refresh_callback
-        root_layout: main_layout
+    FloatLayout:
         size_hint: 1, 1
-        scroll_distance: 10
 
         MDGridLayout:
             id: main_layout
             cols: 1
-            size_hint_y: None
-            height: self.minimum_height
+            size_hint_y: 1
 
             MDGridLayout:
                 id: watering_programs_enable_grid
@@ -119,3 +114,11 @@
                             text: root.watering_label_variable
                             halign: "center"
                             font_style: "H5"
+
+
+        MDFloatingActionButton:
+            icon: "refresh"
+            style: "small"
+            pos_hint: {"right": 0.98}
+            y: 10
+            on_release: root.refresh_callback()

@@ -114,7 +114,7 @@ class LoginController:
     def _setup_after_login(self, login_success, email):
         RaspberryController().start_listening_for_watering_now()
         WateringProgramController().perform_initial_setup()
-        EventLogger().load_initial_data()
+        EventLogger().perform_initial_setup()
 
         self._login_page_on_try_login_callback(login_success, email)
 

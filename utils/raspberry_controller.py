@@ -2,6 +2,8 @@ import threading
 import time
 from datetime import datetime
 
+from domain.RaspberryInfo import RaspberryInfoBuilder, RaspberryInfo
+from domain.logging.MessageType import MessageType
 from utils.datetime_utils import get_current_datetime_tz
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
@@ -41,6 +43,15 @@ class RaspberryController:
 
         self._watering_cycle_start_time = None
         self._watering_manually = False
+
+        self._default_raspberry_info = (RaspberryInfoBuilder()
+                                        .with_id(self.raspberry_id)
+                                        .with_name("Raspberry" + str(hash(self.raspberry_id))[0:6])
+                                        .with_location("Not set")
+                                        .with_description("Not set")
+                                        .with_notifiable_messages({})
+                                        .build()
+                                        )
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -212,3 +223,13 @@ class RaspberryController:
 
     def set_callback_for_watering_updates(self, callback):
         self._while_watering_callback_function = callback
+
+    def get_raspberry_info(self) -> RaspberryInfo:
+        _raspberry_info = FirebaseController().get_raspberry_info(self.raspberry_id)
+        if _raspberry_info is not None:
+            return _raspberry_info
+        return self._default_raspberry_info
+
+    def update_raspberry_notification_info(self, message_type: MessageType, value):
+        self._default_raspberry_info.notifiableMessages[message_type] = value
+        FirebaseController().update_raspberry_notifiable_message(self.raspberry_id, message_type, value)

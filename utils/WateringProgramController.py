@@ -129,7 +129,7 @@ class WateringProgramController:
         self._moisture_check_thread = threading.Timer(
             interval=0,
             function=self._moisture_check_task,
-            args=(active_program, 3600,)
+            args=(active_program, 3600,),
         )
         self._moisture_check_thread.daemon = True
         self._moisture_check_thread.start()

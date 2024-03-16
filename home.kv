@@ -1,4 +1,4 @@
-#:kivy 2.2.1
+#:kivy 2.3.0
 
 <ContentNavigationDrawer>
 
@@ -39,8 +39,8 @@ MDScreen:
             pos_hint: {"top": 1}
             elevation: 1
             title: "Home"
+            specific_text_color: 0.9, 1, 1, 1
             left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
-
 
         MDScreenManager:
             id: screen_manager

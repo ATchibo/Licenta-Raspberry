@@ -1,22 +1,15 @@
 import threading
 
 from kivy.clock import Clock
-from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
 from kivy.properties import StringProperty, BooleanProperty
-from kivy.uix.button import Button
-from kivy.uix.dropdown import DropDown
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.menu import MDDropdownMenu
-from matplotlib import pyplot as plt
 
 from utils.WateringProgramController import WateringProgramController
 from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("components/homepage/watering_options_view.kv")
 
-
-# TODO: replace local variables with variables from watering program controller when necessary and if applicable
 class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
     moisture_variable = StringProperty()
@@ -47,7 +40,9 @@ class WateringOptionsView(MDBoxLayout):
         if len(self.current_program_name) > 0:
             self.ids.watering_program_spinner.text = self.current_program_name
 
-        self._watering_program_controller.set_on_receive_from_network_callback(self._update_values_on_receive_from_network)
+        self._watering_program_controller.set_on_receive_from_network_callback(
+            self._update_values_on_receive_from_network
+        )
 
         self.ids.watering_program_switch.bind(active=self.toggle_watering_program)
 
@@ -91,13 +86,16 @@ class WateringOptionsView(MDBoxLayout):
             self.ids.water_now_label.text = "Could not start watering"
 
     def stop_watering(self):
-        res = self.raspberry_controller.manual_stop_watering()
+        def stop_thread():
+            res = self.raspberry_controller.manual_stop_watering()
 
-        if res:
-            self.ids.water_now_button.text = "Water now"
-            self.pushed_water_now = False
-        else:
-            self.ids.water_now_label.text = "Could not stop watering"
+            if res:
+                self.ids.water_now_button.text = "Water now"
+                self.pushed_water_now = False
+            else:
+                self.ids.water_now_label.text = "Could not stop watering"
+
+        threading.Thread(target=stop_thread, daemon=True).start()
 
     def bind_raspberry_controller_properties(self):
         self.raspberry_controller.set_callback_for_watering_updates(callback=self._update_watering_now_info)

@@ -77,7 +77,7 @@ class FirebaseController:
 
             # TODO: check how can i set the document id
             self.db.collection(self._raspberryInfoCollectionName).add(
-                rpi_info.get_info_dict()
+                rpi_info.to_dict()
             )
         else:
             raise Exception("Raspberry Pi already registered")
@@ -89,8 +89,7 @@ class FirebaseController:
         doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
         doc_dict = doc_ref.get().to_dict()
 
-        rasp_info = RaspberryInfo()
-        rasp_info.from_dict(doc_dict)
+        rasp_info = RaspberryInfo().from_dict(doc_dict)
         return rasp_info
 
     def add_watering_now_listener(self, serial, callback):
@@ -216,6 +215,13 @@ class FirebaseController:
         self.watering_programs_collection_listener = programs_collection_query.on_snapshot(
             _update_values_on_receive_from_network)
 
+    def add_listener_for_log_messages_changes(self, raspberry_id, _update_values_on_receive_from_network):
+        if self.db is None:
+            return False
+
+        doc_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
+        doc_ref.on_snapshot(_update_values_on_receive_from_network)
+
     def unregister_raspberry(self, raspberry_id):
         if self.db is None:
             return False
@@ -282,31 +288,27 @@ class FirebaseController:
             print(f"Error adding log message: {e}")
             return False
 
+    def update_raspberry_notifiable_message(self, raspberry_id, message_type, value):
+        if self.db is None:
+            print("DB is None")
+            return False
+
+        data = {
+            message_type.value: value
+        }
+
+        doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(raspberry_id)
+        doc_ref.set({"notifiable_messages": data}, merge=True)
+
     def get_notifiable_messages(self, raspberry_id):
-        return None, True
+        try:
+            notifiable_messages_ref = self.db.collection(self._raspberryInfoCollectionName).document(raspberry_id).get()
+            notifiable_messages = notifiable_messages_ref.get("notifiable_messages")
+            return notifiable_messages, True
 
-        # try:
-        #     notifiable_messages_ref = self.db.collection(self._deviceInfoCollectionName).document(raspberry_id).get()
-        #     notifiable_messages = notifiable_messages_ref.get("notifiable_messages")
-        #     return notifiable_messages, True
-        # except Exception as e:
-        #     print(f"Error getting notifiable messages: {e}")
-        #     return None, False
-
-    def update_notifiable_message(self, raspberry_id, notifiable_message, value):
-        return True
-
-        # try:
-        #     data = {
-        #         notifiable_message: value
-        #     }
-        #
-        #     notifiable_messages_ref = self.db.collection(self._deviceInfoCollectionName).document(raspberry_id)
-        #     notifiable_messages_ref.update({"notifiable_messages": data})
-        #     return True
-        # except Exception as e:
-        #     print(f"Error updating notifiable message: {e}")
-        #     return False
+        except Exception as e:
+            print(f"Error getting notifiable messages: {e}")
+            return None, False
 
     def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> bool:
         if self.db is None:
@@ -404,10 +406,12 @@ class FirebaseController:
                                                                  self.__refresh_token,
                                                                  client_id="",
                                                                  client_secret="",
-                                                                 token_uri=f"https://securetoken.googleapis.com/v1/token?key={cls.__api_key}"
+                                                                 token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
                                                                  )
 
             self._instance.db = firestore.Client(self.__project_id, _credentials)
+
+            return True
 
         except Exception as e:
             print(f"Error attempting anonymous login: {e}")
