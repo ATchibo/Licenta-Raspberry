@@ -30,8 +30,12 @@ class LocalStorageController:
         try:
             with open(self._raspberry_info_file, 'rb') as file:
                 _raspberry_dict = pickle.load(file)
-                _rasp_info = RaspberryInfo().from_dict(_raspberry_dict)
-                return _rasp_info
+                try:
+                    _rasp_info = RaspberryInfo().from_dict(_raspberry_dict)
+                    return _rasp_info
+                except Exception as e:
+                    print(f'Error while loading RaspberryInfo from file: {e}')
+                    return None
         except FileNotFoundError:
             return None
 

@@ -118,39 +118,46 @@ class RaspberryController:
         RemoteRequests().add_watering_now_listener(callback=self._watering_now_callback_for_incoming_messages)
 
     def _watering_now_callback_for_incoming_messages(self, doc_snapshot, changes, read_time):
-        for doc in doc_snapshot:
-            if doc.exists:
-                # Handle the updated data
-                updated_data = doc.to_dict()
-                # Update your UI or perform necessary actions
-                # print(f"Document data: {updated_data}")
+        for change in changes:
+            changed_doc = change.document
+            updated_data = changed_doc.to_dict()
 
-                if updated_data["command"] is not None:
-                    if updated_data["command"] == "start_watering":
-                        if self.pump_controller.is_watering:
-                            return
+            print("Watering callback updated data: ", updated_data)
 
-                        self.pump_controller.start_watering()
-                        self.start_sending_watering_updates()
+            # check for moisture request
+            if "soilMoisture" in updated_data.keys():
+                if "REQUEST" in str(updated_data["soilMoisture"]):
+                    print("Sending moisture info")
+                    self._send_moisture_info()
 
-                    elif updated_data["command"] == "stop_watering":
-                        if not self.pump_controller.is_watering:
-                            return
+            # check for watering now command
+            if "command" in updated_data.keys():
+                if updated_data["command"] == "start_watering":
+                    if self.pump_controller.is_watering:
+                        return
 
-                        self.pump_controller.stop_watering()
-                        self.stop_sending_watering_updates()
+                    self.pump_controller.start_watering()
+                    self.start_sending_watering_updates()
 
-                        if self._while_watering_callback_function is not None:
-                            self._while_watering_callback_function(
-                                is_watering=self.pump_controller.is_watering,
-                                watering_time=round(self.watering_time),
-                                liters_sent=round(self.liters_sent, 2)
-                            )
+                elif updated_data["command"] == "stop_watering":
+                    if not self.pump_controller.is_watering:
+                        return
 
-                        self._log_manual_watering_cycle()
+                    self.pump_controller.stop_watering()
+                    self.stop_sending_watering_updates()
 
-            else:
-                print("Current data: null")
+                    if self._while_watering_callback_function is not None:
+                        self._while_watering_callback_function(
+                            is_watering=self.pump_controller.is_watering,
+                            watering_time=round(self.watering_time),
+                            liters_sent=round(self.liters_sent, 2)
+                        )
+
+                    self._log_manual_watering_cycle()
+                else:
+                    print("Current data: null")
+
+
 
     def stop_listening_for_watering_now(self):
         RemoteRequests().unsubscribe_watering_now_listener()
@@ -236,3 +243,6 @@ class RaspberryController:
     def update_raspberry_notification_info(self, message_type: MessageType, value):
         self._default_raspberry_info.set_notifiable_message(message_type, value)
         RemoteRequests().update_raspberry_notifiable_message(message_type, value)
+
+    def _send_moisture_info(self):
+        RemoteRequests().update_moisture_info(self.get_moisture_percentage())

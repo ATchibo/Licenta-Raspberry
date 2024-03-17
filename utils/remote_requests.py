@@ -176,3 +176,10 @@ class RemoteRequests:
 
     def unsubscribe_watering_now_listener(self):
         self._firebase_controller.unsubscribe_watering_now_listener()
+
+    def update_moisture_info(self, param) -> bool:
+        try:
+            return self._firebase_controller.update_moisture_info(self._raspberry_id, param)
+        except Exception as e:
+            return False
+
