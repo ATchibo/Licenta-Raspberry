@@ -334,98 +334,6 @@ class FirebaseController:
         except Exception as e:
             raise Exception(f"Error adding moisture percentage measurement: {e}")
 
-    def attempt_login_with_custom_token(self, token=None):
-        print("Attempting login")
-
-        self.db = None
-
-        if token is None:
-            return False
-
-        load_dotenv()
-        self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
-        self.__project_id = os.getenv("PROJECT_ID")
-
-        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={self.__api_key}"
-        headers = {"Content-Type": "application/json; charset=UTF-8"}
-        data = json.dumps({"token": token, "returnSecureToken": True})
-        response = requests.post(request_url, headers=headers, data=data)
-        try:
-            response.raise_for_status()
-        except (HTTPError, Exception):
-            content = response.json()
-            error = f"error: {content['error']['message']}"
-
-            raise Exception(error)
-
-        json_response = response.json()
-        _token = json_response["idToken"]
-        _refresh_token = json_response["refreshToken"]
-
-        print("Sunt la credentiale")
-
-        _credentials = (google.oauth2.credentials
-                        .Credentials(_token,
-                                     _refresh_token,
-                                     client_id="",
-                                     client_secret="",
-                                     token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
-                                     )
-                        )
-        try:
-            self.db = firestore.Client(self.__project_id, _credentials)
-
-            print("Am reusit sa ma conectez")
-
-            self._start_listening_for_ping()
-
-            return True
-        except Exception as e:
-            print(f"Error attempting login: {e}")
-            return False
-
-    def anonymous_login(self):
-        load_dotenv()
-        self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
-        self.__project_id = os.getenv("PROJECT_ID")
-
-        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={self.__api_key}"
-        headers = {"Content-Type": "application/json; charset=UTF-8"}
-        data = json.dumps({"returnSecureToken": True})
-        response = requests.post(request_url, headers=headers, data=data)
-        try:
-            response.raise_for_status()
-        except (HTTPError, Exception):
-            content = response.json()
-            error = f"error: {content['error']['message']}"
-
-            self._instance.db = None
-
-            raise Exception(error)
-
-        try:
-            json_response = response.json()
-            self.__token = json_response["idToken"]
-            self.__refresh_token = json_response["refreshToken"]
-
-            _credentials = google.oauth2.credentials.Credentials(self.__token,
-                                                                 self.__refresh_token,
-                                                                 client_id="",
-                                                                 client_secret="",
-                                                                 token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
-                                                                 )
-
-            self._instance.db = firestore.Client(self.__project_id, _credentials)
-
-            self._start_listening_for_ping()
-
-            return True
-
-        except Exception as e:
-            print(f"Error attempting anonymous login: {e}")
-            self._instance.db = None
-            return False
-
     def unsubscribe_watering_now_listener(self):
         self.watering_now_listener.unsubscribe()
 
@@ -449,3 +357,142 @@ class FirebaseController:
             if "message" in doc_data.keys():
                 if doc_data["message"] == "PING":
                     self.db.collection(self._wsCollectionName).document(getserial()).set({"message": "PONG"})
+
+    def login_with_custom_token(self, token=None):
+        print("Attempting login")
+
+        self.db = None
+
+        if token is None:
+            return False
+
+        load_dotenv()
+        self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+        self.__project_id = os.getenv("PROJECT_ID")
+
+        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={self.__api_key}"
+        headers = {"Content-Type": "application/json; charset=UTF-8"}
+        data = json.dumps({"token": token, "returnSecureToken": True})
+        response = requests.post(request_url, headers=headers, data=data)
+
+        try:
+            response.raise_for_status()
+        except (HTTPError, Exception):
+            content = response.json()
+            error = f"error: {content['error']['message']}"
+
+            raise Exception(error)
+
+        json_response = response.json()
+        _token = json_response["idToken"]
+        _refresh_token = json_response["refreshToken"]
+        _expires_in = int(json_response["expiresIn"])
+
+        if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
+            self._start_listening_for_ping()
+
+            self.__token = _token
+            self.__refresh_token = _refresh_token
+            self._schedule_token_refresh(_expires_in - 1)
+
+            return True
+        else:
+            return False
+
+    def anonymous_login(self):
+        load_dotenv()
+        self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+        self.__project_id = os.getenv("PROJECT_ID")
+
+        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={self.__api_key}"
+        headers = {"Content-Type": "application/json; charset=UTF-8"}
+        data = json.dumps({"returnSecureToken": True})
+        response = requests.post(request_url, headers=headers, data=data)
+        try:
+            response.raise_for_status()
+        except (HTTPError, Exception):
+            content = response.json()
+            error = f"error: {content['error']['message']}"
+
+            self._instance.db = None
+
+            raise Exception(error)
+
+        json_response = response.json()
+        _token = json_response["idToken"]
+        _refresh_token = json_response["refreshToken"]
+        _expires_in = int(json_response["expiresIn"])
+
+        if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
+            self._start_listening_for_ping()
+            self.__token = _token
+            self.__refresh_token = _refresh_token
+            self._schedule_token_refresh(_expires_in - 1)
+
+            return True
+        else:
+            return False
+
+    def _get_new_tokens(self, refresh_token) -> tuple[str, str, int] | None:
+        load_dotenv()
+        self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+
+        request_url = f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        data = {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token
+        }
+        response = requests.post(request_url, headers=headers, data=data)
+
+        try:
+            response.raise_for_status()
+        except (HTTPError, Exception):
+            content = response.json()
+            error = f"error: {content['error']['message']}"
+
+            raise Exception(error)
+
+        json_response = response.json()
+        _token = json_response["id_token"]
+        _refresh_token = json_response["refresh_token"]
+        _expires_in = int(json_response["expires_in"])
+
+        return _token, _refresh_token, _expires_in
+
+    def _authenticate_firestore_client_with_tokens(self, token, refresh_token) -> bool:
+        try:
+            _credentials = google.oauth2.credentials.Credentials(token,
+                                                                 refresh_token,
+                                                                 client_id="",
+                                                                 client_secret="",
+                                                                 token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
+                                                                 )
+
+            self._instance.db = firestore.Client(self.__project_id, _credentials)
+            return True
+
+        except Exception as e:
+            print(f"Error attempting anonymous login: {e}")
+            self._instance.db = None
+            return False
+
+    def _schedule_token_refresh(self, delay):
+        _refresh_thread = threading.Timer(delay, self._auto_refresh_firestore_client)
+        _refresh_thread.daemon = True
+        _refresh_thread.start()
+
+    def _auto_refresh_firestore_client(self):
+        try:
+            _token, _refresh_token, _expires_in = self._get_new_tokens(self.__refresh_token)
+
+            if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
+                self.__token = _token
+                self.__refresh_token = _refresh_token
+                self._schedule_token_refresh(_expires_in - 1)
+
+                print("Token refreshed")
+
+        except Exception as e:
+            print(f"Error attempting to refresh token: {e}")
+

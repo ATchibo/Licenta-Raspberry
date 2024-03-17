@@ -147,7 +147,7 @@ class ConnectPage(MDScreen):
         print("Connection closed: ", stat_code, reason)
 
     def _on_connection_error(self, ws, error):
-        print("Connection error:", error)
+        print("Connection error in connect page:", error)
         self.info_text = "Connection error"
 
     def _disconnect_from_ws(self):

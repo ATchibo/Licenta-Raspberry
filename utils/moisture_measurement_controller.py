@@ -62,5 +62,4 @@ class MoistureMeasurementController:
             _measurement_time = get_current_datetime_tz()
 
             RemoteRequests().add_moisture_percentage_measurement(_moisture_perc, _measurement_time)
-
             EventLogger().add_moisture_measurement_message(_moisture_perc, _measurement_time)

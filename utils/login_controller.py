@@ -92,13 +92,13 @@ class LoginController:
         print("Connection closed: ", stat_code, reason)
 
     def _on_connection_error(self, ws, error):
-        print("Connection error:", error)
+        print("Connection error in login controller:", error)
 
     def _disconnect_from_ws(self):
         BackendController().close_ws()
 
     def _try_login(self, auth_token: str, email: str):
-        if FirebaseController().attempt_login_with_custom_token(auth_token):
+        if FirebaseController().login_with_custom_token(auth_token):
             self._is_logged_in.set()
 
             FirebaseController().register_raspberry_to_device(self._raspberry_id, email)
