@@ -8,8 +8,10 @@ from utils.datetime_utils import get_current_datetime_tz
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
+from utils.local_storage_controller import LocalStorageController
 from utils.moisture_controller import MoistureController
 from utils.pump_controller import PumpController
+from utils.remote_requests import RemoteRequests
 
 
 class RaspberryController:
@@ -52,6 +54,9 @@ class RaspberryController:
                                         .with_notifiable_messages({})
                                         .build()
                                         )
+
+        if LocalStorageController().get_raspberry_info() is None:
+            LocalStorageController().save_raspberry_info(self._default_raspberry_info)
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -110,45 +115,52 @@ class RaspberryController:
         # print("Watering finished - raspi controller")
 
     def start_listening_for_watering_now(self):
-        FirebaseController().add_watering_now_listener(serial=getserial(), callback=self._watering_now_callback_for_incoming_messages)
+        RemoteRequests().add_watering_now_listener(callback=self._watering_now_callback_for_incoming_messages)
 
     def _watering_now_callback_for_incoming_messages(self, doc_snapshot, changes, read_time):
-        for doc in doc_snapshot:
-            if doc.exists:
-                # Handle the updated data
-                updated_data = doc.to_dict()
-                # Update your UI or perform necessary actions
-                # print(f"Document data: {updated_data}")
+        for change in changes:
+            changed_doc = change.document
+            updated_data = changed_doc.to_dict()
 
-                if updated_data["command"] is not None:
-                    if updated_data["command"] == "start_watering":
-                        if self.pump_controller.is_watering:
-                            return
+            print("Watering callback updated data: ", updated_data)
 
-                        self.pump_controller.start_watering()
-                        self.start_sending_watering_updates()
+            # check for moisture request
+            if "soilMoisture" in updated_data.keys():
+                if "REQUEST" in str(updated_data["soilMoisture"]):
+                    print("Sending moisture info")
+                    self._send_moisture_info()
 
-                    elif updated_data["command"] == "stop_watering":
-                        if not self.pump_controller.is_watering:
-                            return
+            # check for watering now command
+            if "command" in updated_data.keys():
+                if updated_data["command"] == "start_watering":
+                    if self.pump_controller.is_watering:
+                        return
 
-                        self.pump_controller.stop_watering()
-                        self.stop_sending_watering_updates()
+                    self.pump_controller.start_watering()
+                    self.start_sending_watering_updates()
 
-                        if self._while_watering_callback_function is not None:
-                            self._while_watering_callback_function(
-                                is_watering=self.pump_controller.is_watering,
-                                watering_time=round(self.watering_time),
-                                liters_sent=round(self.liters_sent, 2)
-                            )
+                elif updated_data["command"] == "stop_watering":
+                    if not self.pump_controller.is_watering:
+                        return
 
-                        self._log_manual_watering_cycle()
+                    self.pump_controller.stop_watering()
+                    self.stop_sending_watering_updates()
 
-            else:
-                print("Current data: null")
+                    if self._while_watering_callback_function is not None:
+                        self._while_watering_callback_function(
+                            is_watering=self.pump_controller.is_watering,
+                            watering_time=round(self.watering_time),
+                            liters_sent=round(self.liters_sent, 2)
+                        )
+
+                    self._log_manual_watering_cycle()
+                else:
+                    print("Current data: null")
+
+
 
     def stop_listening_for_watering_now(self):
-        FirebaseController().watering_now_listener.unsubscribe()
+        RemoteRequests().unsubscribe_watering_now_listener()
 
     def start_sending_watering_updates(self):
         self._watering_cycle_start_time = get_current_datetime_tz()
@@ -192,8 +204,7 @@ class RaspberryController:
             self._update_info_for_watering_callback()
 
     def _send_stop_watering_message(self):
-        FirebaseController().update_watering_info(
-            getserial(),
+        RemoteRequests().update_watering_info(
             'stop_watering',
             round(self.liters_sent, 2),
             round(self.watering_time)
@@ -203,8 +214,7 @@ class RaspberryController:
         self.pump_controller.stop_watering()
 
     def _update_current_watering_info(self):
-        FirebaseController().update_watering_info(
-            getserial(),
+        RemoteRequests().update_watering_info(
             'start_watering',
             round(self.liters_sent, 2),
             round(self.watering_time)
@@ -225,11 +235,14 @@ class RaspberryController:
         self._while_watering_callback_function = callback
 
     def get_raspberry_info(self) -> RaspberryInfo:
-        _raspberry_info = FirebaseController().get_raspberry_info(self.raspberry_id)
+        _raspberry_info = RemoteRequests().get_raspberry_info()
         if _raspberry_info is not None:
             return _raspberry_info
         return self._default_raspberry_info
 
     def update_raspberry_notification_info(self, message_type: MessageType, value):
-        self._default_raspberry_info.notifiableMessages[message_type] = value
-        FirebaseController().update_raspberry_notifiable_message(self.raspberry_id, message_type, value)
+        self._default_raspberry_info.set_notifiable_message(message_type, value)
+        RemoteRequests().update_raspberry_notifiable_message(message_type, value)
+
+    def _send_moisture_info(self):
+        RemoteRequests().update_moisture_info(self.get_moisture_percentage())

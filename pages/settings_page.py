@@ -24,6 +24,9 @@ class SettingsPage(MDScreen):
 
         Clock.schedule_once(self._init_setup, 0.1)
 
+    def on_pre_enter(self, *args):
+        self._load_data()
+
     def _load_data(self):
         self.raspberry_info = RaspberryController().get_raspberry_info()
 

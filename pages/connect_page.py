@@ -13,6 +13,7 @@ from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.login_controller import LoginController
 from utils.raspberry_controller import RaspberryController
+from utils.remote_requests import RemoteRequests
 
 Builder.load_file("pages/connect_page.kv")
 
@@ -28,7 +29,6 @@ class ConnectPage(MDScreen):
 
         self.info_text = ""
         self.qr_data = getserial()
-        self.firebase_controller = FirebaseController()
 
         self.backend_thread = None
         self._is_logged_in = threading.Event()
@@ -58,7 +58,7 @@ class ConnectPage(MDScreen):
             self.backend_thread.join()
             self.backend_thread = None
 
-        FirebaseController().unregister_raspberry(self._raspberry_id)
+        RemoteRequests().unregister_raspberry()
 
         self._is_logged_in.clear()
         self.backend_thread = threading.Thread(target=self._backend_ops)
@@ -147,14 +147,14 @@ class ConnectPage(MDScreen):
         print("Connection closed: ", stat_code, reason)
 
     def _on_connection_error(self, ws, error):
-        print("Connection error:", error)
+        print("Connection error in connect page:", error)
         self.info_text = "Connection error"
 
     def _disconnect_from_ws(self):
         BackendController().close_ws()
 
     def _try_login(self, auth_token: str, email: str):
-        if FirebaseController().attempt_login(auth_token):
+        if RemoteRequests().attempt_login(auth_token):
             self._is_logged_in.set()
             self.info_text = "Connected to " + email
 
@@ -162,7 +162,8 @@ class ConnectPage(MDScreen):
             self.ids.connect_button.text = "Log out and connect again"
             self.qr_data = ""
 
-            FirebaseController().register_raspberry_to_device(self._raspberry_id, email)
+            RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
+            RemoteRequests().register_raspberry_to_device(email)
             BackendController().send_message_to_ws("OK")
 
             RaspberryController().start_listening_for_watering_now()

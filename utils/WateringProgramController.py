@@ -9,6 +9,7 @@ from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.raspberry_controller import RaspberryController
+from utils.remote_requests import RemoteRequests
 
 
 class WateringProgramController:
@@ -51,31 +52,30 @@ class WateringProgramController:
         self.get_is_watering_programs_active()
         self.get_active_watering_program_id()
 
-        FirebaseController().add_listener_for_watering_programs_changes(
-            self.raspberry_id,
+        RemoteRequests().add_listener_for_watering_programs_changes(
             self._update_values_on_receive_from_network
         )
 
     def get_watering_programs(self):
-        watering_programs_list = FirebaseController().get_watering_programs(self.raspberry_id)
+        watering_programs_list = RemoteRequests().get_watering_programs()
         self._watering_programs = {program.id: program for program in watering_programs_list}
         return watering_programs_list
 
     def get_active_watering_program_id(self):
-        self._active_watering_program_id = FirebaseController().get_active_watering_program_id(self.raspberry_id)
+        self._active_watering_program_id = RemoteRequests().get_active_watering_program_id()
         return self._active_watering_program_id
 
     def set_active_watering_program_id(self, program_id):
-        FirebaseController().set_active_watering_program_id(self.raspberry_id, program_id)
+        RemoteRequests().set_active_watering_program_id(program_id)
         self._active_watering_program_id = program_id
         self._schedule_watering()
 
     def get_is_watering_programs_active(self):
-        self._is_watering_programs_active = FirebaseController().get_is_watering_programs_active(self.raspberry_id)
+        self._is_watering_programs_active = RemoteRequests().get_is_watering_programs_active()
         return self._is_watering_programs_active
 
     def set_is_watering_programs_active(self, is_active):
-        FirebaseController().set_is_watering_programs_active(self.raspberry_id, is_active)
+        RemoteRequests().set_is_watering_programs_active(is_active)
         self._is_watering_programs_active = is_active
 
     def _get_active_watering_program(self):
@@ -189,10 +189,10 @@ class WateringProgramController:
             changed_doc = change.document
             doc_id = changed_doc.id
             doc_data = changed_doc.to_dict()
-
-            print(f"Change type: {change_type}")
-            print(f"Changed doc id: {doc_id}")
-            print(f"Changed doc data: {doc_data}")
+            #
+            # print(f"Change type: {change_type}")
+            # print(f"Changed doc id: {doc_id}")
+            # print(f"Changed doc data: {doc_data}")
 
             new_programs = {}
             new_active_program_id = None

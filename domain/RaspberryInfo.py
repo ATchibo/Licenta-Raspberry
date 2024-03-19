@@ -31,6 +31,7 @@ class RaspberryInfo:
 
     def to_dict(self):
         return {
+            "id": self.raspberryId,
             "name": self.raspberryName,
             "location": self.raspberryLocation,
             "description": self.raspberryDescription,
@@ -46,6 +47,9 @@ class RaspberryInfo:
             self.notifiableMessages[key] = value
 
         return self
+
+    def set_notifiable_message(self, message_type: MessageType, value):
+        self.notifiableMessages[message_type.value] = value
 
 
 class RaspberryInfoBuilder:

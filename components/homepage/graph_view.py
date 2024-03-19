@@ -14,6 +14,7 @@ import matplotlib.dates as mdates
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
+from utils.remote_requests import RemoteRequests
 
 Builder.load_file("components/homepage/graph_view.kv")
 
@@ -23,8 +24,6 @@ class GraphView(MDBoxLayout):
         super(GraphView, self).__init__(**kwargs)
         self.orientation = "vertical"
         self.size_hint = (1, 1)
-
-        self.firebase_controller = FirebaseController()
 
         self.menu = None
         self.dropdown = None
@@ -47,8 +46,8 @@ class GraphView(MDBoxLayout):
 
         fig, ax = plt.subplots()
 
-        moisture_info_list = self.firebase_controller.get_moisture_info_for_rasp_id(getserial(), self.start_datetime,
-                                                                                    self.end_datetime)
+        moisture_info_list = RemoteRequests().get_moisture_info(self.start_datetime,
+                                                                self.end_datetime)
 
         timestamps = [moisture_info["measurementTime"] for moisture_info in moisture_info_list]
         # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
@@ -63,15 +62,14 @@ class GraphView(MDBoxLayout):
         ax.set_xlabel('Time')
         ax.set_ylabel('Moisture (%)')
 
-        # Set minimum and maximum values for the y-axis
-        ax.set_ylim(0, 100)  # Adjust the values as needed
+        ax.set_ylim(0, 100)
 
         xfmt = mdates.DateFormatter('%d %b\n%H:%M')
         ax.xaxis.set_major_formatter(xfmt)
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
         plt.xticks(rotation=45, ha="right")
 
-        plt.tight_layout()
+        plt.tight_layout(pad=3.0)
 
         graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
 
@@ -106,4 +104,7 @@ class GraphView(MDBoxLayout):
         elif index == 2:
             self.start_datetime = self.end_datetime - timedelta(days=30)
 
+        self.update_plot()
+
+    def refresh_data(self, *args):
         self.update_plot()

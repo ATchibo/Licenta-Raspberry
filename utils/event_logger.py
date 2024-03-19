@@ -10,6 +10,7 @@ from utils.backend_controller import BackendController
 from utils.firebase_controller import FirebaseController
 from domain.logging.AutoWateringCycleMessage import AutoWateringCycleMessage
 from utils.get_rasp_uuid import getserial
+from utils.remote_requests import RemoteRequests
 
 
 class EventLogger:
@@ -36,26 +37,14 @@ class EventLogger:
         self._gui_notifiables_update_callback = None
 
     def perform_initial_setup(self):
-        FirebaseController().add_listener_for_log_messages_changes(
-            self._raspberry_id,
+        RemoteRequests().add_listener_for_log_messages_changes(
             self._update_logs_on_receive_from_network
         )
-        #
-        # FirebaseController().add_listener_for_notifiable_messages_changes(
-        #     self._raspberry_id,
-        #     self._update_notifiables_on_receive_from_network
-        # )
 
-        # self.load_initial_data()
+        self._load_initial_data()
 
     def load_log_messages(self):
-        log_messages, success = FirebaseController().get_log_messages(self._raspberry_id)
-
-        # print(f"Log messages: {log_messages}")
-
-        if not success:
-            return None, False
-
+        log_messages = RemoteRequests().get_log_messages()
         self._log_messages = []
 
         for log_message_key, log_message_value in log_messages.items():
@@ -72,7 +61,7 @@ class EventLogger:
         return self._log_messages, True
 
     def _load_notifiable_messages(self):
-        notifiable_messages, success = FirebaseController().get_notifiable_messages(self._raspberry_id)
+        notifiable_messages, success = RemoteRequests().get_notifiable_messages()
 
         if not success:
             return
@@ -83,12 +72,12 @@ class EventLogger:
 
         return self._notifiable_messages
 
-    # def load_initial_data(self):
-    #     self._load_log_messages()
-    #     self._load_notifiable_messages()
+    def _load_initial_data(self):
+        self.load_log_messages()
+        self._load_notifiable_messages()
 
     def _add_log_message(self, log_message):
-        if FirebaseController().add_log_message(self._raspberry_id, log_message):
+        if RemoteRequests().add_log_message(log_message):
             self._log_messages.append(log_message)
 
             if self._notifiable_messages.get(log_message.get_level()) is True or len(self._notifiable_messages.keys()) == 0:
@@ -109,18 +98,9 @@ class EventLogger:
         changes,
         read_time
     ):
-        # print(f"Received new data from network in {read_time}")
-
         for change in changes:
-            change_type = change.type
             changed_doc = change.document
-            doc_id = changed_doc.id
             doc_data = changed_doc.to_dict()
-
-            # print(f"Change type: {change_type}")
-            # print(f"Changed doc: {changed_doc}")
-            # print(f"Doc id: {doc_id}")
-            # print(f"Doc data: {doc_data}")
 
             if "messages" in doc_data.keys():
                 logs = []
@@ -136,8 +116,6 @@ class EventLogger:
 
                 logs.sort(key=lambda x: x.get_timestamp(), reverse=True)
                 self._log_messages = logs
-
-                print(f"Log messages: {self._log_messages}")
 
                 if self._gui_log_update_callback is not None:
                     self._gui_log_update_callback(self._log_messages)

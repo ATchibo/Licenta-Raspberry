@@ -1,36 +1,50 @@
 <GraphView>:
     name: "graph_view"
 
-    MDLabel:
-        text: "Soil humidity history"
-        halign: "center"
-        font_style: "H5"
-        size_hint_y: 0.15
+    MDFloatLayout:
+        size_hint: 1, 1
 
-    MDBoxLayout:
-        id: graph_box
-        size_hint_y: 1
-
-    MDBoxLayout:
-        size_hint: 1, 0.15
-        padding: 10
+        MDLabel:
+            text: "Soil humidity history"
+            halign: "center"
+            font_style: "H5"
+            size_hint_y: 0.1
+            pos_hint: {"x": 0, "top": 1}
 
         MDBoxLayout:
-            padding: [0, 0, 0, 15]
-            size_hint: 0.5, None
-
-            MDLabel:
-                text: "Period: "
-                halign: "right"
-                font_style: "H6"
-                size_hint: 1, 1
-                pos_hint: {"center_x": 0.5, "center_y": 0}
+            id: graph_box
+            size_hint: 1, 0.75
+            pos_hint: {"top": 0.9}
 
         MDBoxLayout:
-            size_hint: 0.5, None
+            size_hint: 1, 0.15
+            padding: 10
 
-            MDFillRoundFlatButton:
-                id: mainbutton
-                text: "Last 24h"
-                text_color: 1, 1, 1, 1
-                pos_hint: {"center_x": 0.5, "center_y": 0.15}
+            MDBoxLayout:
+                padding: [0, 0, 0, 15]
+                size_hint: 0.5, None
+
+                MDLabel:
+                    text: "Period: "
+                    halign: "right"
+                    font_style: "H6"
+                    size_hint: 1, 1
+                    pos_hint: {"center_x": 0.5, "center_y": 0}
+
+            MDBoxLayout:
+                size_hint: 0.5, None
+
+                MDFillRoundFlatButton:
+                    id: mainbutton
+                    text: "Last 24h"
+                    text_color: 1, 1, 1, 1
+                    pos_hint: {"center_x": 0.5, "center_y": 0.15}
+
+    # Reload button
+        MDFloatingActionButton:
+            icon: "refresh"
+            icon_color: 1, 1, 1, 1
+            type: "small"
+            pos_hint: {"right": 0.98}
+            y: 10
+            on_release: root.refresh_data()
