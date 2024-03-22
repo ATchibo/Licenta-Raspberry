@@ -128,7 +128,7 @@ class RemoteRequests:
 
     def register_raspberry_to_device(self, device_id: str) -> bool:
         try:
-            return self._firebase_controller.register_raspberry_to_device(self._raspberry_id, device_id)
+            return self._firebase_controller.link_raspberry_to_device(self._raspberry_id, device_id)
         except Exception as e:
             return False
 

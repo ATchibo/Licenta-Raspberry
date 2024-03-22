@@ -70,13 +70,17 @@ class FirebaseController:
 
     def register_raspberry(self, rpi_info: RaspberryInfo) -> bool:
         print("Registering raspberry with id: " + rpi_info.raspberryId)
+        print("Raspberry info: " + str(rpi_info.to_dict()))
 
         if self.db is None:
             raise FirebaseUninitializedException()
 
         print("Registering raspberry: db is not none")
 
-        if not self._is_raspberry_registered(rpi_info.raspberryId):
+        _is_registered = self._is_raspberry_registered(rpi_info.raspberryId)
+        print("Is registered: " + str(_is_registered))
+
+        if not _is_registered:
             print("Registering raspberry: " + rpi_info.raspberryId)
             self.db.collection(self._raspberryInfoCollectionName).document(rpi_info.raspberryId).set(rpi_info.to_dict())
 
@@ -261,7 +265,7 @@ class FirebaseController:
 
         return True
 
-    def register_raspberry_to_device(self, raspberry_id, device_id) -> bool:
+    def link_raspberry_to_device(self, raspberry_id, device_id) -> bool:
         if self.db is None:
             raise FirebaseUninitializedException()
 
