@@ -93,6 +93,10 @@ class FirebaseController:
             raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
+
+        if not doc_ref.get().exists:
+            return None
+
         doc_dict = doc_ref.get().to_dict()
 
         rasp_info = RaspberryInfo().from_dict(doc_dict)

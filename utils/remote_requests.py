@@ -44,7 +44,10 @@ class RemoteRequests:
     def get_raspberry_info(self) -> RaspberryInfo | None:
         try:
             _result = self._firebase_controller.get_raspberry_info(self._raspberry_id)
-            self._local_storage_controller.save_raspberry_info(_result)
+            if _result is None:
+                _result = self._local_storage_controller.get_raspberry_info()
+            else:
+                self._local_storage_controller.save_raspberry_info(_result)
             return _result
         except Exception as e:
             return self._local_storage_controller.get_raspberry_info()
