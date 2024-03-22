@@ -60,6 +60,7 @@ class ConnectPage(MDScreen):
 
         RemoteRequests().unregister_raspberry()
 
+
         self.info_text = "Device not logged in"
 
         self._is_logged_in.clear()

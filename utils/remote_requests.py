@@ -174,9 +174,6 @@ class RemoteRequests:
         except Exception as e:
             return False
 
-    # def set_login_page_on_try_login_callback(self, callback):
-    #     self._login_controller.set_login_page_on_try_login_callback(callback)
-
     def unsubscribe_watering_now_listener(self):
         self._firebase_controller.unsubscribe_watering_now_listener()
 

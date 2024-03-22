@@ -1,3 +1,4 @@
+import os
 import pickle
 import threading
 
@@ -25,6 +26,18 @@ class LocalStorageController:
         self._watering_programs_active_id_file = 'watering_programs_active_id'
         self._is_watering_programs_active_file = 'is_watering_programs_active'
         self._log_messages_file = 'log_messages'
+
+    def clear_all(self):
+        self._delete_file(self._raspberry_info_file)
+        self._delete_file(self._moisture_info_file)
+        self._delete_file(self._watering_programs_file)
+        self._delete_file(self._watering_programs_active_id_file)
+        self._delete_file(self._is_watering_programs_active_file)
+        self._delete_file(self._log_messages_file)
+
+    def _delete_file(self, file_name):
+        if file_name in os.listdir():
+            os.remove(file_name)
 
     def get_raspberry_info(self) -> RaspberryInfo | None:
         try:
