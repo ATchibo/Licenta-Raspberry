@@ -165,18 +165,18 @@ class FirebaseController:
                 watering_program_data["id"] = doc_snapshot.id
                 watering_programs.append(WateringProgram().fromDict(watering_program_data))
 
-        global_watering_programs_ref = self.db.collection(self._globalWateringProgramsCollectionName)
-
-        global_watering_programs = []
-
-        for doc_snapshot in global_watering_programs_ref.get():
-            global_watering_program_data = doc_snapshot.to_dict()
-
-            if global_watering_program_data:
-                global_watering_program_data["id"] = doc_snapshot.id
-                global_watering_programs.append(WateringProgram().fromDict(global_watering_program_data))
-
-        watering_programs.extend(global_watering_programs)
+        # global_watering_programs_ref = self.db.collection(self._globalWateringProgramsCollectionName)
+        #
+        # global_watering_programs = []
+        #
+        # for doc_snapshot in global_watering_programs_ref.get():
+        #     global_watering_program_data = doc_snapshot.to_dict()
+        #
+        #     if global_watering_program_data:
+        #         global_watering_program_data["id"] = doc_snapshot.id
+        #         global_watering_programs.append(WateringProgram().fromDict(global_watering_program_data))
+        #
+        # watering_programs.extend(global_watering_programs)
         return watering_programs
 
     def get_active_watering_program_id(self, raspberry_id) -> str | None:
