@@ -35,14 +35,20 @@
                 halign: "center"
                 valign: "top"
 
-            MDFillRoundFlatButton:
-                text: root.calibrate_button_text
-                on_release: root.calibrate_button_function()
-                size_hint: 0.4, None
-                height: dp(50)
-                pos_hint: {"center_x": 0.5}
-                text_color: 1, 1, 1, 1
-                disabled: root.calibrating
+            MDBoxLayout:
+                size_hint: 1, None
+                orientation: "vertical"
+
+                MDFillRoundFlatButton:
+                    text: root.calibrate_button_text
+                    on_release:
+                        root.calibrate_button_function()
+                        app.root.ids.navigation_drawer.screen_manager.current = "calibrate" if root.calibrate_button_text == "Save" else None
+                    size_hint: 0.4, None
+                    height: dp(50)
+                    pos_hint: {"center_x": 0.5}
+                    text_color: 1, 1, 1, 1
+                    disabled: root.calibrating
 
         MDBoxLayout:
             size_hint: 1, 0.2
@@ -50,7 +56,10 @@
 
             MDFillRoundFlatButton:
                 text: "Cancel"
-                on_release: root._navigate_back()
+                on_release:
+                    root.cancel()
+                    app.root.ids.navigation_drawer.screen_manager.current = "calibrate"
                 size_hint: 0.4, None
                 height: dp(50)
+                text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5}
