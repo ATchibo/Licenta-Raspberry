@@ -30,7 +30,7 @@ class RaspberryController:
         self._initialized = True
 
         self.moisture_controller = MoistureController(channel=1)
-        self.pump_controller = PumpController(pin=4, liters_per_second=0.1)
+        self.pump_controller = PumpController(pin=4, liters_per_second=0.017857143)
 
         self._send_watering_updates_interval_ms = 1000
         self._max_watering_time_sec = 30
