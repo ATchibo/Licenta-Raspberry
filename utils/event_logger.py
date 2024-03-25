@@ -34,11 +34,14 @@ class EventLogger:
         self._notifiable_messages = {}
 
         self._gui_log_update_callback = None
-        self._gui_notifiables_update_callback = None
 
     def perform_initial_setup(self):
         RemoteRequests().add_listener_for_log_messages_changes(
             self._update_logs_on_receive_from_network
+        )
+
+        RemoteRequests().add_listener_for_notification_changes(
+            self._update_notifiables_on_receive_from_network
         )
 
         self._load_initial_data()
@@ -52,7 +55,7 @@ class EventLogger:
                 LogMessage(
                     message=log_message_value,
                     level=MessageType.ANY,
-                    timestamp=datetime.strptime(log_message_key[:-6], "%Y-%m-%d %H:%M:%S.%f")
+                    timestamp=datetime.strptime(str(log_message_key)[:-6], "%Y-%m-%d %H:%M:%S.%f")
                 )
             )
 
@@ -78,10 +81,16 @@ class EventLogger:
 
     def _add_log_message(self, log_message):
         if RemoteRequests().add_log_message(log_message):
+            print("Added log message")
             self._log_messages.append(log_message)
 
-            if self._notifiable_messages.get(log_message.get_level()) is True or len(self._notifiable_messages.keys()) == 0:
+            if self._notifiable_messages.get(log_message.get_level().value) is True:
+                print("Sending notification")
                 BackendController().send_notification(self._raspberry_id, log_message.get_message())
+            else:
+                print(f"Dont send notification: {log_message.get_level().value}")
+        else:
+            print("Did not add log message")
 
     def add_auto_watering_cycle_message(self, start_time, duration, water_amount):
         self._add_log_message(AutoWateringCycleMessage(start_time, duration, water_amount))
@@ -120,14 +129,21 @@ class EventLogger:
                 if self._gui_log_update_callback is not None:
                     self._gui_log_update_callback(self._log_messages)
 
-    def _update_notifiables_on_receive_from_network(self, notifiable_message_key, notifiable_message_value):
-        if notifiable_message_key in self._notifiable_messages:
-            del self._notifiable_messages[notifiable_message_key]
+    def _update_notifiables_on_receive_from_network(
+        self,
+        doc_snapshot,
+        changes,
+        read_time
+    ):
+        for change in changes:
+            changed_doc = change.document
+            doc_data = changed_doc.to_dict()
 
-        self._notifiable_messages[notifiable_message_key] = notifiable_message_value
+            print(f"Received new notifiable messages: {doc_data}")
 
-        if self._gui_notifiables_update_callback is not None:
-            self._gui_notifiables_update_callback(self._notifiable_messages)
+            if "notifiable_messages" in doc_data.keys():
+                self._notifiable_messages = doc_data["notifiable_messages"]
+                print(f"New notifiable messages: {self._notifiable_messages}")
 
     def set_gui_log_update_callback(self, _populate_list_callback):
         self._gui_log_update_callback = _populate_list_callback

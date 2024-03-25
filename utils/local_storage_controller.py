@@ -50,8 +50,6 @@ class LocalStorageController:
 
                 try:
                     _rasp_info = RaspberryInfo().from_dict(_raspberry_dict)
-                    if _rasp_info.raspberryId is None or _rasp_info.raspberryId == "":
-                        return None
                     return _rasp_info
                 except Exception as e:
                     print(f'Error while loading RaspberryInfo from file: {e}')
@@ -149,7 +147,7 @@ class LocalStorageController:
 
     def add_log_message(self, log_message):
         _log_messages = self.get_log_messages()
-        _log_messages.append(log_message)
+        _log_messages[log_message.get_timestamp()] = log_message.get_message()
         self.save_log_messages(_log_messages)
 
     def update_raspberry_notifiable_message(self, message_type, value):

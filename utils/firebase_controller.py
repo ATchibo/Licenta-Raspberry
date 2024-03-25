@@ -237,6 +237,13 @@ class FirebaseController:
         doc_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
         doc_ref.on_snapshot(_update_values_on_receive_from_network)
 
+    def add_listener_for_notification_changes(self, raspberry_id, _update_values_on_receive_from_network):
+        if self.db is None:
+            raise FirebaseUninitializedException()
+
+        doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(raspberry_id)
+        doc_ref.on_snapshot(_update_values_on_receive_from_network)
+
     def unlink_raspberry(self, raspberry_id):
         if self.db is None:
             raise FirebaseUninitializedException()

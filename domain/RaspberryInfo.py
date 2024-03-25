@@ -43,6 +43,9 @@ class RaspberryInfo:
         self.raspberryLocation = info_dict["location"]
         self.raspberryDescription = info_dict["description"]
         self.notifiableMessages = {}
+
+        print(f"Notifiable messages: {info_dict['notifiable_messages']}")
+
         for key, value in info_dict["notifiable_messages"].items():
             self.notifiableMessages[key] = value
 

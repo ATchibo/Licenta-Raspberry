@@ -84,7 +84,7 @@ class LoginController:
 
     def _on_connection_opened(self, ws):
         print("Connection opened")
-        _raspberry_info = RemoteRequests().get_raspberry_info()
+        _raspberry_info = RaspberryController().get_raspberry_info()
         _message = f"{_raspberry_info.raspberryName} requests permission to log in"
         self._send_notification_for_login(_message, self._ws_code)
 

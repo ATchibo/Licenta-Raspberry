@@ -114,6 +114,9 @@ class WateringProgramController:
             return
 
         initial_delay_sec = self._compute_initial_delay_sec(active_program)
+
+        print("initial delay: ", initial_delay_sec)
+
         self._watering_thread_finished.clear()
         self._moisture_check_thread_finished.clear()
 
@@ -145,6 +148,12 @@ class WateringProgramController:
         self._watering_thread_finished.wait(initial_delay_sec)
         if self._watering_thread_finished.is_set():
             return
+
+        if self._is_watering_programs_active:
+            current_soil_moisture = self._moisture_controller.get_moisture_percentage()
+
+            if current_soil_moisture < program.max_moisture:
+                self._raspberry_controller.water_for_liters(program.quantity_l)
 
         water_interval_sec = self._compute_watering_interval_sec(program)
 
