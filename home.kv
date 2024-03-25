@@ -31,6 +31,13 @@
                 app.root.ids.toolbar.title = "Settings"
 
         OneLineListItem:
+            text: "Calibration"
+            on_press:
+                root.nav_drawer.set_state("close")
+                root.screen_manager.current = "calibrate"
+                app.root.ids.toolbar.title = "Calibration"
+
+        OneLineListItem:
             text: "Exit"
             on_press: app.stop()
 

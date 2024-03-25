@@ -1,0 +1,25 @@
+<CalibrationPage>
+    name: "calibrate"
+
+    MDBoxLayout:
+        size_hint: 1, 1
+        orientation: "vertical"
+        padding: 10
+
+        MDLabel:
+            text: "Component calibration"
+            font_style: "H4"
+            halign: "center"
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        MDFillRoundFlatButton:
+            id: connect_button
+            text: "Start moisture calibration"
+            font_size: 20
+            elevation: 1
+            size_hint: 0.5, 0.1
+            text_color: 1, 1, 1, 1
+            halign: "center"
+            on_release: root.start_moisture_calibration()
+
