@@ -56,6 +56,8 @@ class WateringProgramController:
             self._update_values_on_receive_from_network
         )
 
+        self._schedule_watering()
+
     def get_watering_programs(self):
         watering_programs_list = RemoteRequests().get_watering_programs()
         self._watering_programs = {program.id: program for program in watering_programs_list}
@@ -87,18 +89,15 @@ class WateringProgramController:
 
     def _compute_initial_delay_sec(self, program):
         current_time = get_current_datetime_tz()
-        seconds_passed_today = (current_time.time().hour * 24 * 60
+        seconds_passed_today = (current_time.time().hour * 60 * 60
                                 + current_time.time().minute * 60
                                 + current_time.time().second)
+
         program_start_time = program.time_of_day_min * 60
         time_to_wait_sec = program_start_time - seconds_passed_today
 
         if time_to_wait_sec < 0:
             time_to_wait_sec += 24 * 60 * 60
-
-        # TODO: remove
-        # print(f"Time to wait: {time_to_wait_sec}")
-        # time_to_wait_sec = 5
 
         return time_to_wait_sec
 
@@ -115,7 +114,6 @@ class WateringProgramController:
             return
 
         initial_delay_sec = self._compute_initial_delay_sec(active_program)
-
         self._watering_thread_finished.clear()
         self._moisture_check_thread_finished.clear()
 
@@ -182,7 +180,7 @@ class WateringProgramController:
             changes,
             read_time
     ):
-        print(f"Received new data from network in {read_time}")
+        # print(f"Received new data from network in {read_time}")
 
         for change in changes:
             change_type = change.type

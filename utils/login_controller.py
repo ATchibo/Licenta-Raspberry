@@ -115,6 +115,7 @@ class LoginController:
             print("Failed to login hehehehe")
 
     def _setup_after_login(self, login_success, email):
+        RaspberryController().update_raspberry_info()
         RaspberryController().start_listening_for_watering_now()
         WateringProgramController().perform_initial_setup()
         EventLogger().perform_initial_setup()
