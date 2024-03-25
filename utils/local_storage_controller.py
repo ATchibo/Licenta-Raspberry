@@ -50,6 +50,8 @@ class LocalStorageController:
 
                 try:
                     _rasp_info = RaspberryInfo().from_dict(_raspberry_dict)
+                    if _rasp_info.raspberryId is None or _rasp_info.raspberryId == "":
+                        return None
                     return _rasp_info
                 except Exception as e:
                     print(f'Error while loading RaspberryInfo from file: {e}')

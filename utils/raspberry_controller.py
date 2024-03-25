@@ -238,7 +238,7 @@ class RaspberryController:
         _raspberry_info = RemoteRequests().get_raspberry_info()
         if _raspberry_info is not None:
             return _raspberry_info
-        return self._default_raspberry_info
+        return LocalStorageController().get_raspberry_info()
 
     def update_raspberry_notification_info(self, message_type: MessageType, value):
         self._default_raspberry_info.set_notifiable_message(message_type, value)
