@@ -101,7 +101,7 @@ class LoginController:
         if FirebaseController().login_with_custom_token(auth_token):
             self._is_logged_in.set()
 
-            FirebaseController().register_raspberry_to_device(self._raspberry_id, email)
+            FirebaseController().link_raspberry_to_device(self._raspberry_id, email)
             BackendController().send_message_to_ws("OK")
 
             self._setup_after_login(True, email)

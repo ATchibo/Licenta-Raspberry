@@ -1,6 +1,7 @@
 import threading
 from datetime import datetime
 
+from components.exceptions.FirebaseUninitializedException import FirebaseUninitializedException
 from domain.RaspberryInfo import RaspberryInfo
 from domain.WateringProgram import WateringProgram
 from domain.logging.MessageType import MessageType
@@ -44,7 +45,10 @@ class RemoteRequests:
     def get_raspberry_info(self) -> RaspberryInfo | None:
         try:
             _result = self._firebase_controller.get_raspberry_info(self._raspberry_id)
-            self._local_storage_controller.save_raspberry_info(_result)
+            if _result is None:
+                _result = self._local_storage_controller.get_raspberry_info()
+            else:
+                self._local_storage_controller.save_raspberry_info(_result)
             return _result
         except Exception as e:
             return self._local_storage_controller.get_raspberry_info()
@@ -122,13 +126,13 @@ class RemoteRequests:
 
     def unregister_raspberry(self) -> bool:
         try:
-            return self._firebase_controller.unregister_raspberry(self._raspberry_id)
+            return self._firebase_controller.unlink_raspberry(self._raspberry_id)
         except Exception as e:
             return False
 
     def register_raspberry_to_device(self, device_id: str) -> bool:
         try:
-            return self._firebase_controller.register_raspberry_to_device(self._raspberry_id, device_id)
+            return self._firebase_controller.link_raspberry_to_device(self._raspberry_id, device_id)
         except Exception as e:
             return False
 
@@ -171,9 +175,6 @@ class RemoteRequests:
         except Exception as e:
             return False
 
-    # def set_login_page_on_try_login_callback(self, callback):
-    #     self._login_controller.set_login_page_on_try_login_callback(callback)
-
     def unsubscribe_watering_now_listener(self):
         self._firebase_controller.unsubscribe_watering_now_listener()
 
@@ -183,3 +184,13 @@ class RemoteRequests:
         except Exception as e:
             return False
 
+    def reset_data(self):
+        self._local_storage_controller.clear_all()
+
+        try:
+            self._firebase_controller.unlink_raspberry(self._raspberry_id)
+            self._firebase_controller.unregister_raspberry(self._raspberry_id)
+        except FirebaseUninitializedException as e:
+            pass
+        except Exception as e:
+            print("Error resetting data from remote")

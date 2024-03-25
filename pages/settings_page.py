@@ -5,7 +5,9 @@ from kivymd.uix.screen import MDScreen
 
 from domain.RaspberryInfo import RaspberryInfo
 from domain.logging.MessageType import MessageType
+from utils.local_storage_controller import LocalStorageController
 from utils.raspberry_controller import RaspberryController
+from utils.remote_requests import RemoteRequests
 
 Builder.load_file("pages/settings_page.kv")
 
@@ -65,3 +67,6 @@ class SettingsPage(MDScreen):
 
     def refresh_data(self, *args):
         self._load_data()
+
+    def reset_data(self, *args):
+        RemoteRequests().reset_data()
