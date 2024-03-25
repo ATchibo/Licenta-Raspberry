@@ -43,7 +43,6 @@
                     text: root.calibrate_button_text
                     on_release:
                         root.calibrate_button_function()
-                        app.root.ids.navigation_drawer.screen_manager.current = "calibrate" if root.calibrate_button_text == "Save" else None
                     size_hint: 0.4, None
                     height: dp(50)
                     pos_hint: {"center_x": 0.5}
@@ -58,7 +57,6 @@
                 text: "Cancel"
                 on_release:
                     root.cancel()
-                    app.root.ids.navigation_drawer.screen_manager.current = "calibrate"
                 size_hint: 0.4, None
                 height: dp(50)
                 text_color: 1, 1, 1, 1

@@ -1,7 +1,8 @@
 import threading
 
+from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import BooleanProperty, StringProperty
+from kivy.properties import BooleanProperty, StringProperty, Clock
 from kivymd.uix.screen import MDScreen
 
 from utils.local_storage_controller import LocalStorageController
@@ -42,7 +43,7 @@ class MoistureCalibrationView(MDScreen):
         self._cancel_event.clear()
 
     def on_leave(self, *args):
-        pass
+        self.on_enter(args)
 
     def calibrate_button_function(self, *args):
         if self._min_value is None:
@@ -68,6 +69,8 @@ class MoistureCalibrationView(MDScreen):
                 self._min_value,
                 self._max_value
             )
+
+            self._navigate_back()
 
     def _get_min_value(self, on_thread_finished=None):
         _time = 0
@@ -109,6 +112,12 @@ class MoistureCalibrationView(MDScreen):
         self._cancel_event.set()
         if self._current_thread is not None:
             self._current_thread.join()
+        self._navigate_back()
+
+    def _navigate_back(self):
+        def _aux(*args):
+            App.get_running_app().root.ids.navigation_drawer.screen_manager.current = "calibrate"
+        Clock.schedule_once(_aux, 0.1)
 
     def _on_min_value_thread_finished(self):
         self.step_text = ("Step 2: Place the sensor in the water"
