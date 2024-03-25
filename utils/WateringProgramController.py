@@ -56,6 +56,8 @@ class WateringProgramController:
             self._update_values_on_receive_from_network
         )
 
+        self._schedule_watering()
+
     def get_watering_programs(self):
         watering_programs_list = RemoteRequests().get_watering_programs()
         self._watering_programs = {program.id: program for program in watering_programs_list}
@@ -190,9 +192,9 @@ class WateringProgramController:
             doc_id = changed_doc.id
             doc_data = changed_doc.to_dict()
             #
-            # print(f"Change type: {change_type}")
-            # print(f"Changed doc id: {doc_id}")
-            # print(f"Changed doc data: {doc_data}")
+            print(f"Change type: {change_type}")
+            print(f"Changed doc id: {doc_id}")
+            print(f"Changed doc data: {doc_data}")
 
             new_programs = {}
             new_active_program_id = None
@@ -227,6 +229,7 @@ class WateringProgramController:
                 self._is_watering_programs_active = new_is_watering_programs_active
 
             if new_active_program_id != old_active_program_id or changed_active_program:
+                print("Rescheduling watering")
                 self._schedule_watering()
 
             if self._gui_update_callback is not None:
