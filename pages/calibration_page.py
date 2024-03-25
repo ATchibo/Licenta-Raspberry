@@ -16,3 +16,6 @@ class CalibrationPage(MDScreen):
 
     def start_moisture_calibration(self, *args):
         pass
+
+    def start_pump_calibration(self, *args):
+        pass
