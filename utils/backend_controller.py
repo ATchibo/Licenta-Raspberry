@@ -40,7 +40,7 @@ class BackendController:
             "raspberryId": rasp_id,
             "body": message,
             "title": f"{rasp_info.raspberryName}",
-            "data": {}
+            "data": json.dumps({})
         }
 
         requests.post(f"{self._backend_url}/api/send-notification", json=message)

@@ -56,8 +56,6 @@ class WateringProgramController:
             self._update_values_on_receive_from_network
         )
 
-        self._schedule_watering()
-
     def get_watering_programs(self):
         watering_programs_list = RemoteRequests().get_watering_programs()
         self._watering_programs = {program.id: program for program in watering_programs_list}
