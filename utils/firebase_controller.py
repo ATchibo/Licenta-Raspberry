@@ -237,7 +237,7 @@ class FirebaseController:
         doc_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
         doc_ref.on_snapshot(_update_values_on_receive_from_network)
 
-    def unregister_raspberry(self, raspberry_id):
+    def unlink_raspberry(self, raspberry_id):
         if self.db is None:
             raise FirebaseUninitializedException()
 
@@ -268,6 +268,12 @@ class FirebaseController:
         })
 
         return True
+
+    def unregister_raspberry(self, raspberry_id):
+        if self.db is None:
+            raise FirebaseUninitializedException()
+
+        self.db.collection(self._raspberryInfoCollectionName).document(raspberry_id).delete()
 
     def link_raspberry_to_device(self, raspberry_id, device_id) -> bool:
         if self.db is None:

@@ -7,6 +7,7 @@ from domain.RaspberryInfo import RaspberryInfo
 from domain.logging.MessageType import MessageType
 from utils.local_storage_controller import LocalStorageController
 from utils.raspberry_controller import RaspberryController
+from utils.remote_requests import RemoteRequests
 
 Builder.load_file("pages/settings_page.kv")
 
@@ -68,5 +69,4 @@ class SettingsPage(MDScreen):
         self._load_data()
 
     def reset_data(self, *args):
-        LocalStorageController().clear_all()
-        # TODO: Add a confirmation dialog and remove from firestore
+        RemoteRequests().reset_data()

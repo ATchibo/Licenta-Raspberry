@@ -1,0 +1,7 @@
+tub - 0.005l -> neglijabil
+pompa - declarat 1.5-2 L/min
+	  - real:
+	  - run 1: 0.5L / 28s
+	  - run 2: 0.5L / 28s
+	  - run 3: 0.5L / 28s
+	  - rezultat: 0.5L / 28s <=> 1.07L / min

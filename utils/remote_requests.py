@@ -1,6 +1,7 @@
 import threading
 from datetime import datetime
 
+from components.exceptions.FirebaseUninitializedException import FirebaseUninitializedException
 from domain.RaspberryInfo import RaspberryInfo
 from domain.WateringProgram import WateringProgram
 from domain.logging.MessageType import MessageType
@@ -125,7 +126,7 @@ class RemoteRequests:
 
     def unregister_raspberry(self) -> bool:
         try:
-            return self._firebase_controller.unregister_raspberry(self._raspberry_id)
+            return self._firebase_controller.unlink_raspberry(self._raspberry_id)
         except Exception as e:
             return False
 
@@ -183,3 +184,13 @@ class RemoteRequests:
         except Exception as e:
             return False
 
+    def reset_data(self):
+        self._local_storage_controller.clear_all()
+
+        try:
+            self._firebase_controller.unlink_raspberry(self._raspberry_id)
+            self._firebase_controller.unregister_raspberry(self._raspberry_id)
+        except FirebaseUninitializedException as e:
+            pass
+        except Exception as e:
+            print("Error resetting data from remote")
