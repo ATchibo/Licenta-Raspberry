@@ -29,7 +29,7 @@
                 size_hint: 1, None
                 pos_hint: {"center_x": 0.5}
                 text_color: 1, 1, 1, 1
-                on_release: root.start_moisture_calibration()
+                on_release: app.root.ids.navigation_drawer.screen_manager.current = "moisture_calibration_view"
 
             MDFillRoundFlatButton:
                 id: pump_button

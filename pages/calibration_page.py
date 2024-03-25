@@ -1,3 +1,4 @@
+from kivy.app import App
 from kivy.lang import Builder
 from kivymd.uix.screen import MDScreen
 
@@ -12,10 +13,4 @@ class CalibrationPage(MDScreen):
         pass
 
     def on_leave(self, *args):
-        pass
-
-    def start_moisture_calibration(self, *args):
-        pass
-
-    def start_pump_calibration(self, *args):
         pass

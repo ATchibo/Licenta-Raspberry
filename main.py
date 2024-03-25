@@ -8,6 +8,7 @@ from pages.connect_page import ConnectPage
 from pages.home_page import HomePage
 from pages.settings_page import SettingsPage
 from pages.calibration_page import CalibrationPage
+from components.calibration.moisture_calibration_view import MoistureCalibrationView
 from utils.login_controller import LoginController
 from utils.moisture_measurement_controller import MoistureMeasurementController
 
@@ -45,10 +46,10 @@ if __name__ == '__main__':
 
     #TODO: revert to try login
 
-    try:
-        LoginController().try_initial_login()
-    except Exception as e:
-        print("Failed to auto login: " + str(e))
+    # try:
+    #     LoginController().try_initial_login()
+    # except Exception as e:
+    #     print("Failed to auto login: " + str(e))
 
     MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 
