@@ -246,3 +246,6 @@ class RaspberryController:
 
     def _send_moisture_info(self):
         RemoteRequests().update_moisture_info(self.get_moisture_percentage())
+
+    def update_raspberry_info(self):
+        self._default_raspberry_info = RemoteRequests().get_raspberry_info()
