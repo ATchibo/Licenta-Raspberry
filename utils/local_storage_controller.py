@@ -27,6 +27,8 @@ class LocalStorageController:
         self._is_watering_programs_active_file = 'is_watering_programs_active'
         self._log_messages_file = 'log_messages'
 
+        self._moisture_sensor_file = 'moisture_sensor'
+
     def clear_all(self):
         self._delete_file(self._raspberry_info_file)
         self._delete_file(self._moisture_info_file)
@@ -178,3 +180,29 @@ class LocalStorageController:
         self.save_moisture_info(_moisture_info)
         return True
 
+    def set_moisture_sensor_absolute_values(self, absolute_dry, absolute_wet) -> bool:
+        try:
+            with (open(self._moisture_sensor_file, 'rb') as file):
+                _moisture_absolute_values = {
+                    "absolute_dry": absolute_dry,
+                    "absolute_wet": absolute_wet
+                }
+                pickle.dump(_moisture_absolute_values, file)
+
+                return True
+        except FileNotFoundError:
+            print(f'File not found: {self._log_messages_file}')
+            return False
+
+    def get_moisture_sensor_absolute_values(self):
+        try:
+            with (open(self._moisture_sensor_file, 'rb') as file):
+                _moisture_absolute_values = pickle.load(file)
+                if (_moisture_absolute_values is None
+                        or "absolute_dry" not in _moisture_absolute_values
+                        or "absolute_wet" not in _moisture_absolute_values):
+                    return None, None
+
+                return _moisture_absolute_values["absolute_dry"], _moisture_absolute_values["absolute_wet"]
+        except FileNotFoundError:
+            return None, None
