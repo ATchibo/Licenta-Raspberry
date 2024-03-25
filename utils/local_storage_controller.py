@@ -182,7 +182,7 @@ class LocalStorageController:
 
     def set_moisture_sensor_absolute_values(self, absolute_dry, absolute_wet) -> bool:
         try:
-            with (open(self._moisture_sensor_file, 'rb') as file):
+            with (open(self._moisture_sensor_file, 'wb') as file):
                 _moisture_absolute_values = {
                     "absolute_dry": absolute_dry,
                     "absolute_wet": absolute_wet
