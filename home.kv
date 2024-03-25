@@ -30,6 +30,10 @@
                 root.screen_manager.current = "settings"
                 app.root.ids.toolbar.title = "Settings"
 
+        OneLineListItem:
+            text: "Exit"
+            on_press: app.stop()
+
 MDScreen:
 
     MDNavigationLayout:
