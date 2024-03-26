@@ -18,7 +18,6 @@ class MoistureController:
         else:
             LocalStorageController().set_moisture_sensor_absolute_values(self.absolute_dry, self.absolute_wet)
 
-
         self.interval = self.absolute_dry - self.absolute_wet
 
     def get_moisture(self):
