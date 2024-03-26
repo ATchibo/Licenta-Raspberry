@@ -9,6 +9,7 @@ from pages.home_page import HomePage
 from pages.settings_page import SettingsPage
 from pages.calibration_page import CalibrationPage
 from components.calibration.moisture_calibration_view import MoistureCalibrationView
+from components.calibration.pump_calibration_view import PumpCalibrationView
 from utils.login_controller import LoginController
 from utils.moisture_measurement_controller import MoistureMeasurementController
 

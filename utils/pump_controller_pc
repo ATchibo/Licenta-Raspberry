@@ -11,7 +11,10 @@ class PumpController:
         # set the pin for the pump
         self.pin = pin
         # set the liters per second
-        self.pump_capacity = liters_per_second
+        if liters_per_second is not None:
+            self.pump_capacity = liters_per_second
+        else:
+            self.pump_capacity = 0.017857143  # about 1 liter per minute
 
         self.is_watering = False
 

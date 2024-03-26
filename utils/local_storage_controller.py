@@ -206,3 +206,28 @@ class LocalStorageController:
                 return _moisture_absolute_values["absolute_dry"], _moisture_absolute_values["absolute_wet"]
         except FileNotFoundError:
             return None, None
+        except Exception as e:
+            print(f'Error while loading moisture sensor absolute values: {e}')
+            return None, None
+
+    def set_pump_capacity(self, _pump_capacity):
+        try:
+            with (open(self._moisture_sensor_file, 'wb') as file):
+                pickle.dump(_pump_capacity, file)
+                return True
+        except FileNotFoundError:
+            print(f'File not found: {self._log_messages_file}')
+            return False
+
+    def get_pump_capacity(self):
+        try:
+            with (open(self._moisture_sensor_file, 'rb') as file):
+                _pump_capacity = pickle.load(file)
+                if not isinstance(_pump_capacity, float) or _pump_capacity < 0:
+                    return None
+                return _pump_capacity
+        except FileNotFoundError:
+            return None
+        except Exception as e:
+            print(f'Error while loading pump capacity: {e}')
+            return None
