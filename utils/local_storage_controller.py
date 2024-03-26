@@ -27,6 +27,9 @@ class LocalStorageController:
         self._is_watering_programs_active_file = 'is_watering_programs_active'
         self._log_messages_file = 'log_messages'
 
+        self._moisture_sensor_file = 'moisture_sensor'
+        self._pump_capacity_file = 'pump_capacity'
+
     def clear_all(self):
         self._delete_file(self._raspberry_info_file)
         self._delete_file(self._moisture_info_file)
@@ -145,7 +148,7 @@ class LocalStorageController:
 
     def add_log_message(self, log_message):
         _log_messages = self.get_log_messages()
-        _log_messages.append(log_message)
+        _log_messages[log_message.get_timestamp()] = log_message.get_message()
         self.save_log_messages(_log_messages)
 
     def update_raspberry_notifiable_message(self, message_type, value):
@@ -178,3 +181,54 @@ class LocalStorageController:
         self.save_moisture_info(_moisture_info)
         return True
 
+    def set_moisture_sensor_absolute_values(self, absolute_dry, absolute_wet) -> bool:
+        try:
+            with (open(self._moisture_sensor_file, 'wb') as file):
+                _moisture_absolute_values = {
+                    "absolute_dry": absolute_dry,
+                    "absolute_wet": absolute_wet
+                }
+                pickle.dump(_moisture_absolute_values, file)
+
+                return True
+        except FileNotFoundError:
+            print(f'File not found: {self._log_messages_file}')
+            return False
+
+    def get_moisture_sensor_absolute_values(self):
+        try:
+            with (open(self._moisture_sensor_file, 'rb') as file):
+                _moisture_absolute_values = pickle.load(file)
+                if (_moisture_absolute_values is None
+                        or "absolute_dry" not in _moisture_absolute_values
+                        or "absolute_wet" not in _moisture_absolute_values):
+                    return None, None
+
+                return _moisture_absolute_values["absolute_dry"], _moisture_absolute_values["absolute_wet"]
+        except FileNotFoundError:
+            return None, None
+        except Exception as e:
+            print(f'Error while loading moisture sensor absolute values: {e}')
+            return None, None
+
+    def set_pump_capacity(self, _pump_capacity):
+        try:
+            with (open(self._pump_capacity_file, 'wb') as file):
+                pickle.dump(_pump_capacity, file)
+                return True
+        except FileNotFoundError:
+            print(f'File not found: {self._log_messages_file}')
+            return False
+
+    def get_pump_capacity(self):
+        try:
+            with (open(self._pump_capacity_file, 'rb') as file):
+                _pump_capacity = pickle.load(file)
+                if not isinstance(_pump_capacity, float) or _pump_capacity < 0:
+                    return None
+                return _pump_capacity
+        except FileNotFoundError:
+            return None
+        except Exception as e:
+            print(f'Error while loading pump capacity: {e}')
+            return None

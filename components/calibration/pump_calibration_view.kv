@@ -1,0 +1,62 @@
+<PumpCalibrationView>
+    name: "pump_calibration_view"
+
+    MDBoxLayout:
+        size_hint: 1, 1
+        orientation: "vertical"
+        padding: 10
+
+        MDLabel:
+            text: "Pump Calibration"
+            font_style: "H4"
+            theme_text_color: "Primary"
+            halign: "center"
+            size_hint: 1, 0.2
+
+        MDGridLayout:
+            cols: 1
+            padding: dp(10)
+            spacing: dp(10)
+            size_hint: 1, 0.6
+
+            MDLabel:
+                id: step_label
+                text: root.step_text
+                font_style: "H5"
+                text_color: 1, 1, 1, 1
+                halign: "center"
+                valign: "bottom"
+
+            MDLabel:
+                id: loading_label
+                text: root.loading_text
+                font_style: "H5"
+                text_color: 1, 1, 1, 1
+                halign: "center"
+                valign: "top"
+
+            MDBoxLayout:
+                size_hint: 1, None
+                orientation: "vertical"
+
+                MDFillRoundFlatButton:
+                    text: root.calibrate_button_text
+                    on_release:
+                        root.calibrate_button_function()
+                    size_hint: 0.4, None
+                    height: dp(50)
+                    pos_hint: {"center_x": 0.5}
+                    text_color: 1, 1, 1, 1
+
+        MDBoxLayout:
+            size_hint: 1, 0.2
+            orientation: "vertical"
+
+            MDFillRoundFlatButton:
+                text: "Cancel"
+                on_release:
+                    root.cancel()
+                size_hint: 0.4, None
+                height: dp(50)
+                text_color: 1, 1, 1, 1
+                pos_hint: {"center_x": 0.5}

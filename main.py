@@ -7,13 +7,11 @@ from kivymd.uix.scrollview import MDScrollView
 from pages.connect_page import ConnectPage
 from pages.home_page import HomePage
 from pages.settings_page import SettingsPage
-from utils.WateringProgramController import WateringProgramController
-from utils.event_logger import EventLogger
-from utils.firebase_controller import FirebaseController
+from pages.calibration_page import CalibrationPage
+from components.calibration.moisture_calibration_view import MoistureCalibrationView
+from components.calibration.pump_calibration_view import PumpCalibrationView
 from utils.login_controller import LoginController
 from utils.moisture_measurement_controller import MoistureMeasurementController
-from utils.raspberry_controller import RaspberryController
-from utils.remote_requests import RemoteRequests
 
 
 class ContentNavigationDrawer(MDScrollView):

@@ -31,6 +31,13 @@
                 app.root.ids.toolbar.title = "Settings"
 
         OneLineListItem:
+            text: "Calibration"
+            on_press:
+                root.nav_drawer.set_state("close")
+                root.screen_manager.current = "calibrate"
+                app.root.ids.toolbar.title = "Calibration"
+
+        OneLineListItem:
             text: "Exit"
             on_press: app.stop()
 
@@ -54,11 +61,15 @@ MDScreen:
             HomePage:
             ConnectPage:
             SettingsPage:
+            CalibrationPage:
+            MoistureCalibrationView:
+            PumpCalibrationView:
 
         MDNavigationDrawer:
             id: nav_drawer
             radius: (0, 16, 16, 0)
 
             ContentNavigationDrawer:
+                id: navigation_drawer
                 screen_manager: screen_manager
                 nav_drawer: nav_drawer

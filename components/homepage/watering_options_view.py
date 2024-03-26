@@ -46,6 +46,9 @@ class WateringOptionsView(MDBoxLayout):
 
         self.ids.watering_program_switch.bind(active=self.toggle_watering_program)
 
+    def on_enter(self):
+        self.bind_raspberry_controller_properties()
+
     def change_program(self):
         self.current_program_name = self.ids.watering_program_spinner.text
 

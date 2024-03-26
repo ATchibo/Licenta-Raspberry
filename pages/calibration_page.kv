@@ -1,0 +1,42 @@
+<CalibrationPage>
+    name: "calibrate"
+
+    MDBoxLayout:
+        size_hint: 1, 1
+        orientation: "vertical"
+        padding: 10
+
+        MDLabel:
+            text: "Component calibration"
+            font_style: "H4"
+            halign: "center"
+            pos_hint: {"center_x": 0.5, "center_y": 0.1}
+            size_hint: 1, 0.2
+            padding: [0, 10, 0, 40]
+
+        MDGridLayout:
+            cols: 1
+            size_hint: 0.4, 0.8
+            pos_hint: {"center_x": 0.5}
+            padding: 10
+            spacing: 20
+
+            MDFillRoundFlatButton:
+                id: moisture_button
+                text: "Start moisture calibration"
+                font_size: 20
+                elevation: 1
+                size_hint: 1, None
+                pos_hint: {"center_x": 0.5}
+                text_color: 1, 1, 1, 1
+                on_release: app.root.ids.navigation_drawer.screen_manager.current = "moisture_calibration_view"
+
+            MDFillRoundFlatButton:
+                id: pump_button
+                text: "Start pump calibration"
+                font_size: 20
+                elevation: 1
+                size_hint: 1, None
+                text_color: 1, 1, 1, 1
+                pos_hint: {"center_x": 0.5}
+                on_release: app.root.ids.navigation_drawer.screen_manager.current = "pump_calibration_view"

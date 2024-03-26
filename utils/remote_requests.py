@@ -124,6 +124,13 @@ class RemoteRequests:
         except Exception as e:
             return False
 
+    def add_listener_for_notification_changes(self, callback) -> bool:
+        try:
+            self._firebase_controller.add_listener_for_notification_changes(self._raspberry_id, callback)
+            return True
+        except Exception as e:
+            return False
+
     def unregister_raspberry(self) -> bool:
         try:
             return self._firebase_controller.unlink_raspberry(self._raspberry_id)
@@ -148,7 +155,9 @@ class RemoteRequests:
         try:
             _result = self._firebase_controller.add_log_message(self._raspberry_id, log_message)
             self._local_storage_controller.add_log_message(log_message)
+            return True
         except Exception as e:
+            print(f"Exception when adding log message: {e}")
             return False
 
     def update_raspberry_notifiable_message(self, message_type: MessageType, value: bool) -> bool:
