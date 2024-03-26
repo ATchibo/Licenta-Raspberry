@@ -8,6 +8,7 @@ from domain.WateringProgram import WateringProgram
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
+from utils.local_storage_controller import LocalStorageController
 from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
@@ -85,26 +86,53 @@ class WateringProgramController:
             return None
         return self._watering_programs[self._active_watering_program_id]
 
-    def _compute_initial_delay_sec(self, program):
-        current_time = get_current_datetime_tz()
-        seconds_passed_today = (current_time.time().hour * 60 * 60
-                                + current_time.time().minute * 60
-                                + current_time.time().second)
+    def _compute_initial_delay_sec(self, program: WateringProgram):
+        if program.starting_date_time is None:
+            return -1
 
-        program_start_time = program.time_of_day_min * 60
-        time_to_wait_sec = program_start_time - seconds_passed_today
+        _current_time = get_current_datetime_tz()
 
-        if time_to_wait_sec < 0:
-            time_to_wait_sec += 24 * 60 * 60
+        _time_delta_seconds = (program.starting_date_time - _current_time).seconds
 
-        return time_to_wait_sec
+        # if program starting time is in the future
+        if _time_delta_seconds >= 0:
+            return _time_delta_seconds
+
+        # if the starting time is in the past, we try to see the last watering time
+        _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
+
+        # if the last recorded watering time is not for the current program or it is None
+        if _program_id is None or _last_watered_time is None or _program_id is not program.id:
+            # we just make the time delta positive so that we can compute how much time passed
+            # since the initial watering should have occurred
+            _time_delta_seconds = -_time_delta_seconds
+
+        else:
+            # we compute the time passed since the last watering
+            _time_delta_seconds = _current_time - _last_watered_time
+
+        # we compute how many seconds are between watering cycles
+        _interval_between_watering_seconds = program.frequency_days * 24 * 60 * 60
+
+        # we compute how many watering intervals fit in the time passed since the last watering
+        _intervals_in_time_delta = _time_delta_seconds // _interval_between_watering_seconds
+
+        # we compute how many seconds are in total in those intervals
+        _waiting_time = _intervals_in_time_delta * _interval_between_watering_seconds
+        if _waiting_time < _time_delta_seconds:
+            # if the sum of intervals does not cover the entire elapsed time, another cycle is
+            # about to start so we add another interval
+            _waiting_time += _interval_between_watering_seconds
+
+        # we compute how many seconds we need to wait until next watering cycle should occur
+        _time_delta_seconds = _waiting_time - _time_delta_seconds
+
+        return _time_delta_seconds
 
     def _compute_watering_interval_sec(self, program):
         return program.frequency_days * 24 * 60 * 60
 
     def _schedule_watering(self):
-        # TODO: get last watered time from localstorage and calculate the next watering time
-
         if self._active_watering_program_id is None:
             return
 
@@ -114,8 +142,10 @@ class WateringProgramController:
             return
 
         initial_delay_sec = self._compute_initial_delay_sec(active_program)
-
         print("initial delay: ", initial_delay_sec)
+
+        if initial_delay_sec < 0:
+            return
 
         self._watering_thread_finished.clear()
         self._moisture_check_thread_finished.clear()
@@ -166,7 +196,9 @@ class WateringProgramController:
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
                 if current_soil_moisture < program.max_moisture:
+                    _current_time = get_current_datetime_tz()
                     self._raspberry_controller.water_for_liters(program.quantity_l)
+                    LocalStorageController().set_last_watering_time(_current_time, program.id)
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         while not self._moisture_check_thread_finished.is_set():
