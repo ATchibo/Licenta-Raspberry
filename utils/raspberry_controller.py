@@ -166,7 +166,7 @@ class RaspberryController:
         self._watering_cycle_start_time = get_current_datetime_tz()
 
         self._send_watering_updates_event.clear()
-        self._send_watering_updates_thread = threading.Thread(target=self._send_watering_updates_worker)
+        self._send_watering_updates_thread = threading.Thread(target=self._send_watering_updates_worker, daemon=True)
         self._send_watering_updates_thread.start()
 
     def stop_sending_watering_updates(self):

@@ -10,8 +10,13 @@ from pages.settings_page import SettingsPage
 from pages.calibration_page import CalibrationPage
 from components.calibration.moisture_calibration_view import MoistureCalibrationView
 from components.calibration.pump_calibration_view import PumpCalibrationView
+from utils.WateringProgramController import WateringProgramController
+from utils.event_logger import EventLogger
+from utils.firebase_controller import FirebaseController
 from utils.login_controller import LoginController
 from utils.moisture_measurement_controller import MoistureMeasurementController
+from utils.raspberry_controller import RaspberryController
+from utils.remote_requests import RemoteRequests
 
 
 class ContentNavigationDrawer(MDScrollView):
@@ -30,7 +35,7 @@ class PlantBuddyApp(MDApp):
 
 if __name__ == '__main__':
     try:
-        if RemoteRequests().anonymous_login():
+        if FirebaseController().anonymous_login():
             RaspberryController().start_listening_for_watering_now()
             WateringProgramController().perform_initial_setup()
             EventLogger().perform_initial_setup()

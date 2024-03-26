@@ -67,6 +67,7 @@ class PumpCalibrationView(MDScreen):
         else:
             _pump_capacity = 60 / self._time_delta * self._WATER_QTY  # 60 seconds in a minute
             LocalStorageController().set_pump_capacity(_pump_capacity)
+            RaspberryController().pump_controller.pump_capacity = _pump_capacity
 
             self._navigate_back()
 

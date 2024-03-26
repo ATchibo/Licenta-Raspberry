@@ -95,20 +95,16 @@ class WateringProgramController:
         _time_delta_seconds = (program.starting_date_time - _current_time).seconds
 
         # if program starting time is in the future
-        if _time_delta_seconds >= 0:
+        if program.starting_date_time >= _current_time:
             return _time_delta_seconds
 
         # if the starting time is in the past, we try to see the last watering time
         _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
 
         # if the last recorded watering time is not for the current program or it is None
-        if _program_id is None or _last_watered_time is None or _program_id is not program.id:
-            # we just make the time delta positive so that we can compute how much time passed
-            # since the initial watering should have occurred
-            _time_delta_seconds = -_time_delta_seconds
-
-        else:
-            # we compute the time passed since the last watering
+        # we leave the delta as is
+        # else we compute the time passed since the last watering
+        if not (_program_id is None or _last_watered_time is None or _program_id is not program.id):
             _time_delta_seconds = _current_time - _last_watered_time
 
         # we compute how many seconds are between watering cycles
