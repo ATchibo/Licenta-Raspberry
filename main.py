@@ -22,23 +22,23 @@ class ContentNavigationDrawer(MDScrollView):
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
-        # Window.size = (800, 480)
-        Window.fullscreen = 'auto'
+        Window.size = (800, 480)
+        # Window.fullscreen = 'auto'
         self.theme_cls.primary_palette = "Green"
         self.theme_cls.primary_hue = "400"
 
 
 if __name__ == '__main__':
-    # try:
-    #     if RemoteRequests().anonymous_login():
-    #         RaspberryController().start_listening_for_watering_now()
-    #         WateringProgramController().perform_initial_setup()
-    #         EventLogger().perform_initial_setup()
-    #         print("Logged in")
-    #     else:
-    #         print("Not logged in")
-    # except Exception as e:
-    #     print("Failed to auto login: " + str(e))
+    try:
+        if RemoteRequests().anonymous_login():
+            RaspberryController().start_listening_for_watering_now()
+            WateringProgramController().perform_initial_setup()
+            EventLogger().perform_initial_setup()
+            print("Logged in")
+        else:
+            print("Not logged in")
+    except Exception as e:
+        print("Failed to auto login: " + str(e))
 
 
     # RaspberryController().start_listening_for_watering_now()
@@ -47,10 +47,10 @@ if __name__ == '__main__':
 
     #TODO: revert to try login
 
-    try:
-        LoginController().try_initial_login()
-    except Exception as e:
-        print("Failed to auto login: " + str(e))
+    # try:
+    #     LoginController().try_initial_login()
+    # except Exception as e:
+    #     print("Failed to auto login: " + str(e))
 
     MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
 

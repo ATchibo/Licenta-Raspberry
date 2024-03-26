@@ -1,10 +1,13 @@
+from datetime import datetime
+
+
 class WateringProgram:
-    def __init__(self, id="", name="", frequency_days=0.0, quantity_l=0.0, time_of_day_min=0, min_moisture=0.0, max_moisture=0.0):
+    def __init__(self, id="", name="", frequency_days=0.0, quantity_l=0.0, starting_date_time=None, min_moisture=0.0, max_moisture=0.0):
         self.id = id
         self.name = name
         self.frequency_days = frequency_days
         self.quantity_l = quantity_l
-        self.time_of_day_min = time_of_day_min
+        self.starting_date_time = starting_date_time if starting_date_time is not None else datetime.now()
         self.min_moisture = min_moisture
         self.max_moisture = max_moisture
 
@@ -23,17 +26,17 @@ class WateringProgram:
             "name": self.name,
             "frequencyDays": self.frequency_days,
             "quantityL": self.quantity_l,
-            "timeOfDayMin": self.time_of_day_min,
+            "startingDateTime": self.starting_date_time,
             "minMoisture": self.min_moisture,
             "maxMoisture": self.max_moisture
         }
 
-    def fromDict(self, dict):
-        self.id = dict["id"]
-        self.name = dict["name"]
-        self.frequency_days = dict["frequencyDays"]
-        self.quantity_l = dict["quantityL"]
-        self.time_of_day_min = dict["timeOfDayMin"]
-        self.min_moisture = dict["minMoisture"]
-        self.max_moisture = dict["maxMoisture"]
+    def fromDict(self, _dict):
+        self.id = _dict["id"]
+        self.name = _dict["name"]
+        self.frequency_days = _dict["frequencyDays"]
+        self.quantity_l = _dict["quantityL"]
+        self.starting_date_time = _dict["startingDateTime"]
+        self.min_moisture = _dict["minMoisture"]
+        self.max_moisture = _dict["maxMoisture"]
         return self
