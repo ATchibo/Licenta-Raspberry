@@ -103,6 +103,8 @@ class WateringProgramController:
         return program.frequency_days * 24 * 60 * 60
 
     def _schedule_watering(self):
+        # TODO: get last watered time from localstorage and calculate the next watering time
+
         if self._active_watering_program_id is None:
             return
 
