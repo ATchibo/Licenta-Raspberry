@@ -157,3 +157,5 @@ cython_debug/
 /watering_programs
 /watering_programs_active_id
 /moisture_info
+/moisture_sensor
+/pump_capacity

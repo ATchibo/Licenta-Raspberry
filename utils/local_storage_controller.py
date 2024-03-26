@@ -28,6 +28,7 @@ class LocalStorageController:
         self._log_messages_file = 'log_messages'
 
         self._moisture_sensor_file = 'moisture_sensor'
+        self._pump_capacity_file = 'pump_capacity'
 
     def clear_all(self):
         self._delete_file(self._raspberry_info_file)
@@ -212,7 +213,7 @@ class LocalStorageController:
 
     def set_pump_capacity(self, _pump_capacity):
         try:
-            with (open(self._moisture_sensor_file, 'wb') as file):
+            with (open(self._pump_capacity_file, 'wb') as file):
                 pickle.dump(_pump_capacity, file)
                 return True
         except FileNotFoundError:
@@ -221,7 +222,7 @@ class LocalStorageController:
 
     def get_pump_capacity(self):
         try:
-            with (open(self._moisture_sensor_file, 'rb') as file):
+            with (open(self._pump_capacity_file, 'rb') as file):
                 _pump_capacity = pickle.load(file)
                 if not isinstance(_pump_capacity, float) or _pump_capacity < 0:
                     return None
