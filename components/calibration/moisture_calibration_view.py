@@ -70,6 +70,9 @@ class MoistureCalibrationView(MDScreen):
                 self._max_value
             )
 
+            RaspberryController().moisture_controller.absolute_dry = self._max_value
+            RaspberryController().moisture_controller.absolute_wet = self._min_value
+
             self._navigate_back()
 
     def _get_min_value(self, on_thread_finished=None):

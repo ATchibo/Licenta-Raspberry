@@ -30,6 +30,8 @@ class LocalStorageController:
         self._moisture_sensor_file = 'moisture_sensor'
         self._pump_capacity_file = 'pump_capacity'
 
+        self._last_watering_time_file = 'last_watering_time'
+
     def clear_all(self):
         self._delete_file(self._raspberry_info_file)
         self._delete_file(self._moisture_info_file)
@@ -232,3 +234,31 @@ class LocalStorageController:
         except Exception as e:
             print(f'Error while loading pump capacity: {e}')
             return None
+
+    def set_last_watering_time(self, timestamp, program_id):
+        try:
+            with open(self._last_watering_time_file, 'rb') as file:
+                data = {
+                    "program_id": program_id,
+                    "timestamp": timestamp
+                }
+                pickle.dump(data, file)
+                return True
+        except FileNotFoundError:
+            return False
+        except Exception as e:
+            print(f'Error while loading last watering times: {e}')
+            return False
+
+    def get_last_watering_time(self):
+        try:
+            with open(self._last_watering_time_file, 'rb') as file:
+                data = pickle.load(file)
+                if data is None or "program_id" not in data or "timestamp" not in data:
+                    return None, None
+                return data["program_id"], data["timestamp"]
+        except FileNotFoundError:
+            return None, None
+        except Exception as e:
+            print(f'Error while loading last watering times: {e}')
+            return None, None
