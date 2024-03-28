@@ -17,7 +17,9 @@ class RaspberryInfo:
             self.notifiableMessages = {
                 MessageType.AUTO_WATERING_CYCLE.value: False,
                 MessageType.MANUAL_WATERING_CYCLE.value: False,
-                MessageType.MOISTURE_LEVEL_MEASUREMENT.value: False
+                MessageType.MOISTURE_LEVEL_MEASUREMENT.value: False,
+                MessageType.LOW_WATER_LEVEL.value: False,
+                MessageType.EMPTY_WATER_TANK.value: False,
             }
         else:
             self.notifiableMessages = notifiableMessages
