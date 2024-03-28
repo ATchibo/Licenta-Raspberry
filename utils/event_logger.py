@@ -3,9 +3,11 @@ import threading
 from datetime import datetime
 
 from domain.logging.LogMessage import LogMessage
+from domain.logging.LowWaterLevelMessage import LowWaterLevelMessage
 from domain.logging.ManualWateringCycleMessage import ManualWateringCycleMessage
 from domain.logging.MessageType import MessageType
 from domain.logging.MoistureMeasurementMessage import MoistureMeasurementMessage
+from domain.logging.NoWaterMessage import NoWaterMessage
 from utils.backend_controller import BackendController
 from utils.firebase_controller import FirebaseController
 from domain.logging.AutoWateringCycleMessage import AutoWateringCycleMessage
@@ -100,6 +102,12 @@ class EventLogger:
 
     def add_moisture_measurement_message(self, moisture_level, date_time):
         self._add_log_message(MoistureMeasurementMessage(moisture_level, date_time))
+
+    def add_no_water_in_tank_message(self, date_time):
+        self._add_log_message(NoWaterMessage(date_time))
+
+    def add_water_level_after_watering_message(self, level, date_time):
+        self._add_log_message(LowWaterLevelMessage(level, date_time))
 
     def _update_logs_on_receive_from_network(
         self,

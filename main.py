@@ -10,6 +10,7 @@ from pages.settings_page import SettingsPage
 from pages.calibration_page import CalibrationPage
 from components.calibration.moisture_calibration_view import MoistureCalibrationView
 from components.calibration.pump_calibration_view import PumpCalibrationView
+from components.calibration.depth_calibration_view import DepthCalibrationView
 from utils.WateringProgramController import WateringProgramController
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
@@ -34,16 +35,16 @@ class PlantBuddyApp(MDApp):
 
 
 if __name__ == '__main__':
-    try:
-        if FirebaseController().anonymous_login():
-            RaspberryController().start_listening_for_watering_now()
-            WateringProgramController().perform_initial_setup()
-            EventLogger().perform_initial_setup()
-            print("Logged in")
-        else:
-            print("Not logged in")
-    except Exception as e:
-        print("Failed to auto login: " + str(e))
+    # try:
+    #     if FirebaseController().anonymous_login():
+    #         RaspberryController().start_listening_for_watering_now()
+    #         WateringProgramController().perform_initial_setup()
+    #         EventLogger().perform_initial_setup()
+    #         print("Logged in")
+    #     else:
+    #         print("Not logged in")
+    # except Exception as e:
+    #     print("Failed to auto login: " + str(e))
 
 
     # RaspberryController().start_listening_for_watering_now()

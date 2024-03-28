@@ -160,3 +160,4 @@ cython_debug/
 /moisture_sensor
 /pump_capacity
 /last_watering_time
+/depth_sensor

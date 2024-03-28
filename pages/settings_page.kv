@@ -73,11 +73,11 @@
                     text: "Receive notifications"
                     bold: True
                     halign: "center"
-                    size_hint: 1, None
+                    size_hint: 1, 0.15
 
                 MDGridLayout:
                     cols: 1
-                    size_hint: 1, None
+                    size_hint: 1, 0.85
                     padding: 10
 
     # Auto cycle
@@ -86,7 +86,7 @@
                         id: auto_watering_enable_grid
                         cols: 2
                         size_hint_y: None
-                        height: dp(60)
+                        height: dp(45)
                         padding: 10
 
                         MDLabel:
@@ -117,7 +117,7 @@
                         id: manual_watering_enable_grid
                         cols: 2
                         size_hint_y: None
-                        height: dp(60)
+                        height: dp(45)
                         padding: 10
 
                         MDLabel:
@@ -148,7 +148,7 @@
                         id: moisture_measurement_enable_grid
                         cols: 2
                         size_hint_y: None
-                        height: dp(60)
+                        height: dp(45)
                         padding: 10
 
                         MDLabel:
@@ -173,12 +173,74 @@
                                 icon_inactive: "close"
                                 icon_inactive_color: "grey"
 
+    # Low Water Level
+
+                    MDGridLayout:
+                        id: low_water_level_enable_grid
+                        cols: 2
+                        size_hint_y: None
+                        height: dp(45)
+                        padding: 10
+
+                        MDLabel:
+                            text: "Low water level"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_y": 0.5}
+
+                        MDAnchorLayout:
+                            size_hint_x: 0.2
+                            height: low_water_level_enable_grid.height
+                            pos_hint: {"center_y": 0.5}
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            padding: -sw4.width, 0, 0, -sw4.height / 3
+
+                            MDSwitch:
+                                id: sw4
+                                active: root.low_water_level_active_variable
+                                size_hint: None, None
+                                icon_active: "check"
+                                icon_active_color: "white"
+                                icon_inactive: "close"
+                                icon_inactive_color: "grey"
+
+    # No Water Left
+
+                    MDGridLayout:
+                        id: no_water_left_enable_grid
+                        cols: 2
+                        size_hint_y: None
+                        height: dp(45)
+                        padding: 10
+
+                        MDLabel:
+                            text: "No water left"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_y": 0.5}
+
+                        MDAnchorLayout:
+                            size_hint_x: 0.2
+                            height: no_water_left_enable_grid.height
+                            pos_hint: {"center_y": 0.5}
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            padding: -sw5.width, 0, 0, -sw5.height / 3
+
+                            MDSwitch:
+                                id: sw5
+                                active: root.no_water_left_active_variable
+                                size_hint: None, None
+                                icon_active: "check"
+                                icon_active_color: "white"
+                                icon_inactive: "close"
+                                icon_inactive_color: "grey"
+
 # Reset button
                     MDGridLayout:
                         id: moisture_measurement_enable_grid
                         cols: 1
                         size_hint_y: None
-                        height: dp(60)
+                        height: dp(45)
                         padding: 10
 
                         MDFillRoundFlatButton:
