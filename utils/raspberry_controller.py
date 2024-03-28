@@ -88,14 +88,15 @@ class RaspberryController:
         )
 
     def _log_no_water_in_tank(self):
-        EventLogger().add_no_water_in_tank_message()
+        EventLogger().add_no_water_in_tank_message(datetime.now())
 
     def _log_water_level_after_watering(self):
         if self.water_depth_measurement_controller.is_water_tank_empty():
-            EventLogger().add_no_water_in_tank_message()
+            EventLogger().add_no_water_in_tank_message(datetime.now())
         elif self.water_depth_measurement_controller.is_water_tank_low():
             EventLogger().add_water_level_after_watering_message(
-                self.water_depth_measurement_controller.get_current_water_volume()
+                self.water_depth_measurement_controller.get_current_water_volume(),
+                datetime.now()
             )
 
     def start_watering(self) -> bool:
