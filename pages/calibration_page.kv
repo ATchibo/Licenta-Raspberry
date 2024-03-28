@@ -40,3 +40,13 @@
                 text_color: 1, 1, 1, 1
                 pos_hint: {"center_x": 0.5}
                 on_release: app.root.ids.navigation_drawer.screen_manager.current = "pump_calibration_view"
+
+            MDFillRoundFlatButton:
+                id: depth_button
+                text: "Start water depth sensor calibration"
+                font_size: 20
+                elevation: 1
+                size_hint: 1, None
+                text_color: 1, 1, 1, 1
+                pos_hint: {"center_x": 0.5}
+                on_release: app.root.ids.navigation_drawer.screen_manager.current = "depth_calibration_view"
