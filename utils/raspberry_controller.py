@@ -12,6 +12,7 @@ from utils.local_storage_controller import LocalStorageController
 from utils.moisture_controller import MoistureController
 from utils.pump_controller import PumpController
 from utils.remote_requests import RemoteRequests
+from utils.water_depth_measurement_controller import WaterDepthMeasurementController
 
 
 class RaspberryController:
@@ -33,6 +34,8 @@ class RaspberryController:
 
         _liter_per_second = LocalStorageController().get_pump_capacity()
         self.pump_controller = PumpController(pin=4, liters_per_second=_liter_per_second)
+
+        self.water_depth_measurement_controller = WaterDepthMeasurementController()
 
         self._send_watering_updates_interval_ms = 1000
         self._max_watering_time_sec = 30

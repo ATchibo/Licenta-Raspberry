@@ -29,6 +29,7 @@ class LocalStorageController:
 
         self._moisture_sensor_file = 'moisture_sensor'
         self._pump_capacity_file = 'pump_capacity'
+        self._depth_sensor_file = 'depth_sensor'
 
         self._last_watering_time_file = 'last_watering_time'
 
@@ -262,3 +263,34 @@ class LocalStorageController:
         except Exception as e:
             print(f'Error while loading last watering times: {e}')
             return None, None
+
+    def set_depth_sensor_parameters(self, tank_volume_ratio):
+        try:
+            with (open(self._depth_sensor_file, 'wb') as file):
+                _depth_sensor_parameters = {
+                    "tank_volume_ratio": tank_volume_ratio
+                }
+                pickle.dump(_depth_sensor_parameters, file)
+
+                return True
+        except FileNotFoundError:
+            print(f'File not found: {self._log_messages_file}')
+            return False
+        except Exception as e:
+            print(f'Error while saving depth sensor parameters: {e}')
+            return False
+
+    def get_depth_sensor_parameters(self):
+        try:
+            with (open(self._depth_sensor_file, 'rb') as file):
+                _depth_sensor_parameters = pickle.load(file)
+                if (_depth_sensor_parameters is None
+                        or "tank_volume_ratio" not in _depth_sensor_parameters):
+                    return None
+
+                return _depth_sensor_parameters["tank_volume_ratio"]
+        except FileNotFoundError:
+            return None
+        except Exception as e:
+            print(f'Error while loading depth sensor parameters: {e}')
+            return None

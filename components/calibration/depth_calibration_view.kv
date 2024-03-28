@@ -26,6 +26,21 @@
                 text_color: 1, 1, 1, 1
                 halign: "center"
                 valign: "bottom"
+                padding: dp(10)
+
+            MDBoxLayout:
+                size_hint: 1, None
+                height: dp(70)
+                padding: dp(20)
+
+                Spinner:
+                    id: volume_spinner
+                    text: root._selected_option
+                    values: root._volume_options.keys()
+                    size_hint: 0.5, 1
+                    opacity: 1 if root._show_spinner else 0
+                    disabled: not root._show_spinner
+                    on_text: root._change_volume_option()
 
             MDLabel:
                 id: loading_label
