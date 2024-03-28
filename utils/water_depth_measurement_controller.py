@@ -1,31 +1,41 @@
 import threading
 
 from utils.depth_sensor_controller import DepthSensorController
+from utils.local_storage_controller import LocalStorageController
 
 
 class WaterDepthMeasurementController:
     _instance = None
     _lock = threading.Lock()
 
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         with cls._lock:
             if not cls._instance:
                 cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self,
+                 tank_volume_ratio=0.08,
+                 trigger_pin=23,
+                 echo_pin=24
+                 ):
+
         if getattr(self, '_initialized', None):
             return
         self._initialized = True
 
-        self._depth_sensor_controller = DepthSensorController(trigger_pin=23, echo_pin=24)
+        self._depth_sensor_controller = DepthSensorController(trigger_pin=trigger_pin, echo_pin=echo_pin)
 
-        self._tank_volume_ratio = None  # liters per cm in height
+        self._tank_volume_ratio = tank_volume_ratio  # liters per cm in height
 
         self._load_parameters()
 
     def _load_parameters(self):
-        pass
+        _tank_volume_ratio = LocalStorageController().get_depth_sensor_parameters()
+        if _tank_volume_ratio is not None:
+            self._tank_volume_ratio = _tank_volume_ratio
+        else:
+            LocalStorageController().set_depth_sensor_parameters(self._tank_volume_ratio)
 
     def measure_water_depth_cm(self):
         return self._depth_sensor_controller.measure_water_depth_cm()
