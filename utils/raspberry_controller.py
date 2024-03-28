@@ -102,6 +102,7 @@ class RaspberryController:
     def start_watering(self) -> bool:
         if self.water_depth_measurement_controller.is_water_tank_empty():
             self._log_no_water_in_tank()
+            self._send_stop_watering_message()
             return False
 
         if self.pump_controller.start_watering():
@@ -121,6 +122,7 @@ class RaspberryController:
                 self._log_manual_watering_cycle()
                 self._watering_manually = False
 
+            self._log_manual_watering_cycle()
             self._log_water_level_after_watering()
             return True
 
@@ -162,19 +164,10 @@ class RaspberryController:
             # check for watering now command
             if "command" in updated_data.keys():
                 if updated_data["command"] == "start_watering":
-                    if self.pump_controller.is_watering:
-                        return
-
-                    self.pump_controller.start_watering()
-                    self.start_sending_watering_updates()
+                    self.start_watering()
 
                 elif updated_data["command"] == "stop_watering":
-                    if not self.pump_controller.is_watering:
-                        return
-
-                    self.pump_controller.stop_watering()
-                    self.stop_sending_watering_updates()
-
+                    self.manual_stop_watering()
                     if self._while_watering_callback_function is not None:
                         self._while_watering_callback_function(
                             is_watering=self.pump_controller.is_watering,
@@ -182,7 +175,20 @@ class RaspberryController:
                             liters_sent=round(self.liters_sent, 2)
                         )
 
-                    self._log_manual_watering_cycle()
+                    # if not self.pump_controller.is_watering:
+                    #     return
+                    #
+                    # self.pump_controller.stop_watering()
+                    # self.stop_sending_watering_updates()
+                    #
+                    # if self._while_watering_callback_function is not None:
+                    #     self._while_watering_callback_function(
+                    #         is_watering=self.pump_controller.is_watering,
+                    #         watering_time=round(self.watering_time),
+                    #         liters_sent=round(self.liters_sent, 2)
+                    #     )
+                    #
+                    # self._log_manual_watering_cycle()
                 else:
                     print("Current data: null")
 
@@ -239,7 +245,7 @@ class RaspberryController:
             round(self.watering_time)
         )
 
-        self.stop_sending_watering_updates()
+        # self.stop_sending_watering_updates()
         self.pump_controller.stop_watering()
 
     def _update_current_watering_info(self):

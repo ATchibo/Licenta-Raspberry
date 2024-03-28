@@ -82,8 +82,10 @@ class EventLogger:
         self._load_notifiable_messages()
 
     def _add_log_message(self, log_message):
+        print("Adding log message: ", log_message.get_message())
+
         if RemoteRequests().add_log_message(log_message):
-            print("Added log message")
+            print("Added log message: ", log_message.get_message())
             self._log_messages.append(log_message)
 
             if self._notifiable_messages.get(log_message.get_level().value) is True:
