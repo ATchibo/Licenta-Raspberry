@@ -11,6 +11,8 @@ class DepthSensorController:
         GPIO.setup(self._trigger_pin, GPIO.OUT)
         GPIO.setup(self._echo_pin, GPIO.IN)
 
+        GPIO.output(self._trigger_pin, GPIO.LOW)
+
     def measure_water_depth_cm(self):
         GPIO.output(self._trigger_pin, GPIO.HIGH)
         time.sleep(0.00001)
