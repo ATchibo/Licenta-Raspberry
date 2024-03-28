@@ -40,6 +40,7 @@ class LocalStorageController:
         self._delete_file(self._watering_programs_active_id_file)
         self._delete_file(self._is_watering_programs_active_file)
         self._delete_file(self._log_messages_file)
+        self._delete_file(self._last_watering_time_file)
 
     def _delete_file(self, file_name):
         if file_name in os.listdir():
