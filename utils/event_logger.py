@@ -101,6 +101,12 @@ class EventLogger:
     def add_moisture_measurement_message(self, moisture_level, date_time):
         self._add_log_message(MoistureMeasurementMessage(moisture_level, date_time))
 
+    def add_no_water_in_tank_message(self):
+        pass
+
+    def add_water_level_after_watering_message(self, param):
+        pass
+
     def _update_logs_on_receive_from_network(
         self,
         doc_snapshot,

@@ -16,6 +16,8 @@ class WaterDepthMeasurementController:
 
     def __init__(self,
                  tank_volume_ratio=0.08,
+                 empty_tank_threshold=0.07,
+                 low_tank_threshold=0.25,
                  trigger_pin=23,
                  echo_pin=24
                  ):
@@ -27,6 +29,8 @@ class WaterDepthMeasurementController:
         self._depth_sensor_controller = DepthSensorController(trigger_pin=trigger_pin, echo_pin=echo_pin)
 
         self._tank_volume_ratio = tank_volume_ratio  # liters per cm in height
+        self._empty_tank_threshold = empty_tank_threshold
+        self._low_tank_threshold = low_tank_threshold
 
         self._load_parameters()
 
@@ -43,3 +47,13 @@ class WaterDepthMeasurementController:
     def set_tank_volume_ratio(self, min_value, max_value, tank_volume):
         self._tank_volume_ratio = tank_volume / (max_value - min_value)
         return self._tank_volume_ratio
+
+    def get_current_water_volume(self):
+        _water_height = self.measure_water_depth_cm()
+        return self._tank_volume_ratio * _water_height
+
+    def is_water_tank_empty(self) -> bool:
+        return self.get_current_water_volume() < self._empty_tank_threshold
+
+    def is_water_tank_low(self) -> bool:
+        return self.get_current_water_volume() < self._low_tank_threshold

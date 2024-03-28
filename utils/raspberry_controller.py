@@ -87,7 +87,22 @@ class RaspberryController:
             self.liters_sent
         )
 
+    def _log_no_water_in_tank(self):
+        EventLogger().add_no_water_in_tank_message()
+
+    def _log_water_level_after_watering(self):
+        if self.water_depth_measurement_controller.is_water_tank_empty():
+            EventLogger().add_no_water_in_tank_message()
+        elif self.water_depth_measurement_controller.is_water_tank_low():
+            EventLogger().add_water_level_after_watering_message(
+                self.water_depth_measurement_controller.get_current_water_volume()
+            )
+
     def start_watering(self) -> bool:
+        if self.water_depth_measurement_controller.is_water_tank_empty():
+            self._log_no_water_in_tank()
+            return False
+
         if self.pump_controller.start_watering():
             self.start_sending_watering_updates()
             self._watering_manually = True
@@ -105,19 +120,27 @@ class RaspberryController:
                 self._log_manual_watering_cycle()
                 self._watering_manually = False
 
+            self._log_water_level_after_watering()
             return True
+
         return False
 
     def water_for_liters(self, liters):
-        print("Watering for", liters, "liters")
+        # print("Watering for", liters, "liters")
+
+        if WaterDepthMeasurementController().is_water_tank_empty():
+            self._log_no_water_in_tank()
+            return False
+
         self.start_sending_watering_updates()
         self.pump_controller.start_watering_for_liters(liters)
         self.stop_sending_watering_updates()
         self._send_stop_watering_message()
 
         self._log_auto_watering_cycle()
+        self._log_water_level_after_watering()
 
-        print("Watering finished - raspi controller")
+        # print("Watering finished - raspi controller")
 
     def start_listening_for_watering_now(self):
         RemoteRequests().add_watering_now_listener(callback=self._watering_now_callback_for_incoming_messages)
