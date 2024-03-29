@@ -47,6 +47,7 @@ class RaspberryController:
         self._while_watering_callback_function = None
 
         self.raspberry_id = getserial()
+        self._watering_program = None
 
         self._watering_cycle_start_time = None
         self._watering_manually = False
@@ -100,6 +101,9 @@ class RaspberryController:
             )
 
     def start_watering(self) -> bool:
+        if self.pump_controller.is_watering:
+            return False
+
         if self.water_depth_measurement_controller.is_water_tank_empty():
             self._log_no_water_in_tank()
             self._send_stop_watering_message()
@@ -112,6 +116,9 @@ class RaspberryController:
         return False
 
     def manual_stop_watering(self) -> bool:
+        if not self.pump_controller.is_watering:
+            return False
+
         self.pump_controller.stop_watering_event.set()
 
         if self.pump_controller.stop_watering():
