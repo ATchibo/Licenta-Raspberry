@@ -443,12 +443,13 @@ class FirebaseController:
 
             self.__token = _token
             self.__refresh_token = _refresh_token
-            self._schedule_token_refresh(_expires_in - 10)
+            self._schedule_token_refresh(_expires_in / 2)
 
             return True
         else:
             return False
 
+    # should deprecate
     def anonymous_login(self):
         load_dotenv()
         self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
@@ -477,7 +478,7 @@ class FirebaseController:
             self._start_listening_for_ping()
             self.__token = _token
             self.__refresh_token = _refresh_token
-            self._schedule_token_refresh(_expires_in - 10)
+            self._schedule_token_refresh(_expires_in / 2)
 
             return True
         else:
@@ -539,7 +540,7 @@ class FirebaseController:
             if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
                 self.__token = _token
                 self.__refresh_token = _refresh_token
-                self._schedule_token_refresh(_expires_in - 10)
+                self._schedule_token_refresh(_expires_in / 2)
 
                 print("Token refreshed")
 
