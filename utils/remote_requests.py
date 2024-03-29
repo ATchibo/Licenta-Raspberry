@@ -203,3 +203,9 @@ class RemoteRequests:
             pass
         except Exception as e:
             print("Error resetting data from remote")
+
+    def update_water_volume_info(self, param):
+        try:
+            return self._firebase_controller.update_water_volume_info(self._raspberry_id, param)
+        except Exception as e:
+            return False

@@ -161,6 +161,11 @@ class RaspberryController:
                     print("Sending moisture info")
                     self._send_moisture_info()
 
+            if "waterVolume" in updated_data.keys():
+                if "REQUEST" in str(updated_data["waterVolume"]):
+                    print("Sending water volume info")
+                    self._send_water_volume_info()
+
             # check for watering now command
             if "command" in updated_data.keys():
                 if updated_data["command"] == "start_watering":
@@ -281,6 +286,11 @@ class RaspberryController:
 
     def _send_moisture_info(self):
         RemoteRequests().update_moisture_info(self.get_moisture_percentage())
+
+    def _send_water_volume_info(self):
+        RemoteRequests().update_water_volume_info(
+            self.water_depth_measurement_controller.get_current_water_volume()
+        )
 
     def update_raspberry_info(self):
         self._raspberry_info = RemoteRequests().get_raspberry_info()

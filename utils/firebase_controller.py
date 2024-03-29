@@ -352,6 +352,21 @@ class FirebaseController:
         except Exception as e:
             raise Exception(f"Error updating moisture info: {e}")
 
+    def update_water_volume_info(self, _raspberry_id, param):
+        if self.db is None:
+            raise FirebaseUninitializedException()
+
+        try:
+            data = {
+                "waterVolume": param
+            }
+
+            self.db.collection(self._wateringNowCollectionName).document(_raspberry_id).set(data, merge=True)
+            return True
+        except Exception as e:
+            raise Exception(f"Error updating water volume info: {e}")
+
+
     def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> bool:
         if self.db is None:
             raise FirebaseUninitializedException()
@@ -530,5 +545,4 @@ class FirebaseController:
 
         except Exception as e:
             print(f"Error attempting to refresh token: {e}")
-
 

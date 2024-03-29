@@ -14,7 +14,7 @@ from components.calibration.depth_calibration_view import DepthCalibrationView
 from utils.WateringProgramController import WateringProgramController
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
-from utils.login_controller import LoginController
+from utils.notification_login_controller import NotificationLoginController
 from utils.moisture_measurement_controller import MoistureMeasurementController
 from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     #TODO: revert to try login
 
     try:
-        LoginController().try_initial_login()
+        NotificationLoginController().try_initial_login()
     except Exception as e:
         print("Failed to auto login: " + str(e))
 
