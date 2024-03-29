@@ -129,7 +129,6 @@ class RaspberryController:
                 self._log_manual_watering_cycle()
                 self._watering_manually = False
 
-            self._log_manual_watering_cycle()
             self._log_water_level_after_watering()
             return True
 
@@ -175,10 +174,10 @@ class RaspberryController:
 
             # check for watering now command
             if "command" in updated_data.keys():
-                if updated_data["command"] == "start_watering":
+                if updated_data["command"] == "start_watering" and not self.pump_controller.is_watering:
                     self.start_watering()
 
-                elif updated_data["command"] == "stop_watering":
+                elif updated_data["command"] == "stop_watering" and self.pump_controller.is_watering:
                     self.manual_stop_watering()
                     if self._while_watering_callback_function is not None:
                         self._while_watering_callback_function(
