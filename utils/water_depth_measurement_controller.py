@@ -48,6 +48,7 @@ class WaterDepthMeasurementController:
 
     def set_tank_volume_ratio(self, min_value, max_value, tank_volume):
         self._tank_volume_ratio = tank_volume / (max_value - min_value)
+        self._max_height = max_value
         LocalStorageController().set_depth_sensor_parameters(self._tank_volume_ratio, max_value)
         return self._tank_volume_ratio
 
