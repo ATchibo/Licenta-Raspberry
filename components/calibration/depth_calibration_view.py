@@ -63,23 +63,23 @@ class DepthCalibrationView(MDScreen):
         self._cancel_event = threading.Event()
 
     def calibrate_button_function(self, *args):
-        if self._min_value is None:
-            self.calibrating = True
-            self.loading_text = "Measuring water depth..."
-
-            self._current_thread = threading.Thread(
-                target=self._get_min_value,
-                args=(self._on_min_value_thread_finished,)
-            )
-
-            self._current_thread.start()
-
-        elif self._max_value is None:
+        if self._max_value is None:
             self.calibrating = True
             self.loading_text = "Measuring water depth..."
 
             self._current_thread = threading.Thread(
                 target=self._get_volume,
+                args=(self._on_max_value_thread_finished,)
+            )
+
+            self._current_thread.start()
+            
+        elif self._min_value is None:
+            self.calibrating = True
+            self.loading_text = "Measuring water depth..."
+
+            self._current_thread = threading.Thread(
+                target=self._get_min_value,
                 args=(self._on_volume_thread_finished,)
             )
 
@@ -120,7 +120,7 @@ class DepthCalibrationView(MDScreen):
             App.get_running_app().root.ids.navigation_drawer.screen_manager.current = "calibrate"
         Clock.schedule_once(_aux, 0.1)
 
-    def _on_min_value_thread_finished(self):
+    def _on_max_value_thread_finished(self):
         self.step_text = ("Step 2: Select an option and fill the tank with the corresponding amount of water."
                           "After filling the tank, press Calibrate.")
         self.calibrating = False
