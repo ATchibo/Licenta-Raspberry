@@ -428,7 +428,7 @@ class FirebaseController:
 
             self.__token = _token
             self.__refresh_token = _refresh_token
-            self._schedule_token_refresh(_expires_in - 1)
+            self._schedule_token_refresh(_expires_in - 10)
 
             return True
         else:
@@ -462,7 +462,7 @@ class FirebaseController:
             self._start_listening_for_ping()
             self.__token = _token
             self.__refresh_token = _refresh_token
-            self._schedule_token_refresh(_expires_in - 1)
+            self._schedule_token_refresh(_expires_in - 10)
 
             return True
         else:
@@ -524,7 +524,7 @@ class FirebaseController:
             if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
                 self.__token = _token
                 self.__refresh_token = _refresh_token
-                self._schedule_token_refresh(_expires_in - 1)
+                self._schedule_token_refresh(_expires_in - 10)
 
                 print("Token refreshed")
 

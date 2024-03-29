@@ -10,7 +10,7 @@ from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
 
-class LoginController:
+class NotificationLoginController:
     _instance = None
     _lock = threading.Lock()
 

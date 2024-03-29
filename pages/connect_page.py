@@ -11,7 +11,7 @@ from utils.WateringProgramController import WateringProgramController
 from utils.backend_controller import BackendController
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
-from utils.login_controller import LoginController
+from utils.notification_login_controller import NotificationLoginController
 from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
@@ -37,7 +37,7 @@ class ConnectPage(MDScreen):
         self.qr_data = ""
         self._user_email = None
 
-        LoginController().set_login_page_on_try_login_callback(self._on_login_controller_login_attempt)
+        NotificationLoginController().set_login_page_on_try_login_callback(self._on_login_controller_login_attempt)
         Clock.schedule_once(self._init_setup, 0.1)
 
     def _init_setup(self, *args):
