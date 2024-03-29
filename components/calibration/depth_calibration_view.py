@@ -91,7 +91,7 @@ class DepthCalibrationView(MDScreen):
                 self._max_value,
                 self._tank_volume
             )
-            LocalStorageController().set_depth_sensor_parameters(_ratio)
+            LocalStorageController().set_depth_sensor_parameters(_ratio, self._max_value)
 
             self._navigate_back()
 
