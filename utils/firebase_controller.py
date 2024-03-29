@@ -352,13 +352,13 @@ class FirebaseController:
         except Exception as e:
             raise Exception(f"Error updating moisture info: {e}")
 
-    def update_water_volume_info(self, _raspberry_id, param):
+    def update_water_tank_volume_info(self, _raspberry_id, param):
         if self.db is None:
             raise FirebaseUninitializedException()
 
         try:
             data = {
-                "waterVolume": param
+                "waterTankVolume": param
             }
 
             self.db.collection(self._wateringNowCollectionName).document(_raspberry_id).set(data, merge=True)

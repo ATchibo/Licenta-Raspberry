@@ -206,6 +206,6 @@ class RemoteRequests:
 
     def update_water_volume_info(self, param):
         try:
-            return self._firebase_controller.update_water_volume_info(self._raspberry_id, param)
+            return self._firebase_controller.update_water_tank_volume_info(self._raspberry_id, param)
         except Exception as e:
             return False

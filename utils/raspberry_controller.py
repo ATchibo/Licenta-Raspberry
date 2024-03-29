@@ -161,8 +161,8 @@ class RaspberryController:
                     print("Sending moisture info")
                     self._send_moisture_info()
 
-            if "waterVolume" in updated_data.keys():
-                if "REQUEST" in str(updated_data["waterVolume"]):
+            if "waterTankVolume" in updated_data.keys():
+                if "REQUEST" in str(updated_data["waterTankVolume"]):
                     print("Sending water volume info")
                     self._send_water_volume_info()
 
