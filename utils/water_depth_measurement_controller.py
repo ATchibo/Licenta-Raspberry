@@ -29,17 +29,19 @@ class WaterDepthMeasurementController:
         self._depth_sensor_controller = DepthSensorController(trigger_pin=trigger_pin, echo_pin=echo_pin)
 
         self._tank_volume_ratio = tank_volume_ratio  # liters per cm in height
+        self._max_height = None
         self._empty_tank_threshold = empty_tank_threshold
         self._low_tank_threshold = low_tank_threshold
 
         self._load_parameters()
 
     def _load_parameters(self):
-        _tank_volume_ratio = LocalStorageController().get_depth_sensor_parameters()
-        if _tank_volume_ratio is not None:
+        _tank_volume_ratio, _max_height = LocalStorageController().get_depth_sensor_parameters()
+        if _tank_volume_ratio is not None and _max_height is not None:
             self._tank_volume_ratio = _tank_volume_ratio
+            self._max_height = _max_height
         else:
-            LocalStorageController().set_depth_sensor_parameters(self._tank_volume_ratio)
+            LocalStorageController().set_depth_sensor_parameters(self._tank_volume_ratio, self._max_height)
 
     def measure_water_depth_cm(self):
         return self._depth_sensor_controller.measure_water_depth_cm()
@@ -51,7 +53,7 @@ class WaterDepthMeasurementController:
 
     def get_current_water_volume(self):
         _water_height = self.measure_water_depth_cm()
-        return self._tank_volume_ratio * _water_height
+        return max(0, self._tank_volume_ratio * (self._max_height - _water_height))
 
     def is_water_tank_empty(self) -> bool:
         return self.get_current_water_volume() < self._empty_tank_threshold

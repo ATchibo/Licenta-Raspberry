@@ -65,6 +65,8 @@ class DepthCalibrationView(MDScreen):
     def calibrate_button_function(self, *args):
         if self._min_value is None:
             self.calibrating = True
+            self.loading_text = "Measuring water depth..."
+
             self._current_thread = threading.Thread(
                 target=self._get_min_value,
                 args=(self._on_min_value_thread_finished,)
@@ -74,6 +76,8 @@ class DepthCalibrationView(MDScreen):
 
         elif self._max_value is None:
             self.calibrating = True
+            self.loading_text = "Measuring water depth..."
+
             self._current_thread = threading.Thread(
                 target=self._get_volume,
                 args=(self._on_volume_thread_finished,)
@@ -92,13 +96,11 @@ class DepthCalibrationView(MDScreen):
             self._navigate_back()
 
     def _get_min_value(self, on_thread_finished=None):
-        self.loading_text = "Measuring water depth..."
         self._min_value = RaspberryController().water_depth_measurement_controller.measure_water_depth_cm()
         if on_thread_finished is not None:
             on_thread_finished()
 
     def _get_volume(self, on_thread_finished=None):
-        self.loading_text = "Measuring water depth..."
         self._max_value = RaspberryController().water_depth_measurement_controller.measure_water_depth_cm()
         if on_thread_finished is not None:
             on_thread_finished()
