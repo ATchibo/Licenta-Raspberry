@@ -326,6 +326,7 @@ class RaspberryController(Observer):
         LocalStorageController().save_raspberry_info(self._raspberry_info)
 
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
+        print(f"Subject notified raspberry controller: {notification_type}")
         if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
             self._set_ping_callback()
             self.start_listening_for_watering_now()

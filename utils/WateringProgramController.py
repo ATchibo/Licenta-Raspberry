@@ -231,11 +231,11 @@ class WateringProgramController(Observer):
             # print(f"Changed doc id: {doc_id}")
             # print(f"Changed doc data: {doc_data}")
 
-            new_programs = {}
+            new_programs = self._watering_programs.copy()
             new_active_program_id = None
             new_is_watering_programs_active = None
 
-            changed_active_program = False
+            edited_active_program_properties = False
 
             if "name" in doc_data:  # this is a program
                 doc_data["id"] = doc_id
@@ -246,7 +246,7 @@ class WateringProgramController(Observer):
                     new_programs.pop(doc_id, None)
 
                 if doc_id == self._active_watering_program_id:
-                    changed_active_program = True
+                    edited_active_program_properties = True
 
             if "activeProgramId" in doc_data:
                 new_active_program_id = str(doc_data["activeProgramId"])
@@ -263,7 +263,7 @@ class WateringProgramController(Observer):
             if new_is_watering_programs_active is not None:
                 self._is_watering_programs_active = new_is_watering_programs_active
 
-            if new_active_program_id != old_active_program_id or changed_active_program:
+            if new_active_program_id != old_active_program_id or edited_active_program_properties:
                 self._schedule_watering()
 
             if self._gui_update_callback is not None:
