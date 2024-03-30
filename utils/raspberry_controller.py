@@ -178,6 +178,7 @@ class RaspberryController(Observer):
             if "command" in updated_data.keys():
                 print("Is watering:", self.pump_controller.is_watering)
                 if updated_data["command"] == "start_watering" and not self.pump_controller.is_watering:
+                    RemoteRequests().update_watering_info('processing', 0.0, 0)
                     self.start_watering()
 
                 elif updated_data["command"] == "stop_watering" and self.pump_controller.is_watering:
@@ -265,7 +266,7 @@ class RaspberryController(Observer):
 
     def _update_current_watering_info(self):
         RemoteRequests().update_watering_info(
-            'start_watering',
+            'processing',
             round(self.liters_sent, 2),
             round(self.watering_time)
         )
