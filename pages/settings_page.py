@@ -42,6 +42,8 @@ class SettingsPage(MDScreen):
         self.auto_watering_active_variable = self.raspberry_info.notifiableMessages[MessageType.AUTO_WATERING_CYCLE.value]
         self.manual_watering_active_variable = self.raspberry_info.notifiableMessages[MessageType.MANUAL_WATERING_CYCLE.value]
         self.moisture_measurement_active_variable = self.raspberry_info.notifiableMessages[MessageType.MOISTURE_LEVEL_MEASUREMENT.value]
+        self.low_water_level_active_variable = self.raspberry_info.notifiableMessages[MessageType.LOW_WATER_LEVEL.value]
+        self.no_water_left_active_variable = self.raspberry_info.notifiableMessages[MessageType.EMPTY_WATER_TANK.value]
 
     def _init_setup(self, *args):
         self._load_data()
