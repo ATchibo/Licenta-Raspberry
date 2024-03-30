@@ -17,10 +17,13 @@ import requests
 import google.oauth2.credentials
 from google.cloud import firestore
 
+from domain.observer.NotificationType import NotificationType
+from domain.observer.Observer import Observer
+from domain.observer.Subject import Subject
 from utils.get_rasp_uuid import getserial
 
 
-class FirebaseController:
+class FirebaseController(Subject):
     __project_id = None
     __api_key = None
     __refresh_token = None
@@ -57,6 +60,10 @@ class FirebaseController:
         self.watering_programs_callback = None
         self.watering_programs_fields_listener = None
         self.watering_programs_collection_listener = None
+        self._log_messages_changes_listener = None
+        self._notification_changes_listener = None
+
+        self._observers = []
 
     def _is_raspberry_registered(self, serial) -> bool:
         if self.db is None:
@@ -235,14 +242,14 @@ class FirebaseController:
             raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._logsCollectionName).document(raspberry_id)
-        doc_ref.on_snapshot(_update_values_on_receive_from_network)
+        self._log_messages_changes_listener = doc_ref.on_snapshot(_update_values_on_receive_from_network)
 
     def add_listener_for_notification_changes(self, raspberry_id, _update_values_on_receive_from_network):
         if self.db is None:
             raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(raspberry_id)
-        doc_ref.on_snapshot(_update_values_on_receive_from_network)
+        self._notification_changes_listener = doc_ref.on_snapshot(_update_values_on_receive_from_network)
 
     def unlink_raspberry(self, raspberry_id):
         if self.db is None:
@@ -408,6 +415,22 @@ class FirebaseController:
                 if doc_data["message"] == "PING":
                     self.db.collection(self._wsCollectionName).document(getserial()).set({"message": "PONG"})
 
+    def _remove_all_listeners(self):
+        if self.watering_now_listener is not None:
+            self.watering_now_listener.unsubscribe()
+
+        if self.watering_programs_fields_listener is not None:
+            self.watering_programs_fields_listener.unsubscribe()
+
+        if self.watering_programs_collection_listener is not None:
+            self.watering_programs_collection_listener.unsubscribe()
+
+        if self._log_messages_changes_listener is not None:
+            self._log_messages_changes_listener.unsubscribe()
+
+        if self._notification_changes_listener is not None:
+            self._notification_changes_listener.unsubscribe()
+
     def login_with_custom_token(self, token=None):
         print("Attempting login")
 
@@ -450,39 +473,39 @@ class FirebaseController:
             return False
 
     # should deprecate
-    def anonymous_login(self):
-        load_dotenv()
-        self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
-        self.__project_id = os.getenv("PROJECT_ID")
-
-        request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={self.__api_key}"
-        headers = {"Content-Type": "application/json; charset=UTF-8"}
-        data = json.dumps({"returnSecureToken": True})
-        response = requests.post(request_url, headers=headers, data=data)
-        try:
-            response.raise_for_status()
-        except (HTTPError, Exception):
-            content = response.json()
-            error = f"error: {content['error']['message']}"
-
-            self._instance.db = None
-
-            raise Exception(error)
-
-        json_response = response.json()
-        _token = json_response["idToken"]
-        _refresh_token = json_response["refreshToken"]
-        _expires_in = int(json_response["expiresIn"])
-
-        if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
-            self._start_listening_for_ping()
-            self.__token = _token
-            self.__refresh_token = _refresh_token
-            self._schedule_token_refresh(_expires_in - 10)
-
-            return True
-        else:
-            return False
+    # def anonymous_login(self):
+    #     load_dotenv()
+    #     self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
+    #     self.__project_id = os.getenv("PROJECT_ID")
+    #
+    #     request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={self.__api_key}"
+    #     headers = {"Content-Type": "application/json; charset=UTF-8"}
+    #     data = json.dumps({"returnSecureToken": True})
+    #     response = requests.post(request_url, headers=headers, data=data)
+    #     try:
+    #         response.raise_for_status()
+    #     except (HTTPError, Exception):
+    #         content = response.json()
+    #         error = f"error: {content['error']['message']}"
+    #
+    #         self._instance.db = None
+    #
+    #         raise Exception(error)
+    #
+    #     json_response = response.json()
+    #     _token = json_response["idToken"]
+    #     _refresh_token = json_response["refreshToken"]
+    #     _expires_in = int(json_response["expiresIn"])
+    #
+    #     if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
+    #         self._start_listening_for_ping()
+    #         self.__token = _token
+    #         self.__refresh_token = _refresh_token
+    #         self._schedule_token_refresh(_expires_in - 10)
+    #
+    #         return True
+    #     else:
+    #         return False
 
     def _get_new_tokens(self, refresh_token) -> tuple[str, str, int] | None:
         load_dotenv()
@@ -520,7 +543,10 @@ class FirebaseController:
                                                                  token_uri=f"https://securetoken.googleapis.com/v1/token?key={self.__api_key}"
                                                                  )
 
+            self._remove_all_listeners()
             self._instance.db = firestore.Client(self.__project_id, _credentials)
+            self.notify(NotificationType.FIRESTORE_CLIENT_CHANGED)
+
             return True
 
         except Exception as e:
@@ -547,3 +573,12 @@ class FirebaseController:
         except Exception as e:
             print(f"Error attempting to refresh token: {e}")
 
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self, notification_type: NotificationType) -> None:
+        for observer in self._observers:
+            observer.update(notification_type)

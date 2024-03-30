@@ -101,10 +101,11 @@ class NotificationLoginController:
         if FirebaseController().login_with_custom_token(auth_token):
             self._is_logged_in.set()
 
-            FirebaseController().link_raspberry_to_device(self._raspberry_id, email)
+            # FirebaseController().link_raspberry_to_device(self._raspberry_id, email)
             BackendController().send_message_to_ws("OK")
 
-            self._setup_after_login(True, email)
+            # self._setup_after_login(True, email)
+            self._login_page_on_try_login_callback(True, email)
 
             print("Logged in hehehehe")
 
@@ -114,13 +115,13 @@ class NotificationLoginController:
 
             print("Failed to login hehehehe")
 
-    def _setup_after_login(self, login_success, email):
-        RaspberryController().update_raspberry_info()
-        RaspberryController().start_listening_for_watering_now()
-        WateringProgramController().perform_initial_setup()
-        EventLogger().perform_initial_setup()
-
-        self._login_page_on_try_login_callback(login_success, email)
+    # def _setup_after_login(self, login_success, email):
+    #     RaspberryController().update_raspberry_info()
+    #     RaspberryController().start_listening_for_watering_now()
+    #     WateringProgramController().perform_initial_setup()
+    #     EventLogger().perform_initial_setup()
+    #
+    #     self._login_page_on_try_login_callback(login_success, email)
 
     def try_initial_login(self):
         self._ws_code = self._backend_request()
