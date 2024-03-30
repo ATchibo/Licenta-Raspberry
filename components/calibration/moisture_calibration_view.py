@@ -13,7 +13,7 @@ Builder.load_file("components/calibration/moisture_calibration_view.kv")
 
 class MoistureCalibrationView(MDScreen):
     calibrating = BooleanProperty(False)
-    step_text = StringProperty("Step 1: Place the sensor in the air"
+    step_text = StringProperty("Step 1: Place the sensor in the water"
                                " and press the button below")
     loading_text = StringProperty("")
     calibrate_button_text = StringProperty("Calibrate")
@@ -31,7 +31,7 @@ class MoistureCalibrationView(MDScreen):
 
     def on_enter(self, *args):
         self.calibrating = False
-        self.step_text = ("Step 1: Place the sensor in the air"
+        self.step_text = ("Step 1: Place the sensor in the water"
                           " and press the button below")
         self.loading_text = ""
         self.calibrate_button_text = "Calibrate"
@@ -123,7 +123,7 @@ class MoistureCalibrationView(MDScreen):
         Clock.schedule_once(_aux, 0.1)
 
     def _on_min_value_thread_finished(self):
-        self.step_text = ("Step 2: Place the sensor in the water"
+        self.step_text = ("Step 2: Place the sensor in the air"
                           " and press the button below")
         self.calibrating = False
         self.loading_text = ""
