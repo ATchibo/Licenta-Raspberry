@@ -8,6 +8,8 @@ from domain.logging.ManualWateringCycleMessage import ManualWateringCycleMessage
 from domain.logging.MessageType import MessageType
 from domain.logging.MoistureMeasurementMessage import MoistureMeasurementMessage
 from domain.logging.NoWaterMessage import NoWaterMessage
+from domain.observer.Observer import Observer
+from domain.observer.ObserverNotificationType import ObserverNotificationType
 from utils.backend_controller import BackendController
 from utils.firebase_controller import FirebaseController
 from domain.logging.AutoWateringCycleMessage import AutoWateringCycleMessage
@@ -15,7 +17,7 @@ from utils.get_rasp_uuid import getserial
 from utils.remote_requests import RemoteRequests
 
 
-class EventLogger:
+class EventLogger(Observer):
     _instance = None
     _lock = threading.Lock()
 
@@ -157,3 +159,9 @@ class EventLogger:
 
     def set_gui_log_update_callback(self, _populate_list_callback):
         self._gui_log_update_callback = _populate_list_callback
+
+    def on_notification_from_subject(self, notification_type: ObserverNotificationType) -> None:
+        if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
+            self.perform_initial_setup()
+        else:
+            print(f"Unknown notification type: {notification_type}")

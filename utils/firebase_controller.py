@@ -17,7 +17,7 @@ import requests
 import google.oauth2.credentials
 from google.cloud import firestore
 
-from domain.observer.NotificationType import NotificationType
+from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Observer import Observer
 from domain.observer.Subject import Subject
 from utils.get_rasp_uuid import getserial
@@ -142,13 +142,13 @@ class FirebaseController(Subject):
         doc_ref = self.db.collection(self._wateringNowCollectionName).document(serial)
 
         if command != '':
-            doc_ref.update({
+            doc_ref.on_notification_from_subject({
                 'command': command,
                 'watering_duration': watering_time,
                 'water_volume': liters_sent
             })
         else:
-            doc_ref.update({
+            doc_ref.on_notification_from_subject({
                 'watering_duration': watering_time,
                 'water_volume': liters_sent
             })
@@ -203,7 +203,7 @@ class FirebaseController(Subject):
             raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
-        doc_ref.update({"activeProgramId": program_id})
+        doc_ref.on_notification_from_subject({"activeProgramId": program_id})
 
     def get_is_watering_programs_active(self, raspberry_id) -> bool:
         if self.db is None:
@@ -221,7 +221,7 @@ class FirebaseController(Subject):
             raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._wateringProgramsCollectionName).document(raspberry_id)
-        doc_ref.update({"wateringProgramsEnabled": is_active})
+        doc_ref.on_notification_from_subject({"wateringProgramsEnabled": is_active})
 
     def add_listener_for_watering_programs_changes(self, raspberry_id, _update_values_on_receive_from_network):
         if self.db is None:
@@ -277,7 +277,7 @@ class FirebaseController(Subject):
 
         print(f"Owner id: {owner_id}")
 
-        self.db.collection(self._ownerInfoCollectionName).document(owner_id).update({
+        self.db.collection(self._ownerInfoCollectionName).document(owner_id).on_notification_from_subject({
             "raspberry_ids": firestore.ArrayRemove([raspberry_id])
         })
 
@@ -294,7 +294,7 @@ class FirebaseController(Subject):
             raise FirebaseUninitializedException()
 
         doc_ref = self.db.collection(self._ownerInfoCollectionName).document(device_id)
-        doc_ref.update({"raspberry_ids": firestore.ArrayUnion([raspberry_id])})
+        doc_ref.on_notification_from_subject({"raspberry_ids": firestore.ArrayUnion([raspberry_id])})
 
         return True
 
@@ -545,7 +545,7 @@ class FirebaseController(Subject):
 
             self._remove_all_listeners()
             self._instance.db = firestore.Client(self.__project_id, _credentials)
-            self.notify(NotificationType.FIRESTORE_CLIENT_CHANGED)
+            self.notify(ObserverNotificationType.FIRESTORE_CLIENT_CHANGED)
 
             return True
 
@@ -579,6 +579,6 @@ class FirebaseController(Subject):
     def detach(self, observer: Observer) -> None:
         self._observers.remove(observer)
 
-    def notify(self, notification_type: NotificationType) -> None:
+    def notify(self, notification_type: ObserverNotificationType) -> None:
         for observer in self._observers:
-            observer.update(notification_type)
+            observer.on_notification_from_subject(notification_type)

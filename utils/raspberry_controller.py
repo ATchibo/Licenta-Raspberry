@@ -4,6 +4,8 @@ from datetime import datetime
 
 from domain.RaspberryInfo import RaspberryInfoBuilder, RaspberryInfo
 from domain.logging.MessageType import MessageType
+from domain.observer.ObserverNotificationType import ObserverNotificationType
+from domain.observer.Observer import Observer
 from utils.datetime_utils import get_current_datetime_tz
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
@@ -15,7 +17,7 @@ from utils.remote_requests import RemoteRequests
 from utils.water_depth_measurement_controller import WaterDepthMeasurementController
 
 
-class RaspberryController:
+class RaspberryController(Observer):
     _instance = None
     _lock = threading.Lock()
 
@@ -61,8 +63,7 @@ class RaspberryController:
                                 .build()
                                 )
 
-        # if LocalStorageController().get_raspberry_info() is None:
-        #     LocalStorageController().save_raspberry_info(self._raspberry_info)
+        self._load_raspberry_info_local_storage()
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -174,6 +175,7 @@ class RaspberryController:
 
             # check for watering now command
             if "command" in updated_data.keys():
+                print("Is watering:", self.pump_controller.is_watering)
                 if updated_data["command"] == "start_watering" and not self.pump_controller.is_watering:
                     self.start_watering()
 
@@ -286,6 +288,11 @@ class RaspberryController:
             return _raspberry_info
         return self._raspberry_info
 
+    def _load_raspberry_info_local_storage(self):
+        _raspberry_info = LocalStorageController().get_raspberry_info()
+        if _raspberry_info is not None:
+            self._raspberry_info = _raspberry_info
+
     def update_raspberry_notification_info(self, message_type: MessageType, value):
         self._raspberry_info.set_notifiable_message(message_type, value)
         RemoteRequests().update_raspberry_notifiable_message(message_type, value)
@@ -301,3 +308,8 @@ class RaspberryController:
     def update_raspberry_info(self):
         self._raspberry_info = RemoteRequests().get_raspberry_info()
         LocalStorageController().save_raspberry_info(self._raspberry_info)
+
+    def on_notification_from_subject(self, notification_type: ObserverNotificationType):
+        if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
+            self.start_listening_for_watering_now()
+            self.update_raspberry_info()

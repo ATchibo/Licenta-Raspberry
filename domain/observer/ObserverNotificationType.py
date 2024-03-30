@@ -1,5 +1,5 @@
 from enum import Enum
 
 
-class NotificationType(Enum):
+class ObserverNotificationType(Enum):
     FIRESTORE_CLIENT_CHANGED = "FIRESTORE_CLIENT_CHANGED"

@@ -100,4 +100,4 @@ class BackendController:
 
         res = requests.post(f"{self._backend_url}/api/send-notification", json=_message)
 
-        print(res.text)
+        print(f"Login notification send result: {res.text}")

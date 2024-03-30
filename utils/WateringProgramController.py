@@ -5,6 +5,8 @@ from datetime import datetime
 from google.cloud.firestore_v1.watch import ChangeType
 
 from domain.WateringProgram import WateringProgram
+from domain.observer.Observer import Observer
+from domain.observer.ObserverNotificationType import ObserverNotificationType
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
@@ -13,7 +15,7 @@ from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
 
-class WateringProgramController:
+class WateringProgramController(Observer):
     _instance = None
     _lock = threading.Lock()
 
@@ -272,3 +274,7 @@ class WateringProgramController:
                 )
             else:
                 print("No callback set for updating the GUI")
+
+    def on_notification_from_subject(self, notification_type: ObserverNotificationType):
+        if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
+            self.perform_initial_setup()

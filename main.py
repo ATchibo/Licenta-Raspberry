@@ -28,8 +28,8 @@ class ContentNavigationDrawer(MDScrollView):
 class PlantBuddyApp(MDApp):
     def build(self):
         self.root = Builder.load_file("home.kv")
-        # Window.size = (800, 480)
-        Window.fullscreen = 'auto'
+        Window.size = (800, 480)
+        # Window.fullscreen = 'auto'
         self.theme_cls.primary_palette = "Green"
         self.theme_cls.primary_hue = "400"
 
@@ -51,7 +51,9 @@ if __name__ == '__main__':
     # WateringProgramController().perform_initial_setup()
     # EventLogger().perform_initial_setup()
 
-    #TODO: revert to try login
+    FirebaseController().attach(RaspberryController())
+    FirebaseController().attach(WateringProgramController())
+    FirebaseController().attach(EventLogger())
 
     try:
         NotificationLoginController().try_initial_login()

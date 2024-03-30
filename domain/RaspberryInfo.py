@@ -45,8 +45,16 @@ class RaspberryInfo:
         self.raspberryLocation = info_dict["location"]
         self.raspberryDescription = info_dict["description"]
         self.notifiableMessages = {}
-        for key, value in info_dict["notifiable_messages"].items():
-            self.notifiableMessages[key] = value
+
+        print("Notifiable messages: ", info_dict["notifiable_messages"])
+        print("Notifiable messages type: ", type(info_dict["notifiable_messages"]))
+
+        if type(info_dict["notifiable_messages"]) is tuple:
+            for key, value in info_dict["notifiable_messages"][0].items():
+                self.notifiableMessages[key] = value
+        else:
+            for key, value in info_dict["notifiable_messages"].items():
+                self.notifiableMessages[key] = value
 
         return self
 
