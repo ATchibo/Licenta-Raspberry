@@ -106,7 +106,7 @@ class RemoteRequests:
         try:
             _result = self._firebase_controller.set_is_watering_programs_active(self._raspberry_id, is_active)
         except Exception as e:
-            pass
+            print(f"Exception when setting is watering programs active: {e}")
 
         self._local_storage_controller.save_is_watering_programs_active(is_active)
 

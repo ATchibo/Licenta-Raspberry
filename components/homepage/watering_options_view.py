@@ -157,6 +157,13 @@ class WateringOptionsView(MDBoxLayout):
                 self.ids.watering_program_spinner.text = self.current_program_name
             Clock.schedule_once(refresh_callback, 0.5)
 
+        else:
+            self.current_program_name = self.programs[self.selected_program_id].name
+
+            def refresh_callback(interval):
+                self.ids.watering_program_spinner.text = self.current_program_name
+            Clock.schedule_once(refresh_callback, 0.5)
+
     def check_moisture(self):
         moisture_percentage = self.raspberry_controller.get_moisture_percentage()
         self.moisture_variable = f"Moisture: {moisture_percentage}%"
