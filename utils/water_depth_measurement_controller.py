@@ -16,7 +16,7 @@ class WaterDepthMeasurementController:
 
     def __init__(self,
                  tank_volume_ratio=0.08,
-                 empty_tank_threshold=0.07,
+                 empty_tank_threshold=0.03,
                  low_tank_threshold=0.25,
                  trigger_pin=23,
                  echo_pin=24
