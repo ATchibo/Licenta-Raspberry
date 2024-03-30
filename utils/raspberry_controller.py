@@ -279,6 +279,22 @@ class RaspberryController(Observer):
                 liters_sent=round(self.liters_sent, 2)
             )
 
+    def _on_ping_from_phone(self,
+        doc_snapshot,
+        changes,
+        read_time):
+
+        for change in changes:
+            changed_doc = change.document
+            doc_data = changed_doc.to_dict()
+
+            if "message" in doc_data.keys():
+                if doc_data["message"] == "PING":
+                    FirebaseController().answer_to_ping()
+
+    def _set_ping_callback(self):
+        FirebaseController().add_ping_listener(self._on_ping_from_phone)
+
     def set_callback_for_watering_updates(self, callback):
         self._while_watering_callback_function = callback
 
@@ -311,5 +327,6 @@ class RaspberryController(Observer):
 
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
         if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
+            self._set_ping_callback()
             self.start_listening_for_watering_now()
             self.update_raspberry_info()

@@ -55,13 +55,14 @@ class FirebaseController(Subject):
         self._wsCollectionName = "general_purpose_ws"
 
         self.watering_now_callback = None
-        self.watering_now_listener = None
-
         self.watering_programs_callback = None
+
+        self.watering_now_listener = None
         self.watering_programs_fields_listener = None
         self.watering_programs_collection_listener = None
         self._log_messages_changes_listener = None
         self._notification_changes_listener = None
+        self._ping_listener = None
 
         self._observers = []
 
@@ -394,26 +395,19 @@ class FirebaseController(Subject):
     def unsubscribe_watering_now_listener(self):
         self.watering_now_listener.unsubscribe()
 
-    def _start_listening_for_ping(self):
+    def add_ping_listener(self, _on_ping_from_phone_callback):
         if self.db is None:
             return
 
         doc_ref = self.db.collection(self._wsCollectionName).document(getserial())
-        doc_ref.set({"message": "+"})
-        doc_ref.on_snapshot(self._on_ping_from_phone)
+        doc_ref.set({"message": ""})
+        self._ping_listener = doc_ref.on_snapshot(_on_ping_from_phone_callback)
 
-    def _on_ping_from_phone(self,
-        doc_snapshot,
-        changes,
-        read_time):
+    def answer_to_ping(self):
+        if self.db is None:
+            return
 
-        for change in changes:
-            changed_doc = change.document
-            doc_data = changed_doc.to_dict()
-
-            if "message" in doc_data.keys():
-                if doc_data["message"] == "PING":
-                    self.db.collection(self._wsCollectionName).document(getserial()).set({"message": "PONG"})
+        self.db.collection(self._wsCollectionName).document(getserial()).set({"message": "PONG"})
 
     def _remove_all_listeners(self):
         if self.watering_now_listener is not None:
@@ -430,6 +424,9 @@ class FirebaseController(Subject):
 
         if self._notification_changes_listener is not None:
             self._notification_changes_listener.unsubscribe()
+
+        if self._ping_listener is not None:
+            self._ping_listener.unsubscribe()
 
     def login_with_custom_token(self, token=None):
         print("Attempting login")
@@ -462,8 +459,6 @@ class FirebaseController(Subject):
         _expires_in = int(json_response["expiresIn"])
 
         if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
-            self._start_listening_for_ping()
-
             self.__token = _token
             self.__refresh_token = _refresh_token
             self._schedule_token_refresh(_expires_in - 10)
