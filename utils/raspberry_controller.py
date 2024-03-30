@@ -120,23 +120,24 @@ class RaspberryController(Observer):
         if not self.pump_controller.is_watering:
             return False
 
-        self.pump_controller.stop_watering_event.set()
+        if not self._watering_manually:
+            self.pump_controller.stop_watering_event.set()
+            return True
 
         if self.pump_controller.stop_watering():
             self.stop_sending_watering_updates()
             self._send_stop_watering_message()
-
-            if self._watering_manually:
-                self._log_manual_watering_cycle()
-                self._watering_manually = False
-
+            self._watering_manually = False
+            self._log_manual_watering_cycle()
             self._log_water_level_after_watering()
+
             return True
 
         return False
 
     def water_for_liters(self, liters):
-        # print("Watering for", liters, "liters")
+        if self.pump_controller.is_watering:
+            return False
 
         if WaterDepthMeasurementController().is_water_tank_empty():
             self._log_no_water_in_tank()
@@ -150,7 +151,7 @@ class RaspberryController(Observer):
         self._log_auto_watering_cycle()
         self._log_water_level_after_watering()
 
-        # print("Watering finished - raspi controller")
+        return True
 
     def start_listening_for_watering_now(self):
         RemoteRequests().add_watering_now_listener(callback=self._watering_now_callback_for_incoming_messages)
@@ -241,6 +242,7 @@ class RaspberryController(Observer):
 
         if self.watering_time >= self._max_watering_time_sec:
             def _stop_watering():
+                self.pump_controller.stop_watering_event.set()
                 self._send_stop_watering_message()
                 self._update_info_for_watering_callback()
 
@@ -270,9 +272,6 @@ class RaspberryController(Observer):
 
     def _update_info_for_watering_callback(self):
         if self._while_watering_callback_function is not None:
-
-            # print("is_watering:", self.pump_controller.is_watering)
-
             self._while_watering_callback_function(
                 is_watering=self.pump_controller.is_watering,
                 watering_time=round(self.watering_time),
