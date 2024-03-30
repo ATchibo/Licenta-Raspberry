@@ -1,7 +1,7 @@
 import threading
 import time
 
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 
 class PumpController:
@@ -17,15 +17,16 @@ class PumpController:
             self.pump_capacity = 0.017857143  # about 1 liter per minute
 
         self.is_watering = False
+
         self.stop_watering_event = threading.Event()
 
-        GPIO.setwarnings(False)
-        # set the mode to BCM - refer to the pins by the GPIO number
-        GPIO.setmode(GPIO.BCM)
-        # set the pin to output
-        GPIO.setup(self.pin, GPIO.OUT)
-        # set the pin to low - not sending any power
-        GPIO.output(self.pin, GPIO.LOW)
+        # GPIO.setwarnings(False)
+        # # set the mode to BCM - refer to the pins by the GPIO number
+        # GPIO.setmode(GPIO.BCM)
+        # # set the pin to output
+        # GPIO.setup(self.pin, GPIO.OUT)
+        # # set the pin to low - not sending any power
+        # GPIO.output(self.pin, GPIO.LOW)
 
     def start_watering_for_seconds(self, seconds):
         """Start watering for the specified amount of seconds."""
@@ -54,7 +55,7 @@ class PumpController:
             return False
 
         """Start the pump."""
-        GPIO.output(self.pin, GPIO.HIGH)
+        # GPIO.output(self.pin, GPIO.HIGH)
 
         self.is_watering = True
         return True
@@ -64,7 +65,7 @@ class PumpController:
             return False
 
         """Stop the pump."""
-        GPIO.output(self.pin, GPIO.LOW)
+        # GPIO.output(self.pin, GPIO.LOW)
 
         self.is_watering = False
         return True
