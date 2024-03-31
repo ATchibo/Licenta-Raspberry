@@ -64,6 +64,9 @@ class WateringProgramController(Observer, Subject):
             self._update_values_on_receive_from_network
         )
 
+        if not self._is_watering_programs_active:
+            self.notify(ObserverNotificationType.WATERING_PROGRAMS_DISABLED)
+
     def get_watering_programs(self):
         watering_programs_list = RemoteRequests().get_watering_programs()
         self._watering_programs = {program.id: program for program in watering_programs_list}
@@ -85,6 +88,11 @@ class WateringProgramController(Observer, Subject):
     def set_is_watering_programs_active(self, is_active):
         RemoteRequests().set_is_watering_programs_active(is_active)
         self._is_watering_programs_active = is_active
+
+        if not is_active:
+            self.notify(ObserverNotificationType.WATERING_PROGRAMS_DISABLED)
+        else:
+            self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
 
     def _get_active_watering_program(self):
         if self._active_watering_program_id is None or self._watering_programs is None:
@@ -188,19 +196,25 @@ class WateringProgramController(Observer, Subject):
         if self._watering_thread_finished.is_set():
             return
 
+        _watering_time_sec = 0
         if self._is_watering_programs_active:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
             if current_soil_moisture < program.max_moisture:
+                _start_time = get_current_datetime_tz()
                 self._raspberry_controller.water_for_liters(program.quantity_l)
+                _end_time = get_current_datetime_tz()
+                _watering_time_sec = (_end_time - _start_time).seconds
 
         water_interval_sec = self._compute_watering_interval_sec(program)
 
         while not self._watering_thread_finished.is_set():
-            self._datetime_of_next_watering = get_current_datetime_tz() + datetime.timedelta(seconds=initial_delay_sec)
+            _waiting_time = water_interval_sec - _watering_time_sec
+
+            self._datetime_of_next_watering = get_current_datetime_tz() + datetime.timedelta(seconds=_waiting_time)
             self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
 
-            self._watering_thread_finished.wait(water_interval_sec)
+            self._watering_thread_finished.wait(_waiting_time)
             if self._watering_thread_finished.is_set():
                 return
 
@@ -208,9 +222,11 @@ class WateringProgramController(Observer, Subject):
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
                 if current_soil_moisture < program.max_moisture:
-                    _current_time = get_current_datetime_tz()
+                    _start_time = get_current_datetime_tz()
                     self._raspberry_controller.water_for_liters(program.quantity_l)
-                    LocalStorageController().set_last_watering_time(_current_time, program.id)
+                    _end_time = get_current_datetime_tz()
+                    _watering_time_sec = (_end_time - _start_time).seconds
+                    LocalStorageController().set_last_watering_time(_start_time, program.id)
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         while not self._moisture_check_thread_finished.is_set():

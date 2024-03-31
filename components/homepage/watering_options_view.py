@@ -188,9 +188,10 @@ class WateringOptionsView(MDBoxLayout):
         if _scheduled_datetime is None:
             return
 
-        def refresh_callback(interval):
-            self.next_watering_time_variable = datetime.strftime(_scheduled_datetime, "%Y-%m-%d %H:%M:%S")
-        Clock.schedule_once(refresh_callback, 0.5)
+        self.next_watering_time_variable = datetime.strftime(_scheduled_datetime, "%Y-%m-%d %H:%M:%S")
+
+    def change_next_watering_time_on_programs_disabled(self):
+        self.next_watering_time_variable = "Disabled"
 
     class WateringProgramObserver(Observer):
         def __init__(self, watering_program_controller: WateringProgramController, watering_options_view):
@@ -201,3 +202,5 @@ class WateringOptionsView(MDBoxLayout):
         def on_notification_from_subject(self, notification_type: ObserverNotificationType) -> None:
             if notification_type == ObserverNotificationType.NEXT_WATERING_TIME_CHANGED:
                 self._watering_options_view.on_change_next_watering_time(self._watering_program_controller.get_next_watering_time())
+            elif notification_type == ObserverNotificationType.WATERING_PROGRAMS_DISABLED:
+                self._watering_options_view.change_next_watering_time_on_programs_disabled()
