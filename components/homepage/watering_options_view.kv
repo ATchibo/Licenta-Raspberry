@@ -13,7 +13,7 @@
                 id: watering_programs_enable_grid
                 cols: 2
                 size_hint_y: None
-                height: dp(80)
+                height: dp(60)
                 padding: 10
 
                 MDLabel:
@@ -25,6 +25,9 @@
                     size_hint_x: 0.1
                     height: watering_programs_enable_grid.height
                     pos_hint: {"center_y": 0.5}
+                    anchor_x: "center"
+                    anchor_y: "center"
+                    padding: -watering_program_switch.width, 0, 0, -watering_program_switch.height / 3
 
                     MDSwitch:
                         id: watering_program_switch
@@ -38,7 +41,7 @@
             MDGridLayout:
                 cols: 2
                 size_hint_y: None
-                height: dp(80)
+                height: dp(55)
                 padding: 10
 
                 MDLabel:
@@ -55,9 +58,26 @@
 
             MDGridLayout:
                 cols: 2
+                size_hint_y: None
+                height: dp(55)
+                padding: 10
+
+                MDLabel:
+                    text: "Next watering occurs at:"
+                    font_style: "H5"
+                    size_hint_x: 0.7
+
+                MDLabel:
+                    id: next_watering_label
+                    text: root.next_watering_time_variable
+                    font_style: "H5"
+                    size_hint_x: 0.3
+
+            MDGridLayout:
+                cols: 2
                 size_hint: 1, None
                 height: dp(150)
-                padding: [10, 20, 10, 10]
+                padding: [10, 10, 10, 10]
 
                 MDGridLayout:
                     cols: 1

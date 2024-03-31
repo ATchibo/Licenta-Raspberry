@@ -14,6 +14,7 @@ class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
     moisture_variable = StringProperty()
     are_programs_active_variable = BooleanProperty(True)
+    next_watering_time_variable = StringProperty("cacat")
 
     def __init__(self, **kwargs):
         super(WateringOptionsView, self).__init__(**kwargs)
@@ -111,7 +112,7 @@ class WateringOptionsView(MDBoxLayout):
                 self.ids.water_now_button.text = "Water now"
 
         self.pushed_water_now = is_watering
-        self.watering_label_variable = f"Last run:\nWater amount: {liters_sent}L\nTime running: {watering_time}s"
+        self.watering_label_variable = f"Water amount: {liters_sent}L\nTime running: {watering_time}s"
 
     def toggle_watering_program(self, instance, value):
         self.are_programs_active_variable = value
