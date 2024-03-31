@@ -3,6 +3,7 @@ import time
 import datetime
 
 from google.cloud.firestore_v1.watch import ChangeType
+from tzlocal import get_localzone
 
 from domain.WateringProgram import WateringProgram
 from domain.observer.Observer import Observer
@@ -109,24 +110,26 @@ class WateringProgramController(Observer, Subject):
             return -1
 
         _current_time = get_current_datetime_tz()
-
-        _time_delta_seconds = (program.starting_date_time - _current_time).seconds
+        _program_starting_date_time = program.starting_date_time.astimezone(get_localzone())
 
         # if program starting time is in the future
-        if program.starting_date_time >= _current_time:
+        if _program_starting_date_time >= _current_time:
+            _time_delta_seconds = (_program_starting_date_time - _current_time).total_seconds()
             return _time_delta_seconds
 
         # if the starting time is in the past, we try to see the last watering time
         _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
 
         # if the last recorded watering time is not for the current program or it is None
-        # we leave the delta as is
+        # we compute the difference between the current date and the starting date of the program
         # else we compute the time passed since the last watering
-        if not (_program_id is None or _last_watered_time is None or _program_id is not program.id):
-            _time_delta_seconds = _current_time - _last_watered_time
+        if _program_id is not None and _last_watered_time is not None and _program_id is program.id:
+            _time_delta_seconds = (_current_time - _last_watered_time).total_seconds()
+        else:
+            _time_delta_seconds = (_current_time - _program_starting_date_time).total_seconds()
 
         # we compute how many seconds are between watering cycles
-        _interval_between_watering_seconds = program.frequency_days * 24 * 60 * 60
+        _interval_between_watering_seconds = self._compute_watering_interval_sec(program)
 
         # we compute how many watering intervals fit in the time passed since the last watering
         _intervals_in_time_delta = _time_delta_seconds // _interval_between_watering_seconds
@@ -139,9 +142,9 @@ class WateringProgramController(Observer, Subject):
             _waiting_time += _interval_between_watering_seconds
 
         # we compute how many seconds we need to wait until next watering cycle should occur
-        _time_delta_seconds = _waiting_time - _time_delta_seconds
+        _time_until_next_watering = _waiting_time - _time_delta_seconds
 
-        return _current_time, _time_delta_seconds
+        return _current_time, _time_until_next_watering
 
     def _compute_watering_interval_sec(self, program):
         return program.frequency_days * 24 * 60 * 60  # days * hours * minutes * seconds -> seconds

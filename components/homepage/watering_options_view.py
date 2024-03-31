@@ -188,6 +188,10 @@ class WateringOptionsView(MDBoxLayout):
         if _scheduled_datetime is None:
             return
 
+        if self._watering_program_controller.get_is_watering_programs_active() is False:
+            self.change_next_watering_time_on_programs_disabled()
+            return
+
         self.next_watering_time_variable = datetime.strftime(_scheduled_datetime, "%Y-%m-%d %H:%M:%S")
 
     def change_next_watering_time_on_programs_disabled(self):
