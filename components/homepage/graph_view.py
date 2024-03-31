@@ -49,6 +49,15 @@ class GraphView(MDBoxLayout):
         moisture_info_list = RemoteRequests().get_moisture_info(self.start_datetime,
                                                                 self.end_datetime)
 
+        if moisture_info_list is None or len(moisture_info_list) == 0:
+            ax.plot(["No data"], [0])
+            ax.grid()
+            ax.set_xlabel('Time')
+            ax.set_ylabel('Moisture (%)')
+            plt.tight_layout(pad=3.0)
+            graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
+            return
+
         timestamps = [moisture_info["measurementTime"] for moisture_info in moisture_info_list]
         # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
         local_tz = ZoneInfo("Europe/Bucharest")
