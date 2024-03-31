@@ -2,4 +2,5 @@ from enum import Enum
 
 
 class ObserverNotificationType(Enum):
+    NEXT_WATERING_TIME_CHANGED = "NEXT_WATERING_TIME_CHANGED"
     FIRESTORE_CLIENT_CHANGED = "FIRESTORE_CLIENT_CHANGED"

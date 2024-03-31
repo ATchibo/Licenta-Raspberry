@@ -1,12 +1,13 @@
 import threading
 import time
-from datetime import datetime
+import datetime
 
 from google.cloud.firestore_v1.watch import ChangeType
 
 from domain.WateringProgram import WateringProgram
 from domain.observer.Observer import Observer
 from domain.observer.ObserverNotificationType import ObserverNotificationType
+from domain.observer.Subject import Subject
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
@@ -15,7 +16,7 @@ from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
 
-class WateringProgramController(Observer):
+class WateringProgramController(Observer, Subject):
     _instance = None
     _lock = threading.Lock()
 
@@ -49,6 +50,10 @@ class WateringProgramController(Observer):
 
         self._watering_cycle_start_time = None
         self._watering_cycle_end_time = None
+
+        self._datetime_of_next_watering = None
+
+        self._observers = []
 
     def perform_initial_setup(self):
         self.get_watering_programs()
@@ -88,6 +93,9 @@ class WateringProgramController(Observer):
             return None
         return self._watering_programs[self._active_watering_program_id]
 
+    def get_next_watering_time(self):
+        return self._datetime_of_next_watering
+
     def _compute_initial_delay_sec(self, program: WateringProgram):
         if program.starting_date_time is None:
             return -1
@@ -125,10 +133,10 @@ class WateringProgramController(Observer):
         # we compute how many seconds we need to wait until next watering cycle should occur
         _time_delta_seconds = _waiting_time - _time_delta_seconds
 
-        return _time_delta_seconds
+        return _current_time, _time_delta_seconds
 
     def _compute_watering_interval_sec(self, program):
-        return program.frequency_days * 24 * 60 * 60
+        return program.frequency_days * 24 * 60 * 60  # days * hours * minutes * seconds -> seconds
 
     def _schedule_watering(self):
         if self._active_watering_program_id is None:
@@ -139,11 +147,14 @@ class WateringProgramController(Observer):
         if active_program is None:
             return
 
-        initial_delay_sec = self._compute_initial_delay_sec(active_program)
+        _processing_time, initial_delay_sec = self._compute_initial_delay_sec(active_program)
         print("initial delay: ", initial_delay_sec)
 
         if initial_delay_sec < 0:
             return
+
+        self._datetime_of_next_watering = _processing_time + datetime.timedelta(seconds=initial_delay_sec)
+        self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
 
         self._watering_thread_finished.clear()
         self._moisture_check_thread_finished.clear()
@@ -186,6 +197,9 @@ class WateringProgramController(Observer):
         water_interval_sec = self._compute_watering_interval_sec(program)
 
         while not self._watering_thread_finished.is_set():
+            self._datetime_of_next_watering = get_current_datetime_tz() + datetime.timedelta(seconds=initial_delay_sec)
+            self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
+
             self._watering_thread_finished.wait(water_interval_sec)
             if self._watering_thread_finished.is_set():
                 return
@@ -278,3 +292,13 @@ class WateringProgramController(Observer):
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
         if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
             self.perform_initial_setup()
+
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self, notification_type: ObserverNotificationType) -> None:
+        for observer in self._observers:
+            observer.on_notification_from_subject(notification_type)

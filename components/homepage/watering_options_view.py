@@ -1,14 +1,18 @@
 import threading
+from datetime import datetime
 
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import StringProperty, BooleanProperty
 from kivymd.uix.boxlayout import MDBoxLayout
 
+from domain.observer.Observer import Observer
+from domain.observer.ObserverNotificationType import ObserverNotificationType
 from utils.WateringProgramController import WateringProgramController
 from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("components/homepage/watering_options_view.kv")
+
 
 class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
@@ -34,6 +38,9 @@ class WateringOptionsView(MDBoxLayout):
         self.bind_raspberry_controller_properties()
         self.load_programs()
         self.check_moisture()
+
+        self._watering_options_observer = self.WateringProgramObserver(self._watering_program_controller, self)
+        self._watering_program_controller.attach(self._watering_options_observer)
 
         Clock.schedule_once(self.init, 0.1)
 
@@ -176,3 +183,21 @@ class WateringOptionsView(MDBoxLayout):
     def check_moisture(self):
         moisture_percentage = self.raspberry_controller.get_moisture_percentage()
         self.moisture_variable = f"Moisture: {moisture_percentage}%"
+
+    def on_change_next_watering_time(self, _scheduled_datetime):
+        if _scheduled_datetime is None:
+            return
+
+        def refresh_callback(interval):
+            self.next_watering_time_variable = datetime.strftime(_scheduled_datetime, "%Y-%m-%d %H:%M:%S")
+        Clock.schedule_once(refresh_callback, 0.5)
+
+    class WateringProgramObserver(Observer):
+        def __init__(self, watering_program_controller: WateringProgramController, watering_options_view):
+            super().__init__()
+            self._watering_program_controller = watering_program_controller
+            self._watering_options_view = watering_options_view
+
+        def on_notification_from_subject(self, notification_type: ObserverNotificationType) -> None:
+            if notification_type == ObserverNotificationType.NEXT_WATERING_TIME_CHANGED:
+                self._watering_options_view.on_change_next_watering_time(self._watering_program_controller.get_next_watering_time())
