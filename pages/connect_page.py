@@ -169,8 +169,8 @@ class ConnectPage(MDScreen):
             RemoteRequests().register_raspberry_to_device(email)
             BackendController().send_message_to_ws("OK")
 
-            RaspberryController().start_listening_for_watering_now()
-            WateringProgramController().perform_initial_setup()
+            # RaspberryController().start_listening_for_watering_now()
+            # WateringProgramController().perform_initial_setup()
 
         else:
             self.info_text = "Failed to login"

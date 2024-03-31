@@ -4,6 +4,8 @@ from datetime import datetime
 
 from domain.RaspberryInfo import RaspberryInfoBuilder, RaspberryInfo
 from domain.logging.MessageType import MessageType
+from domain.observer.ObserverNotificationType import ObserverNotificationType
+from domain.observer.Observer import Observer
 from utils.datetime_utils import get_current_datetime_tz
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
@@ -15,7 +17,7 @@ from utils.remote_requests import RemoteRequests
 from utils.water_depth_measurement_controller import WaterDepthMeasurementController
 
 
-class RaspberryController:
+class RaspberryController(Observer):
     _instance = None
     _lock = threading.Lock()
 
@@ -61,8 +63,7 @@ class RaspberryController:
                                 .build()
                                 )
 
-        # if LocalStorageController().get_raspberry_info() is None:
-        #     LocalStorageController().save_raspberry_info(self._raspberry_info)
+        self._load_raspberry_info_local_storage()
 
     def set_watering_program(self, watering_program):
         self._watering_program = watering_program
@@ -92,9 +93,7 @@ class RaspberryController:
         EventLogger().add_no_water_in_tank_message(datetime.now())
 
     def _log_water_level_after_watering(self):
-        if self.water_depth_measurement_controller.is_water_tank_empty():
-            EventLogger().add_no_water_in_tank_message(datetime.now())
-        elif self.water_depth_measurement_controller.is_water_tank_low():
+        if self.water_depth_measurement_controller.is_water_tank_low():
             EventLogger().add_water_level_after_watering_message(
                 self.water_depth_measurement_controller.get_current_water_volume(),
                 datetime.now()
@@ -119,23 +118,24 @@ class RaspberryController:
         if not self.pump_controller.is_watering:
             return False
 
-        self.pump_controller.stop_watering_event.set()
+        if not self._watering_manually:
+            self.pump_controller.stop_watering_event.set()
+            return True
 
         if self.pump_controller.stop_watering():
             self.stop_sending_watering_updates()
             self._send_stop_watering_message()
-
-            if self._watering_manually:
-                self._log_manual_watering_cycle()
-                self._watering_manually = False
-
+            self._watering_manually = False
+            self._log_manual_watering_cycle()
             self._log_water_level_after_watering()
+
             return True
 
         return False
 
     def water_for_liters(self, liters):
-        # print("Watering for", liters, "liters")
+        if self.pump_controller.is_watering:
+            return False
 
         if WaterDepthMeasurementController().is_water_tank_empty():
             self._log_no_water_in_tank()
@@ -149,7 +149,7 @@ class RaspberryController:
         self._log_auto_watering_cycle()
         self._log_water_level_after_watering()
 
-        # print("Watering finished - raspi controller")
+        return True
 
     def start_listening_for_watering_now(self):
         RemoteRequests().add_watering_now_listener(callback=self._watering_now_callback_for_incoming_messages)
@@ -174,7 +174,9 @@ class RaspberryController:
 
             # check for watering now command
             if "command" in updated_data.keys():
+                print("Is watering:", self.pump_controller.is_watering)
                 if updated_data["command"] == "start_watering" and not self.pump_controller.is_watering:
+                    RemoteRequests().update_watering_info('processing', 0.0, 0)
                     self.start_watering()
 
                 elif updated_data["command"] == "stop_watering" and self.pump_controller.is_watering:
@@ -239,6 +241,7 @@ class RaspberryController:
 
         if self.watering_time >= self._max_watering_time_sec:
             def _stop_watering():
+                self.pump_controller.stop_watering_event.set()
                 self._send_stop_watering_message()
                 self._update_info_for_watering_callback()
 
@@ -261,21 +264,34 @@ class RaspberryController:
 
     def _update_current_watering_info(self):
         RemoteRequests().update_watering_info(
-            'start_watering',
+            'processing',
             round(self.liters_sent, 2),
             round(self.watering_time)
         )
 
     def _update_info_for_watering_callback(self):
         if self._while_watering_callback_function is not None:
-
-            # print("is_watering:", self.pump_controller.is_watering)
-
             self._while_watering_callback_function(
                 is_watering=self.pump_controller.is_watering,
                 watering_time=round(self.watering_time),
                 liters_sent=round(self.liters_sent, 2)
             )
+
+    def _on_ping_from_phone(self,
+        doc_snapshot,
+        changes,
+        read_time):
+
+        for change in changes:
+            changed_doc = change.document
+            doc_data = changed_doc.to_dict()
+
+            if "message" in doc_data.keys():
+                if doc_data["message"] == "PING":
+                    FirebaseController().answer_to_ping()
+
+    def _set_ping_callback(self):
+        FirebaseController().add_ping_listener(self._on_ping_from_phone)
 
     def set_callback_for_watering_updates(self, callback):
         self._while_watering_callback_function = callback
@@ -285,6 +301,11 @@ class RaspberryController:
         if _raspberry_info is not None:
             return _raspberry_info
         return self._raspberry_info
+
+    def _load_raspberry_info_local_storage(self):
+        _raspberry_info = LocalStorageController().get_raspberry_info()
+        if _raspberry_info is not None:
+            self._raspberry_info = _raspberry_info
 
     def update_raspberry_notification_info(self, message_type: MessageType, value):
         self._raspberry_info.set_notifiable_message(message_type, value)
@@ -301,3 +322,10 @@ class RaspberryController:
     def update_raspberry_info(self):
         self._raspberry_info = RemoteRequests().get_raspberry_info()
         LocalStorageController().save_raspberry_info(self._raspberry_info)
+
+    def on_notification_from_subject(self, notification_type: ObserverNotificationType):
+        print(f"Subject notified raspberry controller: {notification_type}")
+        if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
+            self._set_ping_callback()
+            self.start_listening_for_watering_now()
+            self.update_raspberry_info()

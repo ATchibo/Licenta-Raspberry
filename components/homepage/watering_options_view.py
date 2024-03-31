@@ -26,7 +26,7 @@ class WateringOptionsView(MDBoxLayout):
         self.moisture_variable = "Moisture: None"
         self.pushed_water_now = False
 
-        self.programs = {}
+        self.programs = {}  # dict of name: WateringProgram
         self.current_program_name = ""
         self.selected_program_id = None
 
@@ -129,11 +129,11 @@ class WateringOptionsView(MDBoxLayout):
 
     def _update_values_on_receive_from_network(
             self,
-            new_programs={},
+            new_programs={},  # dict of id: WateringProgram
             new_active_program_id=None,
             new_is_watering_programs_active=None
     ):
-        print("Updating values: ", new_programs, new_active_program_id, new_is_watering_programs_active)
+        # print("Updating values: ", new_programs, new_active_program_id, new_is_watering_programs_active)
 
         if new_is_watering_programs_active is not None and new_is_watering_programs_active != self.are_programs_active_variable:
             self.are_programs_active_variable = new_is_watering_programs_active
@@ -152,10 +152,25 @@ class WateringOptionsView(MDBoxLayout):
             for program in new_programs.values():
                 self.programs[program.name] = program
 
+            if self.selected_program_id in self.programs.keys():
+                self.current_program_name = self.programs[self.selected_program_id].name
+
             def refresh_callback(interval):
                 self.ids.watering_program_spinner.values = list(self.programs.keys())
                 self.ids.watering_program_spinner.text = self.current_program_name
             Clock.schedule_once(refresh_callback, 0.5)
+
+        elif self.selected_program_id is not None:
+
+            for program in self.programs.values():
+                if program.id == self.selected_program_id:
+                    self.current_program_name = program.name
+
+                    def refresh_callback(interval):
+                        self.ids.watering_program_spinner.text = self.current_program_name
+                    Clock.schedule_once(refresh_callback, 0.5)
+
+                    break
 
     def check_moisture(self):
         moisture_percentage = self.raspberry_controller.get_moisture_percentage()

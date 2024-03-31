@@ -36,11 +36,16 @@ class BackendController:
     def send_notification(self, rasp_id, message):
         rasp_info = RemoteRequests().get_raspberry_info()
 
+        data = {
+            "raspberryId": rasp_id,
+            "type": "LOG"
+        }
+
         message = {
             "raspberryId": rasp_id,
             "body": message,
             "title": f"{rasp_info.raspberryName}",
-            "data": json.dumps({})
+            "data": json.dumps(data)
         }
 
         requests.post(f"{self._backend_url}/api/send-notification", json=message)
@@ -89,6 +94,7 @@ class BackendController:
     def send_notification_for_login(self, rasp_id, message, ws_token):
         _data = {
             "wsToken": ws_token,
+            "type": "LOGIN_REQUEST"
         }
 
         _message = {
@@ -100,4 +106,4 @@ class BackendController:
 
         res = requests.post(f"{self._backend_url}/api/send-notification", json=_message)
 
-        print(res.text)
+        print(f"Login notification send result: {res.text}")

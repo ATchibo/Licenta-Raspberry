@@ -25,4 +25,10 @@ class MoistureController:
 
     def get_moisture_percentage(self):
         # pass
-        return round(1 - (self.get_moisture() - self.absolute_wet) / self.interval, 2) * 100
+        return max(0.0, round(1 - (self.get_moisture() - self.absolute_wet) / self.interval, 2) * 100)
+
+    def update_absolute_values(self, dry, wet):
+        self.absolute_dry = dry
+        self.absolute_wet = wet
+        self.interval = self.absolute_dry - self.absolute_wet
+        LocalStorageController().set_moisture_sensor_absolute_values(self.absolute_dry, self.absolute_wet)

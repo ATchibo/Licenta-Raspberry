@@ -51,7 +51,9 @@ if __name__ == '__main__':
     # WateringProgramController().perform_initial_setup()
     # EventLogger().perform_initial_setup()
 
-    #TODO: revert to try login
+    FirebaseController().attach(RaspberryController())
+    FirebaseController().attach(WateringProgramController())
+    FirebaseController().attach(EventLogger())
 
     try:
         NotificationLoginController().try_initial_login()
