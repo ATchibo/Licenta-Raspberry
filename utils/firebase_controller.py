@@ -374,8 +374,7 @@ class FirebaseController(Subject):
         except Exception as e:
             raise Exception(f"Error updating water volume info: {e}")
 
-
-    def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> bool:
+    def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> [bool, any]:
         if self.db is None:
             raise FirebaseUninitializedException()
 
@@ -387,7 +386,7 @@ class FirebaseController(Subject):
             }
 
             self.db.collection(self._moistureInfoCollectionName).add(data)
-            return True
+            return True, data
 
         except Exception as e:
             raise Exception(f"Error adding moisture percentage measurement: {e}")

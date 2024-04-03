@@ -35,8 +35,6 @@ class GraphView(MDBoxLayout):
         self.dropdown = None
         self.dropdown_items = ["Last 24h", "Last 7 days", "Last 30 days"]
 
-        # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
-
         self.end_datetime = get_current_datetime_tz()
         self.start_datetime = self.end_datetime - timedelta(days=1)
 
@@ -52,8 +50,7 @@ class GraphView(MDBoxLayout):
 
         fig, ax = plt.subplots()
 
-        moisture_info_list = RemoteRequests().get_moisture_info(self.start_datetime,
-                                                                self.end_datetime)
+        moisture_info_list = RemoteRequests().get_moisture_info(self.start_datetime, self.end_datetime)
 
         if moisture_info_list is None or len(moisture_info_list) == 0:
             ax.plot(["No data"], [0])
@@ -64,24 +61,41 @@ class GraphView(MDBoxLayout):
             graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
             return
 
+        moisture_info_list = sorted(moisture_info_list, key=lambda x: x["measurementTime"], reverse=True)
         timestamps = [moisture_info["measurementTime"].astimezone(get_localzone()) for moisture_info in
                       moisture_info_list]
         values = [moisture_info["measurementValuePercent"] for moisture_info in moisture_info_list]
 
         ax.grid()
-        ax.set_xlabel('Time')
         ax.set_ylabel('Moisture (%)')
 
         ax.set_ylim(0, 100)
 
-        x_labels = [""]
-        x_labels.extend([timestamp.strftime("%d %b\n%H:%M") for timestamp in timestamps])
-        x_positions = range(len(timestamps))
+        if len(timestamps) > 20:
+            _rotation = 45
+            _fontsize = 8
+            _format = "%d.%m %H:%M"
+        elif len(timestamps) > 10:
+            _rotation = 50
+            _fontsize = 9
+            _format = "%d.%m %H:%M"
+        else:
+            _rotation = 0
+            _fontsize = 10
+            _format = "%d %b\n%H:%M"
 
-        ax.plot(x_positions, values, color='red', marker='o')
-        ax.set_xticklabels(x_labels, rotation=45, ha="right")
+        x_labels = [timestamp.strftime(_format) for timestamp in timestamps]
+        y_values = values
+        x_positions = range(len(x_labels))
+        x_ticks = range(0, len(x_labels))
 
-        plt.tight_layout(pad=3.0)
+        ax.plot(x_positions, y_values, color='red', marker='o')
+        ax.set_xticks(x_ticks)
+        ax.set_xticklabels(x_labels, rotation=_rotation, ha="right", fontsize=_fontsize)
+        for zip_obj in zip(x_positions, y_values):
+            ax.text(zip_obj[0], zip_obj[1], str(zip_obj[1]), ha='center', va='bottom')
+
+        plt.tight_layout(pad=2.9, w_pad=-2.5)
 
         graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
 
@@ -99,11 +113,7 @@ class GraphView(MDBoxLayout):
         self.dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', self.dropdown_items[x]))
 
     def select_item(self, index):
-        print(f"Selected item: {index}")
         self.dropdown.select(index)
-
-        # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
-        # self.end_datetime = datetime.now(local_tz)
 
         self.end_datetime = get_current_datetime_tz()
 

@@ -59,10 +59,10 @@ class RemoteRequests:
     def get_moisture_info(self, start_date: datetime, end_date: datetime) -> list[dict]:
         try:
             _result = self._firebase_controller.get_moisture_info_for_rasp_id(self._raspberry_id, start_date, end_date)
-            self._local_storage_controller.save_moisture_info(_result)
+            self._local_storage_controller.update_moisture_info_list(_result)
             return _result
         except Exception as e:
-            return self._local_storage_controller.get_moisture_info()
+            return self._local_storage_controller.get_moisture_info(start_date, end_date)
 
     def update_watering_info(self, command: str, liters_sent: float, watering_time: int) -> bool:
         try:
@@ -180,8 +180,8 @@ class RemoteRequests:
 
     def add_moisture_percentage_measurement(self, percentage: float, timestamp: datetime) -> bool:
         try:
-            _result = self._firebase_controller.add_moisture_percentage_measurement(self._raspberry_id, percentage, timestamp)
-            self._local_storage_controller.add_moisture_percentage_measurement(percentage, timestamp)
+            _result, _measurement = self._firebase_controller.add_moisture_percentage_measurement(self._raspberry_id, percentage, timestamp)
+            self._local_storage_controller.add_moisture_percentage_measurement(_measurement)
             return _result
         except Exception as e:
             return False
