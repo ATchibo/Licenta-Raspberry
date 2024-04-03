@@ -25,6 +25,7 @@ class MoistureMeasurementController:
         self._initialized = True
 
         self._raspberry_id = getserial()
+        self._moisture_check_interval_sec = None
 
         self._moisture_controller = MoistureController(channel=1)
 
@@ -34,14 +35,16 @@ class MoistureMeasurementController:
     def get_current_moisture_percentage(self):
         return self._moisture_controller.get_moisture_percentage()
 
-    def start_moisture_check_thread(self, interval_ms=1000*10):
+    def get_moisture_check_interval_sec(self):
+        return self._moisture_check_interval_sec
+
+    def start_moisture_check_thread(self, interval_sec=1000*10):
         self._stop_moisture_check_thread()
 
-        self._moisture_check_thread_finished.clear()
+        self._moisture_check_interval_sec = interval_sec
 
         self._moisture_check_thread = threading.Thread(
             target=self._moisture_check_thread_function,
-            args=(interval_ms,),
             daemon=True
         )
 
@@ -51,10 +54,11 @@ class MoistureMeasurementController:
         self._moisture_check_thread_finished.set()
         if self._moisture_check_thread is not None:
             self._moisture_check_thread.join()
+        self._moisture_check_thread_finished.clear()
 
-    def _moisture_check_thread_function(self, interval_ms):
+    def _moisture_check_thread_function(self):
         while not self._moisture_check_thread_finished.is_set():
-            self._moisture_check_thread_finished.wait(interval_ms / 1000)
+            self._moisture_check_thread_finished.wait(self._moisture_check_interval_sec)
             if self._moisture_check_thread_finished.is_set():
                 return
 

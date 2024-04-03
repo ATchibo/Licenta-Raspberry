@@ -3,17 +3,23 @@ from zoneinfo import ZoneInfo
 
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.uix.boxlayout import BoxLayout
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
+from kivy.uix.label import Label
+from kivy_garden.graph import Graph, MeshLinePlot
 from kivymd.uix.boxlayout import MDBoxLayout
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from kivymd.uix.scrollview import MDScrollView
+from tzlocal import get_localzone
 
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
+from utils.moisture_measurement_controller import MoistureMeasurementController
 from utils.remote_requests import RemoteRequests
 
 Builder.load_file("components/homepage/graph_view.kv")
@@ -58,14 +64,9 @@ class GraphView(MDBoxLayout):
             graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
             return
 
-        timestamps = [moisture_info["measurementTime"] for moisture_info in moisture_info_list]
-        # local_tz = datetime.now(timezone.utc).astimezone().tzinfo
-        local_tz = ZoneInfo("Europe/Bucharest")
-        timestamps = [timestamp.astimezone(local_tz) for timestamp in timestamps]
-
+        timestamps = [moisture_info["measurementTime"].astimezone(get_localzone()) for moisture_info in
+                      moisture_info_list]
         values = [moisture_info["measurementValuePercent"] for moisture_info in moisture_info_list]
-
-        ax.plot(timestamps, values, color='red', marker='o')
 
         ax.grid()
         ax.set_xlabel('Time')
@@ -73,16 +74,16 @@ class GraphView(MDBoxLayout):
 
         ax.set_ylim(0, 100)
 
-        xfmt = mdates.DateFormatter('%d %b\n%H:%M')
-        ax.xaxis.set_major_formatter(xfmt)
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
-        plt.xticks(rotation=45, ha="right")
+        x_labels = [""]
+        x_labels.extend([timestamp.strftime("%d %b\n%H:%M") for timestamp in timestamps])
+        x_positions = range(len(timestamps))
+
+        ax.plot(x_positions, values, color='red', marker='o')
+        ax.set_xticklabels(x_labels, rotation=45, ha="right")
 
         plt.tight_layout(pad=3.0)
 
         graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
-
-        # TODO: check timezone and add some kind of loading spinner
 
     def init_dropdown(self, *args):
         self.dropdown = DropDown()
