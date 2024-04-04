@@ -56,8 +56,13 @@ class WaterDepthMeasurementController:
         if self._max_height is None:
             return 0
 
-        _water_height = self.measure_water_depth_cm()
-        return round(max(0.0, self._tank_volume_ratio * (self._max_height - _water_height)), 2)
+        _water_height_1 = self.measure_water_depth_cm()
+        _water_height_2 = self.measure_water_depth_cm()
+        while abs(_water_height_1 - _water_height_2) > 0.1:
+            _water_height_1 = _water_height_2
+            _water_height_2 = self.measure_water_depth_cm()
+
+        return round(max(0.0, self._tank_volume_ratio * (self._max_height - _water_height_2)), 2)
 
     def is_water_tank_empty(self) -> bool:
         return self.get_current_water_volume() < self._empty_tank_threshold
