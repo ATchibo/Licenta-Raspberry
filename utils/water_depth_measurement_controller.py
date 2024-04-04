@@ -56,11 +56,13 @@ class WaterDepthMeasurementController:
         if self._max_height is None:
             return 0
 
+        _max_tries = 5
         _water_height_1 = self.measure_water_depth_cm()
         _water_height_2 = self.measure_water_depth_cm()
-        while abs(_water_height_1 - _water_height_2) > 0.1:
+        while abs(_water_height_1 - _water_height_2) > 0.1 and _max_tries > 0:
             _water_height_1 = _water_height_2
             _water_height_2 = self.measure_water_depth_cm()
+            _max_tries -= 1
 
         return round(max(0.0, self._tank_volume_ratio * (self._max_height - _water_height_2)), 2)
 
