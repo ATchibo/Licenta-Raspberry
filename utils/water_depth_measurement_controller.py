@@ -1,4 +1,5 @@
 import threading
+import time
 
 from utils.depth_sensor_controller import DepthSensorController
 from utils.local_storage_controller import LocalStorageController
@@ -59,10 +60,12 @@ class WaterDepthMeasurementController:
         _max_tries = 5
         _water_height_1 = self.measure_water_depth_cm()
         print("Water height 1: ", _water_height_1)
+        time.sleep(0.5)
         _water_height_2 = self.measure_water_depth_cm()
         print("Water height 2: ", _water_height_2)
         while abs(_water_height_1 - _water_height_2) > 0.1 and _max_tries > 0:
             _water_height_1 = _water_height_2
+            time.sleep(0.5)
             _water_height_2 = self.measure_water_depth_cm()
             print("Water height 2: ", _water_height_2)
             _max_tries -= 1
