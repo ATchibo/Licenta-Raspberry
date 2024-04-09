@@ -51,8 +51,9 @@
                 valign: "top"
 
             MDBoxLayout:
-                size_hint: 1, None
                 orientation: "vertical"
+                size_hint: 0.3, None
+                spacing: dp(10)
 
                 MDFillRoundFlatButton:
                     text: root.calibrate_button_text
@@ -63,6 +64,17 @@
                     pos_hint: {"center_x": 0.5}
                     text_color: 1, 1, 1, 1
                     disabled: root.calibrating
+
+                MDFillRoundFlatButton:
+                    text: root.retry_step_button_text
+                    on_release:
+                        root._retry_last_step()
+                    size_hint: 0.4, None
+                    height: dp(50)
+                    pos_hint: {"center_x": 0.5}
+                    text_color: 1, 1, 1, 1
+                    opacity: 0 if root._finished_step_2 else 1
+                    disabled: root.calibrating or root._finished_step_2
 
         MDBoxLayout:
             size_hint: 1, 0.2

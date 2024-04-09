@@ -18,6 +18,9 @@ class DepthCalibrationView(MDScreen):
     step_text = StringProperty("Step 1: Empty the water tank and press the button below")
     loading_text = StringProperty("")
     calibrate_button_text = StringProperty("Calibrate")
+    retry_step_button_text = StringProperty("Retry step")
+    _finished_step_1 = BooleanProperty(False)
+    _finished_step_2 = BooleanProperty(False)
 
     _show_spinner = BooleanProperty(False)
 
@@ -51,6 +54,7 @@ class DepthCalibrationView(MDScreen):
         self.step_text = "Step 1: Empty the water tank and press the button below"
         self.loading_text = ""
         self.calibrate_button_text = "Calibrate"
+        self._finished_calibrating = False
 
         self._selected_option = "0.5 L"
         self._show_spinner = False
@@ -64,15 +68,20 @@ class DepthCalibrationView(MDScreen):
 
     def calibrate_button_function(self, *args):
         if self._max_value is None:
+            self._init_setup()
+
             self.calibrating = True
             self.loading_text = "Measuring water depth..."
 
             self._current_thread = threading.Thread(
-                target=self._get_volume,
-                args=(self._on_max_value_thread_finished,)
+                target=self._get_max_value,
+                args=(self._on_height_measurement_finished,)
             )
 
             self._current_thread.start()
+
+        elif self._finished_step_1 is False:
+            self._on_max_value_computing_finished()
             
         elif self._min_value is None:
             self.calibrating = True
@@ -80,10 +89,13 @@ class DepthCalibrationView(MDScreen):
 
             self._current_thread = threading.Thread(
                 target=self._get_min_value,
-                args=(self._on_volume_thread_finished,)
+                args=(self._on_height_measurement_finished,)
             )
 
             self._current_thread.start()
+
+        elif self._finished_step_2 is False:
+            self._on_min_value_computing_finished()
 
         else:
             _ratio = RaspberryController().water_depth_measurement_controller.set_tank_volume_ratio(
@@ -100,7 +112,7 @@ class DepthCalibrationView(MDScreen):
         if on_thread_finished is not None:
             on_thread_finished()
 
-    def _get_volume(self, on_thread_finished=None):
+    def _get_max_value(self, on_thread_finished=None):
         self._max_value = RaspberryController().water_depth_measurement_controller.measure_water_depth_cm()
         if on_thread_finished is not None:
             on_thread_finished()
@@ -120,20 +132,36 @@ class DepthCalibrationView(MDScreen):
             App.get_running_app().root.ids.navigation_drawer.screen_manager.current = "calibrate"
         Clock.schedule_once(_aux, 0.1)
 
-    def _on_max_value_thread_finished(self):
+    def _on_height_measurement_finished(self):
+        height = self._min_value if self._min_value is not None else self._max_value
+
+        self.loading_text = "Measured height: " + str(height) + " cm"
+        self.calibrating = False
+        self.calibrate_button_text = "Next"
+
+    def _on_max_value_computing_finished(self):
         self.step_text = ("Step 2: Select an option and fill the tank with the corresponding amount of water."
                           "After filling the tank, press Calibrate.")
         self.calibrating = False
         self.loading_text = ""
         self.calibrate_button_text = "Calibrate"
+        self._finished_step_1 = True
 
         Clock.schedule_once(lambda dt: setattr(self, '_show_spinner', True), 0.1)
 
-    def _on_volume_thread_finished(self):
+    def _on_min_value_computing_finished(self):
         self.step_text = "Calibration finished"
         self.calibrating = False
         self.loading_text = ""
         self.calibrate_button_text = "Save"
+        self._finished_step_2 = True
 
         Clock.schedule_once(lambda dt: setattr(self, '_show_spinner', False), 0.1)
 
+    def _retry_last_step(self):
+        if self._min_value is not None:
+            self._min_value = None
+            self._on_max_value_computing_finished()
+        else:
+            self._max_value = None
+            self._init_setup()
