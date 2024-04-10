@@ -64,7 +64,7 @@ class ConnectPage(MDScreen):
         self.info_text = "Device not logged in"
 
         self._is_logged_in.clear()
-        self.backend_thread = threading.Thread(target=self._backend_ops)
+        self.backend_thread = threading.Thread(target=self._backend_ops, daemon=True)
         self.backend_thread.start()
 
     def _backend_request(self) -> int | tuple[datetime, str]:
