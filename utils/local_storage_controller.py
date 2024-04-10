@@ -64,6 +64,9 @@ class LocalStorageController:
                     return None
         except FileNotFoundError:
             return None
+        except Exception as e:
+            print(f'Error while loading RaspberryInfo from file: {e}')
+            return None
 
     def save_raspberry_info(self, raspberry_info: RaspberryInfo):
         try:
