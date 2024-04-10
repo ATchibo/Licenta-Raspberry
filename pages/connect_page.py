@@ -60,7 +60,6 @@ class ConnectPage(MDScreen):
 
         RemoteRequests().unregister_raspberry()
 
-
         self.info_text = "Device not logged in"
 
         self._is_logged_in.clear()
@@ -168,9 +167,6 @@ class ConnectPage(MDScreen):
             RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
             RemoteRequests().register_raspberry_to_device(email)
             BackendController().send_message_to_ws("OK")
-
-            # RaspberryController().start_listening_for_watering_now()
-            # WateringProgramController().perform_initial_setup()
 
         else:
             self.info_text = "Failed to login"

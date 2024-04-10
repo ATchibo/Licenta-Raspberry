@@ -544,7 +544,7 @@ class FirebaseController(Subject):
             return True
 
         except Exception as e:
-            print(f"Error attempting anonymous login: {e}")
+            print(f"Error authenticating firestore client with tokens: {e}")
             self._instance.db = None
             return False
 
