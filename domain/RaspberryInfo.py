@@ -41,17 +41,23 @@ class RaspberryInfo:
         }
 
     def from_dict(self, info_dict):
+        if info_dict is None:
+            return self
+
         self.raspberryName = info_dict["name"]
         self.raspberryLocation = info_dict["location"]
         self.raspberryDescription = info_dict["description"]
         self.notifiableMessages = {}
 
-        if type(info_dict["notifiable_messages"]) is tuple:
-            for key, value in info_dict["notifiable_messages"][0].items():
-                self.notifiableMessages[key] = value
-        else:
-            for key, value in info_dict["notifiable_messages"].items():
-                self.notifiableMessages[key] = value
+        try:
+            if type(info_dict["notifiable_messages"]) is tuple:
+                for key, value in info_dict["notifiable_messages"][0].items():
+                    self.notifiableMessages[key] = value
+            else:
+                for key, value in info_dict["notifiable_messages"].items():
+                    self.notifiableMessages[key] = value
+        except Exception as e:
+            print(f"Failed to parse notifiable messages: {e}")
 
         return self
 

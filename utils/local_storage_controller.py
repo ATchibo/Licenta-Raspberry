@@ -75,6 +75,9 @@ class LocalStorageController:
         except FileNotFoundError:
             print(f'File not found: {self._raspberry_info_file}')
             pass
+        except Exception as e:
+            print(f'Error while saving RaspberryInfo to file: {e}')
+            pass
 
     def get_moisture_info(self, start_date=None, end_date=None) -> list[dict]:
         try:
@@ -206,8 +209,8 @@ class LocalStorageController:
     def get_notifiable_messages(self):
         _raspberry_info = self.get_raspberry_info()
         if _raspberry_info is None:
-            return {}
-        return _raspberry_info.notifiableMessages
+            return {}, False
+        return _raspberry_info.notifiableMessages, True
 
     def add_moisture_percentage_measurement(self, measurement):
         _moisture_info = self.get_moisture_info()

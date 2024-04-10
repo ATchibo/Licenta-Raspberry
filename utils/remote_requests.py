@@ -170,11 +170,11 @@ class RemoteRequests:
         except Exception as e:
             return False
 
-    def get_notifiable_messages(self) -> dict:
+    def get_notifiable_messages(self) -> [dict, bool]:
         try:
             _result = self._firebase_controller.get_notifiable_messages(self._raspberry_id)
             self._local_storage_controller.save_notifiable_messages(_result)
-            return _result
+            return _result, True
         except Exception as e:
             return self._local_storage_controller.get_notifiable_messages()
 
