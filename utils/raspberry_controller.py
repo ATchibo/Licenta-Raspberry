@@ -324,6 +324,8 @@ class RaspberryController(Observer):
         if _raspberry_info is not None:
             self._raspberry_info = _raspberry_info
             LocalStorageController().save_raspberry_info(self._raspberry_info)
+        else:
+            RemoteRequests().register_raspberry(self._raspberry_info)
 
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
         print(f"Subject notified raspberry controller: {notification_type}")

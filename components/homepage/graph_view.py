@@ -61,7 +61,7 @@ class GraphView(MDBoxLayout):
             graph_box.add_widget(FigureCanvasKivyAgg(plt.gcf()))
             return
 
-        moisture_info_list = sorted(moisture_info_list, key=lambda x: x["measurementTime"], reverse=True)
+        moisture_info_list = sorted(moisture_info_list, key=lambda x: x["measurementTime"])
         timestamps = [moisture_info["measurementTime"].astimezone(get_localzone()) for moisture_info in
                       moisture_info_list]
         values = [moisture_info["measurementValuePercent"] for moisture_info in moisture_info_list]

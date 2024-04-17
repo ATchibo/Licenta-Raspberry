@@ -164,7 +164,7 @@ class ConnectPage(MDScreen):
             self.ids.connect_button.text = "Log out and connect again"
             self.qr_data = ""
 
-            RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
+            # RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
             RemoteRequests().register_raspberry_to_device(email)
             BackendController().send_message_to_ws("OK")
 
