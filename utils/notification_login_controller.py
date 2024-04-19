@@ -59,6 +59,7 @@ class NotificationLoginController:
             return
 
         def _temp():
+            BackendController().close_ws()
             BackendController().connect_to_ws(
                 token,
                 self._on_message_received,
