@@ -32,7 +32,7 @@ class NotificationLoginController:
 
         self._login_page_on_try_login_callback = None
 
-        self._retry_login_notification_delay_seconds = 0.5 * 1000 * 60 * 60 * 24  # 0.5 days
+        self._retry_login_notification_delay_seconds = 0.5 * 60 * 60 * 24  # 0.5 days
         self._retry_login_notification_event = threading.Event()
         self._retry_login_notification_thread = None
 
