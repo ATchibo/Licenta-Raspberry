@@ -51,7 +51,7 @@ if __name__ == '__main__':
     FirebaseController().attach(EventLogger())
 
     try:
-        NotificationLoginController().try_initial_login()
+        NotificationLoginController().try_send_login_notification()
     except Exception as e:
         print("Failed to auto login: " + str(e))
 
