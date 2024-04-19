@@ -10,6 +10,7 @@ from domain.observer.Observer import Observer
 from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Subject import Subject
 from utils.datetime_utils import get_current_datetime_tz
+from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.local_storage_controller import LocalStorageController
@@ -241,7 +242,13 @@ class WateringProgramController(Observer, Subject):
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
                 if current_soil_moisture < program.min_moisture:
-                    self._raspberry_controller.water_for_liters(program.quantity_l)
+                    self._raspberry_controller.water_for_liters(program.quantity_l * 0.3)  # 30% of the quantity
+                elif current_soil_moisture > program.max_moisture:
+                    EventLogger().add_high_moisture_level_message(
+                        current_soil_moisture,
+                        program.max_moisture,
+                        get_current_datetime_tz()
+                    )
 
     def set_on_receive_from_network_callback(self, _update_values_on_receive_from_network):
         self._gui_update_callback = _update_values_on_receive_from_network
