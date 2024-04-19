@@ -1,4 +1,5 @@
 import threading
+import time
 
 from utils.depth_sensor_controller import DepthSensorController
 from utils.local_storage_controller import LocalStorageController
@@ -56,8 +57,22 @@ class WaterDepthMeasurementController:
         if self._max_height is None:
             return 0
 
-        _water_height = self.measure_water_depth_cm()
-        return round(max(0.0, self._tank_volume_ratio * (self._max_height - _water_height)), 2)
+        _max_tries = 5
+        _water_height_1 = self.measure_water_depth_cm()
+        print("Water height 1: ", _water_height_1)
+        time.sleep(0.5)
+        _water_height_2 = self.measure_water_depth_cm()
+        print("Water height 2: ", _water_height_2)
+        while abs(_water_height_1 - _water_height_2) > 0.1 and _max_tries > 0:
+            _water_height_1 = _water_height_2
+            time.sleep(0.5)
+            _water_height_2 = self.measure_water_depth_cm()
+            print("Water height 2: ", _water_height_2)
+            _max_tries -= 1
+
+        _volume = self._tank_volume_ratio * (self._max_height - _water_height_2)
+        print("Volume: ", _volume)
+        return round(max(0.0, _volume), 2)
 
     def is_water_tank_empty(self) -> bool:
         return self.get_current_water_volume() < self._empty_tank_threshold

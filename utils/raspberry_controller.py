@@ -170,7 +170,7 @@ class RaspberryController(Observer):
             if "waterTankVolume" in updated_data.keys():
                 if "REQUEST" in str(updated_data["waterTankVolume"]):
                     print("Sending water volume info")
-                    self._send_water_volume_info()
+                    self._send_water_tank_volume_info()
 
             # check for watering now command
             if "command" in updated_data.keys():
@@ -314,14 +314,18 @@ class RaspberryController(Observer):
     def _send_moisture_info(self):
         RemoteRequests().update_moisture_info(self.get_moisture_percentage())
 
-    def _send_water_volume_info(self):
-        RemoteRequests().update_water_volume_info(
+    def _send_water_tank_volume_info(self):
+        RemoteRequests().update_water_tank_volume_info(
             self.water_depth_measurement_controller.get_current_water_volume()
         )
 
     def update_raspberry_info(self):
-        self._raspberry_info = RemoteRequests().get_raspberry_info()
-        LocalStorageController().save_raspberry_info(self._raspberry_info)
+        _raspberry_info = RemoteRequests().get_raspberry_info()
+        if _raspberry_info is not None:
+            self._raspberry_info = _raspberry_info
+            LocalStorageController().save_raspberry_info(self._raspberry_info)
+        else:
+            RemoteRequests().register_raspberry(self._raspberry_info)
 
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
         print(f"Subject notified raspberry controller: {notification_type}")

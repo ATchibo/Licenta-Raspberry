@@ -1,6 +1,9 @@
+import datetime
 import os
 import pickle
 import threading
+
+from tzlocal import get_localzone
 
 from domain.RaspberryInfo import RaspberryInfo
 
@@ -61,6 +64,9 @@ class LocalStorageController:
                     return None
         except FileNotFoundError:
             return None
+        except Exception as e:
+            print(f'Error while loading RaspberryInfo from file: {e}')
+            return None
 
     def save_raspberry_info(self, raspberry_info: RaspberryInfo):
         try:
@@ -69,13 +75,29 @@ class LocalStorageController:
         except FileNotFoundError:
             print(f'File not found: {self._raspberry_info_file}')
             pass
+        except Exception as e:
+            print(f'Error while saving RaspberryInfo to file: {e}')
+            pass
 
-    def get_moisture_info(self) -> list[dict]:
+    def get_moisture_info(self, start_date=None, end_date=None) -> list[dict]:
         try:
             with open(self._moisture_info_file, 'rb') as file:
                 _moisture_info = pickle.load(file)
-                return _moisture_info
-        except FileNotFoundError:
+
+                if start_date is None:
+                    start_date = datetime.datetime.min
+                if end_date is None:
+                    end_date = datetime.datetime.now()
+
+                start_date = start_date.astimezone(get_localzone())
+                end_date = end_date.astimezone(get_localzone())
+
+                _moisture_info_filtered = [measurement for measurement in _moisture_info
+                                  if start_date <= measurement["measurementTime"] <= end_date]
+
+                return _moisture_info_filtered
+        except FileNotFoundError as e:
+            print(f'File not found: {self._moisture_info_file} and error is {e}')
             return []
 
     def save_moisture_info(self, moisture_info: list[dict]):
@@ -84,6 +106,17 @@ class LocalStorageController:
                 pickle.dump(moisture_info, file)
         except FileNotFoundError:
             print(f'File not found: {self._moisture_info_file}')
+            pass
+
+    def update_moisture_info_list(self, moisture_info: list[dict]):
+        try:
+            _current_moisture_info = self.get_moisture_info()
+            _current_moisture_info.extend(moisture_info)
+            _current_moisture_info = sorted(_current_moisture_info, key=lambda x: x["measurementTime"], reverse=True)
+            _current_moisture_info = _current_moisture_info[:100]
+            self.save_moisture_info(_current_moisture_info)
+        except Exception as e:
+            print(f'Error while updating moisture info: {e}')
             pass
 
     def get_watering_programs(self):
@@ -176,13 +209,13 @@ class LocalStorageController:
     def get_notifiable_messages(self):
         _raspberry_info = self.get_raspberry_info()
         if _raspberry_info is None:
-            return {}
-        return _raspberry_info.notifiableMessages
+            return {}, False
+        return _raspberry_info.notifiableMessages, True
 
-    def add_moisture_percentage_measurement(self, measurement, timestamp):
+    def add_moisture_percentage_measurement(self, measurement):
         _moisture_info = self.get_moisture_info()
-        _moisture_info.append({timestamp: measurement})
-        self.save_moisture_info(_moisture_info)
+        _moisture_info.append(measurement)
+        self.update_moisture_info_list(_moisture_info)
         return True
 
     def set_moisture_sensor_absolute_values(self, absolute_dry, absolute_wet) -> bool:

@@ -26,3 +26,4 @@ python-dotenv==1.0.1
 websocket-client==1.7.0
 rel==0.4.9.6
 keyring==24.3.1
+tzlocal==5.2

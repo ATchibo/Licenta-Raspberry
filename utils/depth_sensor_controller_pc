@@ -9,4 +9,4 @@ class DepthSensorController:
 
     def measure_water_depth_cm(self):
         time.sleep(1)
-        return random.randint(0, 100)
+        return random.randint(10, 100)

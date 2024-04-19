@@ -46,11 +46,6 @@ if __name__ == '__main__':
     # except Exception as e:
     #     print("Failed to auto login: " + str(e))
 
-
-    # RaspberryController().start_listening_for_watering_now()
-    # WateringProgramController().perform_initial_setup()
-    # EventLogger().perform_initial_setup()
-
     FirebaseController().attach(RaspberryController())
     FirebaseController().attach(WateringProgramController())
     FirebaseController().attach(EventLogger())
@@ -60,6 +55,6 @@ if __name__ == '__main__':
     except Exception as e:
         print("Failed to auto login: " + str(e))
 
-    MoistureMeasurementController().start_moisture_check_thread(1000 * 60 * 60 * 12)
+    MoistureMeasurementController().start_moisture_check_thread(12 * 60 * 60)  # 12 hours
 
     PlantBuddyApp().run()

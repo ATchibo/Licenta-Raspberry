@@ -60,11 +60,10 @@ class ConnectPage(MDScreen):
 
         RemoteRequests().unregister_raspberry()
 
-
         self.info_text = "Device not logged in"
 
         self._is_logged_in.clear()
-        self.backend_thread = threading.Thread(target=self._backend_ops)
+        self.backend_thread = threading.Thread(target=self._backend_ops, daemon=True)
         self.backend_thread.start()
 
     def _backend_request(self) -> int | tuple[datetime, str]:
@@ -165,12 +164,9 @@ class ConnectPage(MDScreen):
             self.ids.connect_button.text = "Log out and connect again"
             self.qr_data = ""
 
-            RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
+            # RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
             RemoteRequests().register_raspberry_to_device(email)
             BackendController().send_message_to_ws("OK")
-
-            # RaspberryController().start_listening_for_watering_now()
-            # WateringProgramController().perform_initial_setup()
 
         else:
             self.info_text = "Failed to login"

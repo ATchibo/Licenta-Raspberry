@@ -54,16 +54,19 @@ class EventLogger(Observer):
         log_messages = RemoteRequests().get_log_messages()
         self._log_messages = []
 
-        for log_message_key, log_message_value in log_messages.items():
-            self._log_messages.append(
-                LogMessage(
-                    message=log_message_value,
-                    level=MessageType.ANY,
-                    timestamp=datetime.strptime(str(log_message_key)[:-6], "%Y-%m-%d %H:%M:%S.%f")
+        try:
+            for log_message_key, log_message_value in log_messages.items():
+                self._log_messages.append(
+                    LogMessage(
+                        message=log_message_value,
+                        level=MessageType.ANY,
+                        timestamp=datetime.strptime(str(log_message_key)[:-6], "%Y-%m-%d %H:%M:%S.%f")
+                    )
                 )
-            )
 
-        self._log_messages.sort(key=lambda x: x.get_timestamp(), reverse=True)
+            self._log_messages.sort(key=lambda x: x.get_timestamp(), reverse=True)
+        except Exception as e:
+            print(f"Failed to parse log messages: {e}")
 
         return self._log_messages, True
 
@@ -74,8 +77,11 @@ class EventLogger(Observer):
             return
 
         self._notifiable_messages = {}
-        for notifiable_message_key, notifiable_message_value in notifiable_messages.items():
-            self._notifiable_messages[notifiable_message_key] = notifiable_message_value
+        try:
+            for notifiable_message_key, notifiable_message_value in notifiable_messages.items():
+                self._notifiable_messages[notifiable_message_key] = notifiable_message_value
+        except Exception as e:
+            print(f"Failed to parse notifiable messages: {e}")
 
         return self._notifiable_messages
 

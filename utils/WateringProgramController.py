@@ -1,12 +1,14 @@
 import threading
 import time
-from datetime import datetime
+import datetime
 
 from google.cloud.firestore_v1.watch import ChangeType
+from tzlocal import get_localzone
 
 from domain.WateringProgram import WateringProgram
 from domain.observer.Observer import Observer
 from domain.observer.ObserverNotificationType import ObserverNotificationType
+from domain.observer.Subject import Subject
 from utils.datetime_utils import get_current_datetime_tz
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
@@ -15,7 +17,7 @@ from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
 
-class WateringProgramController(Observer):
+class WateringProgramController(Observer, Subject):
     _instance = None
     _lock = threading.Lock()
 
@@ -50,6 +52,10 @@ class WateringProgramController(Observer):
         self._watering_cycle_start_time = None
         self._watering_cycle_end_time = None
 
+        self._datetime_of_next_watering = None
+
+        self._observers = []
+
     def perform_initial_setup(self):
         self.get_watering_programs()
         self.get_is_watering_programs_active()
@@ -58,6 +64,9 @@ class WateringProgramController(Observer):
         RemoteRequests().add_listener_for_watering_programs_changes(
             self._update_values_on_receive_from_network
         )
+
+        if not self._is_watering_programs_active:
+            self.notify(ObserverNotificationType.WATERING_PROGRAMS_DISABLED)
 
     def get_watering_programs(self):
         watering_programs_list = RemoteRequests().get_watering_programs()
@@ -81,6 +90,11 @@ class WateringProgramController(Observer):
         RemoteRequests().set_is_watering_programs_active(is_active)
         self._is_watering_programs_active = is_active
 
+        if not is_active:
+            self.notify(ObserverNotificationType.WATERING_PROGRAMS_DISABLED)
+        else:
+            self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
+
     def _get_active_watering_program(self):
         if self._active_watering_program_id is None or self._watering_programs is None:
             return None
@@ -88,29 +102,34 @@ class WateringProgramController(Observer):
             return None
         return self._watering_programs[self._active_watering_program_id]
 
+    def get_next_watering_time(self):
+        return self._datetime_of_next_watering
+
     def _compute_initial_delay_sec(self, program: WateringProgram):
         if program.starting_date_time is None:
             return -1
 
         _current_time = get_current_datetime_tz()
-
-        _time_delta_seconds = (program.starting_date_time - _current_time).seconds
+        _program_starting_date_time = program.starting_date_time.astimezone(get_localzone())
 
         # if program starting time is in the future
-        if program.starting_date_time >= _current_time:
+        if _program_starting_date_time >= _current_time:
+            _time_delta_seconds = (_program_starting_date_time - _current_time).total_seconds()
             return _time_delta_seconds
 
         # if the starting time is in the past, we try to see the last watering time
         _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
 
         # if the last recorded watering time is not for the current program or it is None
-        # we leave the delta as is
+        # we compute the difference between the current date and the starting date of the program
         # else we compute the time passed since the last watering
-        if not (_program_id is None or _last_watered_time is None or _program_id is not program.id):
-            _time_delta_seconds = _current_time - _last_watered_time
+        if _program_id is not None and _last_watered_time is not None and _program_id is program.id:
+            _time_delta_seconds = (_current_time - _last_watered_time).total_seconds()
+        else:
+            _time_delta_seconds = (_current_time - _program_starting_date_time).total_seconds()
 
         # we compute how many seconds are between watering cycles
-        _interval_between_watering_seconds = program.frequency_days * 24 * 60 * 60
+        _interval_between_watering_seconds = self._compute_watering_interval_sec(program)
 
         # we compute how many watering intervals fit in the time passed since the last watering
         _intervals_in_time_delta = _time_delta_seconds // _interval_between_watering_seconds
@@ -123,12 +142,12 @@ class WateringProgramController(Observer):
             _waiting_time += _interval_between_watering_seconds
 
         # we compute how many seconds we need to wait until next watering cycle should occur
-        _time_delta_seconds = _waiting_time - _time_delta_seconds
+        _time_until_next_watering = _waiting_time - _time_delta_seconds
 
-        return _time_delta_seconds
+        return _current_time, _time_until_next_watering
 
     def _compute_watering_interval_sec(self, program):
-        return program.frequency_days * 24 * 60 * 60
+        return program.frequency_days * 24 * 60 * 60  # days * hours * minutes * seconds -> seconds
 
     def _schedule_watering(self):
         if self._active_watering_program_id is None:
@@ -139,11 +158,14 @@ class WateringProgramController(Observer):
         if active_program is None:
             return
 
-        initial_delay_sec = self._compute_initial_delay_sec(active_program)
+        _processing_time, initial_delay_sec = self._compute_initial_delay_sec(active_program)
         print("initial delay: ", initial_delay_sec)
 
         if initial_delay_sec < 0:
             return
+
+        self._datetime_of_next_watering = _processing_time + datetime.timedelta(seconds=initial_delay_sec)
+        self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
 
         self._watering_thread_finished.clear()
         self._moisture_check_thread_finished.clear()
@@ -177,16 +199,25 @@ class WateringProgramController(Observer):
         if self._watering_thread_finished.is_set():
             return
 
+        _watering_time_sec = 0
         if self._is_watering_programs_active:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
             if current_soil_moisture < program.max_moisture:
+                _start_time = get_current_datetime_tz()
                 self._raspberry_controller.water_for_liters(program.quantity_l)
+                _end_time = get_current_datetime_tz()
+                _watering_time_sec = (_end_time - _start_time).seconds
 
         water_interval_sec = self._compute_watering_interval_sec(program)
 
         while not self._watering_thread_finished.is_set():
-            self._watering_thread_finished.wait(water_interval_sec)
+            _waiting_time = water_interval_sec - _watering_time_sec
+
+            self._datetime_of_next_watering = get_current_datetime_tz() + datetime.timedelta(seconds=_waiting_time)
+            self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
+
+            self._watering_thread_finished.wait(_waiting_time)
             if self._watering_thread_finished.is_set():
                 return
 
@@ -194,9 +225,11 @@ class WateringProgramController(Observer):
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
                 if current_soil_moisture < program.max_moisture:
-                    _current_time = get_current_datetime_tz()
+                    _start_time = get_current_datetime_tz()
                     self._raspberry_controller.water_for_liters(program.quantity_l)
-                    LocalStorageController().set_last_watering_time(_current_time, program.id)
+                    _end_time = get_current_datetime_tz()
+                    _watering_time_sec = (_end_time - _start_time).seconds
+                    LocalStorageController().set_last_watering_time(_start_time, program.id)
 
     def _moisture_check_task(self, program, sleep_time_sec=600):
         while not self._moisture_check_thread_finished.is_set():
@@ -278,3 +311,13 @@ class WateringProgramController(Observer):
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
         if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
             self.perform_initial_setup()
+
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self, notification_type: ObserverNotificationType) -> None:
+        for observer in self._observers:
+            observer.on_notification_from_subject(notification_type)

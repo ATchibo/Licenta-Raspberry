@@ -66,6 +66,8 @@ class FirebaseController(Subject):
 
         self._observers = []
 
+        self._refresh_token_time_delay_sec = 60
+
     def _is_raspberry_registered(self, serial) -> bool:
         if self.db is None:
             raise FirebaseUninitializedException()
@@ -374,8 +376,7 @@ class FirebaseController(Subject):
         except Exception as e:
             raise Exception(f"Error updating water volume info: {e}")
 
-
-    def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> bool:
+    def add_moisture_percentage_measurement(self, _raspberry_id, moisture_perc, timestamp) -> [bool, any]:
         if self.db is None:
             raise FirebaseUninitializedException()
 
@@ -387,7 +388,7 @@ class FirebaseController(Subject):
             }
 
             self.db.collection(self._moistureInfoCollectionName).add(data)
-            return True
+            return True, data
 
         except Exception as e:
             raise Exception(f"Error adding moisture percentage measurement: {e}")
@@ -461,7 +462,7 @@ class FirebaseController(Subject):
         if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
             self.__token = _token
             self.__refresh_token = _refresh_token
-            self._schedule_token_refresh(_expires_in - 10)
+            self._schedule_token_refresh(_expires_in - self._refresh_token_time_delay_sec)
 
             return True
         else:
@@ -496,7 +497,7 @@ class FirebaseController(Subject):
     #         self._start_listening_for_ping()
     #         self.__token = _token
     #         self.__refresh_token = _refresh_token
-    #         self._schedule_token_refresh(_expires_in - 10)
+    #         self._schedule_token_refresh(_expires_in - self._refresh_token_time_delay)
     #
     #         return True
     #     else:
@@ -545,7 +546,7 @@ class FirebaseController(Subject):
             return True
 
         except Exception as e:
-            print(f"Error attempting anonymous login: {e}")
+            print(f"Error authenticating firestore client with tokens: {e}")
             self._instance.db = None
             return False
 
@@ -561,7 +562,7 @@ class FirebaseController(Subject):
             if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
                 self.__token = _token
                 self.__refresh_token = _refresh_token
-                self._schedule_token_refresh(_expires_in - 10)
+                self._schedule_token_refresh(_expires_in - self._refresh_token_time_delay_sec)
 
                 print("Token refreshed")
 
