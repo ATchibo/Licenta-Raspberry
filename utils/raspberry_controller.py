@@ -333,3 +333,6 @@ class RaspberryController(Observer):
             self._set_ping_callback()
             self.start_listening_for_watering_now()
             self.update_raspberry_info()
+
+    def update_next_watering_time(self, next_watering_time):
+        RemoteRequests().update_next_watering_time(next_watering_time)

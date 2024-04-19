@@ -211,3 +211,9 @@ class RemoteRequests:
             return self._firebase_controller.update_water_tank_volume_info(self._raspberry_id, param)
         except Exception as e:
             return False
+
+    def update_next_watering_time(self, next_watering_time):
+        try:
+            return self._firebase_controller.update_next_watering_time(self._raspberry_id, next_watering_time)
+        except Exception as e:
+            return False

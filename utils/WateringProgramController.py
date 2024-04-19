@@ -167,6 +167,7 @@ class WateringProgramController(Observer, Subject):
 
         self._datetime_of_next_watering = _processing_time + datetime.timedelta(seconds=initial_delay_sec)
         self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
+        self._raspberry_controller.update_next_watering_time(self._datetime_of_next_watering)
 
         self._watering_thread_finished.clear()
         self._moisture_check_thread_finished.clear()

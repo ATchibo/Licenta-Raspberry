@@ -362,6 +362,20 @@ class FirebaseController(Subject):
         except Exception as e:
             raise Exception(f"Error updating moisture info: {e}")
 
+    def update_next_watering_time(self, _raspberry_id, next_watering_time):
+        if self.db is None:
+            raise FirebaseUninitializedException()
+
+        try:
+            data = {
+                "nextWateringTime": next_watering_time
+            }
+
+            self.db.collection(self._wateringNowCollectionName).document(_raspberry_id).set(data, merge=True)
+            return True
+        except Exception as e:
+            raise Exception(f"Error updating next watering time: {e}")
+
     def update_water_tank_volume_info(self, _raspberry_id, param):
         if self.db is None:
             raise FirebaseUninitializedException()
