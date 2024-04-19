@@ -569,6 +569,9 @@ class FirebaseController(Subject):
         except Exception as e:
             print(f"Error attempting to refresh token: {e}")
 
+    def is_logged_in(self):
+        return self.db is not None
+
     def attach(self, observer: Observer) -> None:
         self._observers.append(observer)
 
