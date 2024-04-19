@@ -2,6 +2,7 @@ import json
 import threading
 from datetime import datetime
 
+from domain.logging.HighMoistureLevelMessage import HighMoistureLevelMessage
 from domain.logging.LogMessage import LogMessage
 from domain.logging.LowWaterLevelMessage import LowWaterLevelMessage
 from domain.logging.ManualWateringCycleMessage import ManualWateringCycleMessage
@@ -118,6 +119,9 @@ class EventLogger(Observer):
 
     def add_water_level_after_watering_message(self, level, date_time):
         self._add_log_message(LowWaterLevelMessage(level, date_time))
+
+    def add_high_moisture_level_message(self, recorded_moisture, max_moisture, timestamp):
+        self._add_log_message(HighMoistureLevelMessage(recorded_moisture, max_moisture, timestamp))
 
     def _update_logs_on_receive_from_network(
         self,
