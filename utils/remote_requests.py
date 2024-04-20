@@ -184,6 +184,17 @@ class RemoteRequests:
             self._local_storage_controller.add_moisture_percentage_measurement(_measurement)
             return _result
         except Exception as e:
+            try:
+                data = {
+                    "raspberryId": self._raspberry_id,
+                    "measurementTime": timestamp,
+                    "measurementValuePercent": percentage
+                }
+                self._local_storage_controller.add_moisture_percentage_measurement(data)
+
+            except Exception as e:
+                pass
+
             return False
 
     def unsubscribe_watering_now_listener(self):
