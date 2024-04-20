@@ -59,7 +59,10 @@ class RemoteRequests:
     def get_moisture_info(self, start_date: datetime, end_date: datetime) -> list[dict]:
         try:
             _result = self._firebase_controller.get_moisture_info_for_rasp_id(self._raspberry_id, start_date, end_date)
-            self._local_storage_controller.update_moisture_info_list(_result)
+            if _result is None or len(_result) == 0:
+                _result = self._local_storage_controller.get_moisture_info(start_date, end_date)
+            else:
+                self._local_storage_controller.update_moisture_info_list(_result)
             return _result
         except Exception as e:
             return self._local_storage_controller.get_moisture_info(start_date, end_date)
