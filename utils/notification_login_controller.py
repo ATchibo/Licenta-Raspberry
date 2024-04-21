@@ -32,7 +32,8 @@ class NotificationLoginController:
 
         self._login_page_on_try_login_callback = None
 
-        self._retry_login_notification_delay_seconds = 0.5 * 60 * 60 * 24  # 0.5 days
+        self._initial_login_delay_seconds = 60 * 60 * 5  # 5 hours
+        self._retry_login_notification_delay_seconds = self._initial_login_delay_seconds
         self._retry_login_notification_event = threading.Event()
         self._retry_login_notification_thread = None
 
@@ -113,8 +114,7 @@ class NotificationLoginController:
 
             print("Logged in hehehehe")
 
-            self._retry_login_notification_delay_seconds = 0.5 * 1000 * 60 * 60 * 24  # 0.5 days
-            self._start_retry_login_notification_thread()
+            self._retry_login_notification_delay_seconds = self._initial_login_delay_seconds
 
         else:
             BackendController().send_message_to_ws("FAIL")
@@ -123,7 +123,8 @@ class NotificationLoginController:
             print("Failed to login hehehehe")
 
             self._retry_login_notification_delay_seconds *= 2
-            self._start_retry_login_notification_thread()
+
+        self._start_retry_login_notification_thread()
 
     def try_send_login_notification(self):
         self._ws_code = self._backend_request()
@@ -147,7 +148,7 @@ class NotificationLoginController:
     def _retry_login_notification(self):
         while not self._retry_login_notification_event.is_set():
             self._retry_login_notification_event.wait(self._retry_login_notification_delay_seconds)
-            if self._is_logged_in.is_set():
+            if self._retry_login_notification_event.is_set():
                 return
 
             if not FirebaseController().is_logged_in():

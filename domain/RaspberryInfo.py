@@ -58,7 +58,7 @@ class RaspberryInfo:
                 for key, value in info_dict["notifiable_messages"].items():
                     self.notifiableMessages[key] = value
         except Exception as e:
-            print(f"Failed to parse notifiable messages: {e}")
+            print(f"Failed to parse notifiable messages in raspberry info: {e}")
 
         return self
 

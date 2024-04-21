@@ -79,10 +79,14 @@ class EventLogger(Observer):
 
         self._notifiable_messages = {}
         try:
-            for notifiable_message_key, notifiable_message_value in notifiable_messages.items():
-                self._notifiable_messages[notifiable_message_key] = notifiable_message_value
+            if type(notifiable_messages) is tuple:
+                for notifiable_message_key, notifiable_message_value in notifiable_messages[0].items():
+                    self._notifiable_messages[notifiable_message_key] = notifiable_message_value
+            else:
+                for notifiable_message_key, notifiable_message_value in notifiable_messages.items():
+                    self._notifiable_messages[notifiable_message_key] = notifiable_message_value
         except Exception as e:
-            print(f"Failed to parse notifiable messages: {e}")
+            print(f"Failed to parse notifiable messages in event logger: {e}")
 
         return self._notifiable_messages
 
