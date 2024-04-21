@@ -32,8 +32,7 @@ class NotificationLoginController:
 
         self._login_page_on_try_login_callback = None
 
-        self._initial_login_delay_seconds = 60 * 60 * 5  # 5 hours
-        self._retry_login_notification_delay_seconds = self._initial_login_delay_seconds
+        self._retry_login_notification_delay_seconds = 60 * 60 * 1  # 1 hour
         self._retry_login_notification_event = threading.Event()
         self._retry_login_notification_thread = None
 
@@ -114,17 +113,13 @@ class NotificationLoginController:
 
             print("Logged in hehehehe")
 
-            self._retry_login_notification_delay_seconds = self._initial_login_delay_seconds
-
         else:
             BackendController().send_message_to_ws("FAIL")
             self._login_page_on_try_login_callback(False, None)
 
             print("Failed to login hehehehe")
 
-            self._retry_login_notification_delay_seconds *= 2
-
-        self._start_retry_login_notification_thread()
+            self._stop_retry_login_notification_thread()
 
     def try_send_login_notification(self):
         self._ws_code = self._backend_request()
@@ -136,13 +131,18 @@ class NotificationLoginController:
 
         self._connect_to_ws(self._ws_code)
 
-    def _start_retry_login_notification_thread(self):
+    def _stop_retry_login_notification_thread(self):
         self._retry_login_notification_event.set()
         if self._retry_login_notification_thread is not None:
             self._retry_login_notification_thread.join()
         self._retry_login_notification_event.clear()
 
-        self._retry_login_notification_thread = threading.Thread(target=self._retry_login_notification, daemon=True)
+    def _start_retry_login_notification_thread(self):
+        self._stop_retry_login_notification_thread()
+        self._retry_login_notification_thread = threading.Thread(
+            target=self._retry_login_notification,
+            daemon=True
+        )
         self._retry_login_notification_thread.start()
 
     def _retry_login_notification(self):

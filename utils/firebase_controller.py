@@ -582,7 +582,6 @@ class FirebaseController(Subject):
 
         except Exception as e:
             print(f"Error attempting to refresh token: {e}")
-            self.db = None
 
     def is_logged_in(self):
         return self.db is not None
