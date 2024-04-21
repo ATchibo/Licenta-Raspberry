@@ -152,4 +152,5 @@ class NotificationLoginController:
                 return
 
             if not FirebaseController().is_logged_in():
+                self._is_logged_in.clear()
                 self.try_send_login_notification()
