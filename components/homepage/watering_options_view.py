@@ -18,7 +18,7 @@ class WateringOptionsView(MDBoxLayout):
     watering_label_variable = StringProperty()
     moisture_variable = StringProperty()
     are_programs_active_variable = BooleanProperty(True)
-    next_watering_time_variable = StringProperty("cacat")
+    next_watering_time_variable = StringProperty("N/A")
 
     def __init__(self, **kwargs):
         super(WateringOptionsView, self).__init__(**kwargs)
