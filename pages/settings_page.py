@@ -23,6 +23,7 @@ class SettingsPage(MDScreen):
     low_water_level_active_variable = BooleanProperty(False)
     no_water_left_active_variable = BooleanProperty(False)
     high_moisture_active_variable = BooleanProperty(False)
+    low_moisture_active_variable = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super(SettingsPage, self).__init__(**kwargs)
@@ -45,6 +46,8 @@ class SettingsPage(MDScreen):
         self.low_water_level_active_variable = self.raspberry_info.notifiableMessages[MessageType.LOW_WATER_LEVEL.value]
         self.no_water_left_active_variable = self.raspberry_info.notifiableMessages[MessageType.EMPTY_WATER_TANK.value]
         self.high_moisture_active_variable = self.raspberry_info.notifiableMessages[MessageType.HIGH_MOISTURE_LEVEL.value]
+        self.low_moisture_active_variable = self.raspberry_info.notifiableMessages[MessageType.LOW_MOISTURE_LEVEL.value] \
+            if MessageType.LOW_MOISTURE_LEVEL.value in self.raspberry_info.notifiableMessages else False
 
     def _init_setup(self, *args):
         self._load_data()
@@ -55,6 +58,7 @@ class SettingsPage(MDScreen):
         self.ids.sw4.bind(active=self.toggle_low_water_level_notification)
         self.ids.sw5.bind(active=self.toggle_no_water_left_notification)
         self.ids.sw6.bind(active=self.toggle_high_moisture_notification)
+        self.ids.sw7.bind(active=self.toggle_low_moisture_notification)
 
     def toggle_auto_watering(self, instance, value):
         self.auto_watering_active_variable = value
@@ -91,6 +95,12 @@ class SettingsPage(MDScreen):
         self.raspberry_info.notifiableMessages[MessageType.HIGH_MOISTURE_LEVEL.value] = value
 
         RaspberryController().update_raspberry_notification_info(MessageType.HIGH_MOISTURE_LEVEL, value)
+
+    def toggle_low_moisture_notification(self, instance, value):
+        self.low_moisture_active_variable = value
+        self.raspberry_info.notifiableMessages[MessageType.LOW_MOISTURE_LEVEL.value] = value
+
+        RaspberryController().update_raspberry_notification_info(MessageType.LOW_MOISTURE_LEVEL, value)
 
     def refresh_data(self, *args):
         self._load_data()

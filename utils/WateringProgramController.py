@@ -243,7 +243,12 @@ class WateringProgramController(Observer, Subject):
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
                 if current_soil_moisture < program.min_moisture:
-                    self._raspberry_controller.water_for_liters(program.quantity_l * 0.3)  # 30% of the quantity
+                    # self._raspberry_controller.water_for_liters(program.quantity_l * 0.3)  # 30% of the quantity
+                    EventLogger().add_low_moisture_level_message(
+                        current_soil_moisture,
+                        program.min_moisture,
+                        get_current_datetime_tz()
+                    )
                 elif current_soil_moisture > program.max_moisture:
                     EventLogger().add_high_moisture_level_message(
                         current_soil_moisture,

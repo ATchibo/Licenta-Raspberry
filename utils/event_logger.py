@@ -4,6 +4,7 @@ from datetime import datetime
 
 from domain.logging.HighMoistureLevelMessage import HighMoistureLevelMessage
 from domain.logging.LogMessage import LogMessage
+from domain.logging.LowMoistureLevelMessage import LowMoistureLevelMessage
 from domain.logging.LowWaterLevelMessage import LowWaterLevelMessage
 from domain.logging.ManualWateringCycleMessage import ManualWateringCycleMessage
 from domain.logging.MessageType import MessageType
@@ -126,6 +127,9 @@ class EventLogger(Observer):
 
     def add_high_moisture_level_message(self, recorded_moisture, max_moisture, timestamp):
         self._add_log_message(HighMoistureLevelMessage(recorded_moisture, max_moisture, timestamp))
+
+    def add_low_moisture_level_message(self, recorded_moisture, min_moisture, timestamp):
+        self._add_log_message(LowMoistureLevelMessage(recorded_moisture, min_moisture, timestamp))
 
     def _update_logs_on_receive_from_network(
         self,
