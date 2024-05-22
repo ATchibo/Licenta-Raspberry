@@ -20,7 +20,8 @@ class RaspberryInfo:
                 MessageType.MOISTURE_LEVEL_MEASUREMENT.value: False,
                 MessageType.LOW_WATER_LEVEL.value: False,
                 MessageType.EMPTY_WATER_TANK.value: False,
-                MessageType.HIGH_MOISTURE_LEVEL.value: False
+                MessageType.HIGH_MOISTURE_LEVEL.value: False,
+                MessageType.LOW_MOISTURE_LEVEL.value: False,
             }
         else:
             self.notifiableMessages = notifiableMessages
