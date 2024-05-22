@@ -116,7 +116,7 @@ class WateringProgramController(Observer, Subject):
         # if program starting time is in the future
         if _program_starting_date_time >= _current_time:
             _time_delta_seconds = (_program_starting_date_time - _current_time).total_seconds()
-            return _time_delta_seconds, _time_delta_seconds
+            return _current_time, _time_delta_seconds
 
         # if the starting time is in the past, we try to see the last watering time
         _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
