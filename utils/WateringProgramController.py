@@ -116,17 +116,18 @@ class WateringProgramController(Observer, Subject):
         # if program starting time is in the future
         if _program_starting_date_time >= _current_time:
             _time_delta_seconds = (_program_starting_date_time - _current_time).total_seconds()
-        else:
-            # if the starting time is in the past, we try to see the last watering time
-            _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
+            return _time_delta_seconds, _time_delta_seconds
 
-            # if the last recorded watering time is not for the current program or it is None
-            # we compute the difference between the current date and the starting date of the program
-            # else we compute the time passed since the last watering
-            if _program_id is not None and _last_watered_time is not None and _program_id is program.id:
-                _time_delta_seconds = (_current_time - _last_watered_time).total_seconds()
-            else:
-                _time_delta_seconds = (_current_time - _program_starting_date_time).total_seconds()
+        # if the starting time is in the past, we try to see the last watering time
+        _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
+
+        # if the last recorded watering time is not for the current program or it is None
+        # we compute the difference between the current date and the starting date of the program
+        # else we compute the time passed since the last watering
+        if _program_id is not None and _last_watered_time is not None and _program_id is program.id:
+            _time_delta_seconds = (_current_time - _last_watered_time).total_seconds()
+        else:
+            _time_delta_seconds = (_current_time - _program_starting_date_time).total_seconds()
 
         # we compute how many seconds are between watering cycles
         _interval_between_watering_seconds = self._compute_watering_interval_sec(program)
