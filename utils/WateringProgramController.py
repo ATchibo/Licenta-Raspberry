@@ -205,7 +205,7 @@ class WateringProgramController(Observer, Subject):
         if self._is_watering_programs_active:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
-            if current_soil_moisture < program.max_moisture:
+            if current_soil_moisture < program.min_moisture:
                 _start_time = get_current_datetime_tz()
                 self._raspberry_controller.water_for_liters(program.quantity_l)
                 _end_time = get_current_datetime_tz()
@@ -226,7 +226,7 @@ class WateringProgramController(Observer, Subject):
             if self._is_watering_programs_active:
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
-                if current_soil_moisture < program.max_moisture:
+                if current_soil_moisture < program.min_moisture:
                     _start_time = get_current_datetime_tz()
                     self._raspberry_controller.water_for_liters(program.quantity_l)
                     _end_time = get_current_datetime_tz()
