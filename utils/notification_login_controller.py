@@ -32,6 +32,12 @@ class NotificationLoginController:
 
         self._login_page_on_try_login_callback = None
 
+        self._retry_login_notification_delay_seconds = 60 * 60 * 1  # 1 hour
+        self._retry_login_notification_event = threading.Event()
+        self._retry_login_notification_thread = None
+
+        self._start_retry_login_notification_thread()
+
     def set_login_page_on_try_login_callback(self, callback):
         self._login_page_on_try_login_callback = callback
 
@@ -53,6 +59,7 @@ class NotificationLoginController:
             return
 
         def _temp():
+            BackendController().close_ws()
             BackendController().connect_to_ws(
                 token,
                 self._on_message_received,
@@ -101,10 +108,7 @@ class NotificationLoginController:
         if FirebaseController().login_with_custom_token(auth_token):
             self._is_logged_in.set()
 
-            # FirebaseController().link_raspberry_to_device(self._raspberry_id, email)
             BackendController().send_message_to_ws("OK")
-
-            # self._setup_after_login(True, email)
             self._login_page_on_try_login_callback(True, email)
 
             print("Logged in hehehehe")
@@ -115,15 +119,9 @@ class NotificationLoginController:
 
             print("Failed to login hehehehe")
 
-    # def _setup_after_login(self, login_success, email):
-    #     RaspberryController().update_raspberry_info()
-    #     RaspberryController().start_listening_for_watering_now()
-    #     WateringProgramController().perform_initial_setup()
-    #     EventLogger().perform_initial_setup()
-    #
-    #     self._login_page_on_try_login_callback(login_success, email)
+            self._stop_retry_login_notification_thread()
 
-    def try_initial_login(self):
+    def try_send_login_notification(self):
         self._ws_code = self._backend_request()
 
         if self._ws_code is None:
@@ -132,3 +130,27 @@ class NotificationLoginController:
         print("Ws code: ", self._ws_code)
 
         self._connect_to_ws(self._ws_code)
+
+    def _stop_retry_login_notification_thread(self):
+        self._retry_login_notification_event.set()
+        if self._retry_login_notification_thread is not None:
+            self._retry_login_notification_thread.join()
+        self._retry_login_notification_event.clear()
+
+    def _start_retry_login_notification_thread(self):
+        self._stop_retry_login_notification_thread()
+        self._retry_login_notification_thread = threading.Thread(
+            target=self._retry_login_notification,
+            daemon=True
+        )
+        self._retry_login_notification_thread.start()
+
+    def _retry_login_notification(self):
+        while not self._retry_login_notification_event.is_set():
+            self._retry_login_notification_event.wait(self._retry_login_notification_delay_seconds)
+            if self._retry_login_notification_event.is_set():
+                return
+
+            if not FirebaseController().is_logged_in():
+                self._is_logged_in.clear()
+                self.try_send_login_notification()

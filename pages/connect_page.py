@@ -71,7 +71,7 @@ class ConnectPage(MDScreen):
 
         if error:
             self.info_text = "Failed to get QR data: " + error
-            return 100000
+            return datetime.datetime.min, ""
 
         expiry_datetime = datetime.fromtimestamp(int(_jwt_expiry) / 1000)
         return expiry_datetime, self.qr_data
@@ -164,29 +164,12 @@ class ConnectPage(MDScreen):
             self.ids.connect_button.text = "Log out and connect again"
             self.qr_data = ""
 
-            # RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
             RemoteRequests().register_raspberry_to_device(email)
             BackendController().send_message_to_ws("OK")
 
         else:
             self.info_text = "Failed to login"
             BackendController().send_message_to_ws("FAIL")
-
-    # def _check_registered(self, *args):
-    #     if not self.firebase_controller.is_raspberry_registered(serial=self.qr_data):
-    #         self.info_text = "This Raspberry Pi is not registered to any account"
-    #         self.ids.connect_button.text = "Register"
-    #         self.qr_data = ""
-    #         return False
-    #
-    #     if self._is_logged_in.is_set():
-    #         self.info_text = "Connected as " + self._user_email
-    #         self.ids.connect_button.text = "Log out and connect again"
-    #         self.qr_data = ""
-    #         return True
-    #
-    #     self.info_text = "Device not logged in"
-    #     self.ids.connect_button.text = "Connect"
 
     def _on_login_controller_login_attempt(self, login_success, owner_email):
         if login_success:

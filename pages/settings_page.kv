@@ -63,6 +63,23 @@
                         halign: "left"
                         size_hint_x: 1
 
+    # Reset button
+                MDGridLayout:
+                    id: moisture_measurement_enable_grid
+                    cols: 1
+                    size_hint_y: None
+                    height: dp(45)
+                    padding: 10
+
+                    MDFillRoundFlatButton:
+                        text: "Reset all data"
+                        font_size: 20
+                        elevation: 1
+                        size_hint: 0.5, 0.1
+                        text_color: 1, 1, 1, 1
+                        pos_hint: {"center_x": 0.5, "center_y": 0.15}
+                        on_release: root.reset_data()
+
 # Notifications
 
             MDGridLayout:
@@ -173,6 +190,68 @@
                                 icon_inactive: "close"
                                 icon_inactive_color: "grey"
 
+    # High Moisture
+
+                    MDGridLayout:
+                        id: high_moisture_enable_grid
+                        cols: 2
+                        size_hint_y: None
+                        height: dp(45)
+                        padding: 10
+
+                        MDLabel:
+                            text: "High moisture level"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_y": 0.5}
+
+                        MDAnchorLayout:
+                            size_hint_x: 0.2
+                            height: high_moisture_enable_grid.height
+                            pos_hint: {"center_y": 0.5}
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            padding: -sw3.width, 0, 0, -sw3.height / 3
+
+                            MDSwitch:
+                                id: sw6
+                                active: root.high_moisture_active_variable
+                                size_hint: None, None
+                                icon_active: "check"
+                                icon_active_color: "white"
+                                icon_inactive: "close"
+                                icon_inactive_color: "grey"
+
+    # Low Moisture
+
+                    MDGridLayout:
+                        id: low_moisture_enable_grid
+                        cols: 2
+                        size_hint_y: None
+                        height: dp(45)
+                        padding: 10
+
+                        MDLabel:
+                            text: "Low moisture level"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_y": 0.5}
+
+                        MDAnchorLayout:
+                            size_hint_x: 0.2
+                            height: low_moisture_enable_grid.height
+                            pos_hint: {"center_y": 0.5}
+                            anchor_x: "center"
+                            anchor_y: "center"
+                            padding: -sw7.width, 0, 0, -sw7.height / 3
+
+                            MDSwitch:
+                                id: sw7
+                                active: root.low_moisture_active_variable
+                                size_hint: None, None
+                                icon_active: "check"
+                                icon_active_color: "white"
+                                icon_inactive: "close"
+                                icon_inactive_color: "grey"
+
     # Low Water Level
 
                     MDGridLayout:
@@ -235,28 +314,11 @@
                                 icon_inactive: "close"
                                 icon_inactive_color: "grey"
 
-# Reset button
-                    MDGridLayout:
-                        id: moisture_measurement_enable_grid
-                        cols: 1
-                        size_hint_y: None
-                        height: dp(45)
-                        padding: 10
-
-                        MDFillRoundFlatButton:
-                            text: "Reset all data"
-                            font_size: 20
-                            elevation: 1
-                            size_hint: 0.5, 0.1
-                            text_color: 1, 1, 1, 1
-                            pos_hint: {"center_x": 0.5, "center_y": 0.15}
-                            on_release: root.reset_data()
-
     # Reload button
         MDFloatingActionButton:
             icon: "refresh"
             icon_color: 1, 1, 1, 1
             type: "small"
-            pos_hint: {"right": 0.98}
+            pos_hint: {"right": 0.07}
             y: 10
             on_release: root.refresh_data()

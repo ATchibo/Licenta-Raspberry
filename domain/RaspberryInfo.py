@@ -20,6 +20,8 @@ class RaspberryInfo:
                 MessageType.MOISTURE_LEVEL_MEASUREMENT.value: False,
                 MessageType.LOW_WATER_LEVEL.value: False,
                 MessageType.EMPTY_WATER_TANK.value: False,
+                MessageType.HIGH_MOISTURE_LEVEL.value: False,
+                MessageType.LOW_MOISTURE_LEVEL.value: False,
             }
         else:
             self.notifiableMessages = notifiableMessages
@@ -57,7 +59,7 @@ class RaspberryInfo:
                 for key, value in info_dict["notifiable_messages"].items():
                     self.notifiableMessages[key] = value
         except Exception as e:
-            print(f"Failed to parse notifiable messages: {e}")
+            print(f"Failed to parse notifiable messages in raspberry info: {e}")
 
         return self
 

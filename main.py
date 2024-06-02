@@ -51,10 +51,10 @@ if __name__ == '__main__':
     FirebaseController().attach(EventLogger())
 
     try:
-        NotificationLoginController().try_initial_login()
+        NotificationLoginController().try_send_login_notification()
     except Exception as e:
         print("Failed to auto login: " + str(e))
 
-    MoistureMeasurementController().start_moisture_check_thread(12 * 60 * 60)  # 12 hours
+    MoistureMeasurementController().start_moisture_check_thread(4 * 60 * 60)  # 12 hours
 
     PlantBuddyApp().run()

@@ -2,7 +2,9 @@ import json
 import threading
 from datetime import datetime
 
+from domain.logging.HighMoistureLevelMessage import HighMoistureLevelMessage
 from domain.logging.LogMessage import LogMessage
+from domain.logging.LowMoistureLevelMessage import LowMoistureLevelMessage
 from domain.logging.LowWaterLevelMessage import LowWaterLevelMessage
 from domain.logging.ManualWateringCycleMessage import ManualWateringCycleMessage
 from domain.logging.MessageType import MessageType
@@ -78,10 +80,14 @@ class EventLogger(Observer):
 
         self._notifiable_messages = {}
         try:
-            for notifiable_message_key, notifiable_message_value in notifiable_messages.items():
-                self._notifiable_messages[notifiable_message_key] = notifiable_message_value
+            if type(notifiable_messages) is tuple:
+                for notifiable_message_key, notifiable_message_value in notifiable_messages[0].items():
+                    self._notifiable_messages[notifiable_message_key] = notifiable_message_value
+            else:
+                for notifiable_message_key, notifiable_message_value in notifiable_messages.items():
+                    self._notifiable_messages[notifiable_message_key] = notifiable_message_value
         except Exception as e:
-            print(f"Failed to parse notifiable messages: {e}")
+            print(f"Failed to parse notifiable messages in event logger: {e}")
 
         return self._notifiable_messages
 
@@ -118,6 +124,12 @@ class EventLogger(Observer):
 
     def add_water_level_after_watering_message(self, level, date_time):
         self._add_log_message(LowWaterLevelMessage(level, date_time))
+
+    def add_high_moisture_level_message(self, recorded_moisture, max_moisture, timestamp):
+        self._add_log_message(HighMoistureLevelMessage(recorded_moisture, max_moisture, timestamp))
+
+    def add_low_moisture_level_message(self, recorded_moisture, min_moisture, timestamp):
+        self._add_log_message(LowMoistureLevelMessage(recorded_moisture, min_moisture, timestamp))
 
     def _update_logs_on_receive_from_network(
         self,

@@ -10,6 +10,7 @@ from domain.observer.Observer import Observer
 from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Subject import Subject
 from utils.datetime_utils import get_current_datetime_tz
+from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.local_storage_controller import LocalStorageController
@@ -107,7 +108,7 @@ class WateringProgramController(Observer, Subject):
 
     def _compute_initial_delay_sec(self, program: WateringProgram):
         if program.starting_date_time is None:
-            return -1
+            return -1, -1
 
         _current_time = get_current_datetime_tz()
         _program_starting_date_time = program.starting_date_time.astimezone(get_localzone())
@@ -115,7 +116,7 @@ class WateringProgramController(Observer, Subject):
         # if program starting time is in the future
         if _program_starting_date_time >= _current_time:
             _time_delta_seconds = (_program_starting_date_time - _current_time).total_seconds()
-            return _time_delta_seconds
+            return _current_time, _time_delta_seconds
 
         # if the starting time is in the past, we try to see the last watering time
         _program_id, _last_watered_time = LocalStorageController().get_last_watering_time()
@@ -166,6 +167,7 @@ class WateringProgramController(Observer, Subject):
 
         self._datetime_of_next_watering = _processing_time + datetime.timedelta(seconds=initial_delay_sec)
         self.notify(ObserverNotificationType.NEXT_WATERING_TIME_CHANGED)
+        self._raspberry_controller.update_next_watering_time(self._datetime_of_next_watering)
 
         self._watering_thread_finished.clear()
         self._moisture_check_thread_finished.clear()
@@ -203,7 +205,7 @@ class WateringProgramController(Observer, Subject):
         if self._is_watering_programs_active:
             current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
-            if current_soil_moisture < program.max_moisture:
+            if current_soil_moisture < program.min_moisture:
                 _start_time = get_current_datetime_tz()
                 self._raspberry_controller.water_for_liters(program.quantity_l)
                 _end_time = get_current_datetime_tz()
@@ -224,7 +226,7 @@ class WateringProgramController(Observer, Subject):
             if self._is_watering_programs_active:
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
-                if current_soil_moisture < program.max_moisture:
+                if current_soil_moisture < program.min_moisture:
                     _start_time = get_current_datetime_tz()
                     self._raspberry_controller.water_for_liters(program.quantity_l)
                     _end_time = get_current_datetime_tz()
@@ -241,7 +243,18 @@ class WateringProgramController(Observer, Subject):
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
                 if current_soil_moisture < program.min_moisture:
-                    self._raspberry_controller.water_for_liters(program.quantity_l)
+                    # self._raspberry_controller.water_for_liters(program.quantity_l * 0.3)  # 30% of the quantity
+                    EventLogger().add_low_moisture_level_message(
+                        current_soil_moisture,
+                        program.min_moisture,
+                        get_current_datetime_tz()
+                    )
+                elif current_soil_moisture > program.max_moisture:
+                    EventLogger().add_high_moisture_level_message(
+                        current_soil_moisture,
+                        program.max_moisture,
+                        get_current_datetime_tz()
+                    )
 
     def set_on_receive_from_network_callback(self, _update_values_on_receive_from_network):
         self._gui_update_callback = _update_values_on_receive_from_network

@@ -59,7 +59,10 @@ class RemoteRequests:
     def get_moisture_info(self, start_date: datetime, end_date: datetime) -> list[dict]:
         try:
             _result = self._firebase_controller.get_moisture_info_for_rasp_id(self._raspberry_id, start_date, end_date)
-            self._local_storage_controller.update_moisture_info_list(_result)
+            if _result is None or len(_result) == 0:
+                _result = self._local_storage_controller.get_moisture_info(start_date, end_date)
+            else:
+                self._local_storage_controller.update_moisture_info_list(_result)
             return _result
         except Exception as e:
             return self._local_storage_controller.get_moisture_info(start_date, end_date)
@@ -184,6 +187,17 @@ class RemoteRequests:
             self._local_storage_controller.add_moisture_percentage_measurement(_measurement)
             return _result
         except Exception as e:
+            try:
+                data = {
+                    "raspberryId": self._raspberry_id,
+                    "measurementTime": timestamp,
+                    "measurementValuePercent": percentage
+                }
+                self._local_storage_controller.add_moisture_percentage_measurement(data)
+
+            except Exception as e:
+                pass
+
             return False
 
     def unsubscribe_watering_now_listener(self):
@@ -209,5 +223,11 @@ class RemoteRequests:
     def update_water_tank_volume_info(self, param):
         try:
             return self._firebase_controller.update_water_tank_volume_info(self._raspberry_id, param)
+        except Exception as e:
+            return False
+
+    def update_next_watering_time(self, next_watering_time):
+        try:
+            return self._firebase_controller.update_next_watering_time(self._raspberry_id, next_watering_time)
         except Exception as e:
             return False

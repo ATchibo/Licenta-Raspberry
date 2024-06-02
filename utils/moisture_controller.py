@@ -1,6 +1,6 @@
 from gpiozero import MCP3008
-
 from utils.local_storage_controller import LocalStorageController
+
 
 class MoistureController:
     def __init__(self, channel):
@@ -20,16 +20,10 @@ class MoistureController:
         self.interval = self.absolute_dry - self.absolute_wet
 
     def get_moisture(self):
-        # pass
         return self.sensor.value
 
     def get_moisture_percentage(self):
-        # pass
         perc = round(1 - (self.get_moisture() - self.absolute_wet) / self.interval, 2) * 100
-        if perc < 0.0:
-            return 0.0
-        if perc > 100.0:
-            return 100.0
         return perc
 
     def update_absolute_values(self, dry, wet):
@@ -37,3 +31,5 @@ class MoistureController:
         self.absolute_wet = wet
         self.interval = self.absolute_dry - self.absolute_wet
         LocalStorageController().set_moisture_sensor_absolute_values(self.absolute_dry, self.absolute_wet)
+
+

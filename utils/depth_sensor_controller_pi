@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
+
 class DepthSensorController:
 
     def __init__(self, trigger_pin, echo_pin):
@@ -25,9 +26,10 @@ class DepthSensorController:
 
         pulse_duration = pulse_end_time - pulse_start_time
 
-        # if we consider the speed of sound to be 343 m/s we get 34300 cm/s
-        # and we divide by 2 because the sound goes to the object and comes back
+        # if we consider the speed of sound to be 343 m/s we get 34300 cm/s,
+        # which we then divide by 2 because the sound goes to the object and comes back.
         # then, by applying the formula distance = time * speed (which is time * 34300 / 2)
         # we get the distance in cm
         distance = pulse_duration * 17150
         return round(distance, 2)
+

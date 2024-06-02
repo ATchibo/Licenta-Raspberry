@@ -64,7 +64,7 @@ class GraphView(MDBoxLayout):
         moisture_info_list = sorted(moisture_info_list, key=lambda x: x["measurementTime"])
         timestamps = [moisture_info["measurementTime"].astimezone(get_localzone()) for moisture_info in
                       moisture_info_list]
-        values = [moisture_info["measurementValuePercent"] for moisture_info in moisture_info_list]
+        values = [int(moisture_info["measurementValuePercent"]) for moisture_info in moisture_info_list]
 
         ax.grid()
         ax.set_ylabel('Moisture (%)')
