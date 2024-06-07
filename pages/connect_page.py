@@ -10,6 +10,7 @@ from kivymd.uix.screen import MDScreen
 from utils.backend_controller import BackendController
 from utils.get_rasp_uuid import getserial
 from utils.notification_login_controller import NotificationLoginController
+from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
 Builder.load_file("pages/connect_page.kv")
@@ -143,6 +144,7 @@ class ConnectPage(MDScreen):
             self.ids.connect_button.text = "Log out and connect again"
             self.qr_data = ""
 
+            RemoteRequests().register_raspberry(RaspberryController().get_raspberry_info())
             RemoteRequests().register_raspberry_to_device(email)
             BackendController().send_message_to_ws("OK")
 
