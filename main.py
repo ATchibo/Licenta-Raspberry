@@ -33,7 +33,7 @@ if __name__ == '__main__':
     try:
         NotificationLoginController().try_send_login_notification()
     except Exception as e:
-        print("Failed to auto login: " + str(e))
+        pass
 
     MoistureMeasurementController().start_moisture_check_thread(12 * 60 * 60)  # 12 hours
 

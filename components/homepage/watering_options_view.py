@@ -87,10 +87,8 @@ class WateringOptionsView(MDBoxLayout):
             self.water_now()
 
     def water_now(self):
-        print("Watering now")
 
         if self.raspberry_controller.start_watering():
-            # moisture_percentage = self.raspberry_controller.get_moisture_percentage()
             self.ids.water_now_button.text = "Stop watering"
             self.pushed_water_now = True
         else:
@@ -141,8 +139,6 @@ class WateringOptionsView(MDBoxLayout):
             new_active_program_id=None,
             new_is_watering_programs_active=None
     ):
-        # print("Updating values: ", new_programs, new_active_program_id, new_is_watering_programs_active)
-
         if new_is_watering_programs_active is not None and new_is_watering_programs_active != self.are_programs_active_variable:
             self.are_programs_active_variable = new_is_watering_programs_active
 

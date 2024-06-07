@@ -60,12 +60,10 @@ class LocalStorageController:
                     _rasp_info = RaspberryInfo().from_dict(_raspberry_dict)
                     return _rasp_info
                 except Exception as e:
-                    print(f'Error while loading RaspberryInfo from file: {e}')
                     return None
         except FileNotFoundError:
             return None
         except Exception as e:
-            print(f'Error while loading RaspberryInfo from file: {e}')
             return None
 
     def save_raspberry_info(self, raspberry_info: RaspberryInfo):
@@ -73,10 +71,8 @@ class LocalStorageController:
             with open(self._raspberry_info_file, 'wb') as file:
                 pickle.dump(raspberry_info.to_dict(), file)
         except FileNotFoundError:
-            print(f'File not found: {self._raspberry_info_file}')
             pass
         except Exception as e:
-            print(f'Error while saving RaspberryInfo to file: {e}')
             pass
 
     def get_moisture_info(self, start_date=None, end_date=None) -> list[dict]:
@@ -97,7 +93,6 @@ class LocalStorageController:
 
                 return _moisture_info_filtered
         except FileNotFoundError as e:
-            print(f'File not found: {self._moisture_info_file} and error is {e}')
             return []
 
     def save_moisture_info(self, moisture_info: list[dict]):
@@ -105,7 +100,6 @@ class LocalStorageController:
             with open(self._moisture_info_file, 'wb') as file:
                 pickle.dump(moisture_info, file)
         except FileNotFoundError:
-            print(f'File not found: {self._moisture_info_file}')
             pass
 
     def update_moisture_info_list(self, moisture_info: list[dict]):
@@ -116,7 +110,6 @@ class LocalStorageController:
             _current_moisture_info = _current_moisture_info[:100]
             self.save_moisture_info(_current_moisture_info)
         except Exception as e:
-            print(f'Error while updating moisture info: {e}')
             pass
 
     def get_watering_programs(self):
@@ -132,7 +125,6 @@ class LocalStorageController:
             with open(self._watering_programs_file, 'wb') as file:
                 pickle.dump(watering_programs, file)
         except FileNotFoundError:
-            print(f'File not found: {self._watering_programs_file}')
             pass
 
     def get_active_watering_program_id(self):
@@ -148,7 +140,6 @@ class LocalStorageController:
             with open(self._watering_programs_active_id_file, 'wb') as file:
                 pickle.dump(active_id, file)
         except FileNotFoundError:
-            print(f'File not found: {self._watering_programs_active_id_file}')
             pass
 
     def get_is_watering_programs_active(self):
@@ -164,7 +155,6 @@ class LocalStorageController:
             with open(self._is_watering_programs_active_file, 'wb') as file:
                 pickle.dump(is_active, file)
         except FileNotFoundError:
-            print(f'File not found: {self._is_watering_programs_active_file}')
             pass
 
     def get_log_messages(self) -> dict:
@@ -180,7 +170,6 @@ class LocalStorageController:
             with open(self._log_messages_file, 'wb') as file:
                 pickle.dump(log_messages, file)
         except FileNotFoundError:
-            print(f'File not found: {self._log_messages_file}')
             pass
 
     def add_log_message(self, log_message):
@@ -229,7 +218,6 @@ class LocalStorageController:
 
                 return True
         except FileNotFoundError:
-            print(f'File not found: {self._log_messages_file}')
             return False
 
     def get_moisture_sensor_absolute_values(self):
@@ -245,7 +233,6 @@ class LocalStorageController:
         except FileNotFoundError:
             return None, None
         except Exception as e:
-            print(f'Error while loading moisture sensor absolute values: {e}')
             return None, None
 
     def set_pump_capacity(self, _pump_capacity):
@@ -254,7 +241,6 @@ class LocalStorageController:
                 pickle.dump(_pump_capacity, file)
                 return True
         except FileNotFoundError:
-            print(f'File not found: {self._log_messages_file}')
             return False
 
     def get_pump_capacity(self):
@@ -267,7 +253,6 @@ class LocalStorageController:
         except FileNotFoundError:
             return None
         except Exception as e:
-            print(f'Error while loading pump capacity: {e}')
             return None
 
     def set_last_watering_time(self, timestamp, program_id):
@@ -282,7 +267,6 @@ class LocalStorageController:
         except FileNotFoundError:
             return False
         except Exception as e:
-            print(f'Error while loading last watering times: {e}')
             return False
 
     def get_last_watering_time(self):
@@ -295,7 +279,6 @@ class LocalStorageController:
         except FileNotFoundError:
             return None, None
         except Exception as e:
-            print(f'Error while loading last watering times: {e}')
             return None, None
 
     def set_depth_sensor_parameters(self, tank_volume_ratio, max_height):
@@ -309,10 +292,8 @@ class LocalStorageController:
 
                 return True
         except FileNotFoundError:
-            print(f'File not found: {self._log_messages_file}')
             return False
         except Exception as e:
-            print(f'Error while saving depth sensor parameters: {e}')
             return False
 
     def get_depth_sensor_parameters(self):
@@ -328,5 +309,4 @@ class LocalStorageController:
         except FileNotFoundError:
             return None, None
         except Exception as e:
-            print(f'Error while loading depth sensor parameters: {e}')
             return None, None

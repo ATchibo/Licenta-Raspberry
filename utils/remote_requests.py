@@ -76,7 +76,6 @@ class RemoteRequests:
             self._local_storage_controller.save_watering_programs(_result)
             return _result
         except Exception as e:
-            print(f"Exception when getting watering programs: {e}")
             return self._local_storage_controller.get_watering_programs()
 
     def get_active_watering_program_id(self) -> str | None:
@@ -107,7 +106,7 @@ class RemoteRequests:
         try:
             _result = self._firebase_controller.set_is_watering_programs_active(self._raspberry_id, is_active)
         except Exception as e:
-            print(f"Exception when setting is watering programs active: {e}")
+            pass
 
         self._local_storage_controller.save_is_watering_programs_active(is_active)
 
@@ -116,7 +115,6 @@ class RemoteRequests:
             self._firebase_controller.add_listener_for_watering_programs_changes(self._raspberry_id, callback)
             return True
         except Exception as e:
-            print(f"Exception when adding listener for watering programs changes: {e}")
             return False
 
     def add_listener_for_log_messages_changes(self, callback) -> bool:
@@ -159,7 +157,6 @@ class RemoteRequests:
             self._local_storage_controller.add_log_message(log_message)
             return True
         except Exception as e:
-            print(f"Exception when adding log message: {e}")
             return False
 
     def update_raspberry_notifiable_message(self, message_type: MessageType, value: bool) -> bool:
@@ -215,7 +212,7 @@ class RemoteRequests:
         except FirebaseUninitializedException as e:
             pass
         except Exception as e:
-            print("Error resetting data from remote")
+            pass
 
     def update_water_tank_volume_info(self, param):
         try:

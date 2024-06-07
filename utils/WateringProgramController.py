@@ -158,7 +158,6 @@ class WateringProgramController(Observer, Subject):
             return
 
         _processing_time, initial_delay_sec = self._compute_initial_delay_sec(active_program)
-        print("initial delay: ", initial_delay_sec)
 
         if initial_delay_sec < 0:
             return
@@ -311,7 +310,7 @@ class WateringProgramController(Observer, Subject):
                     new_is_watering_programs_active=new_is_watering_programs_active
                 )
             else:
-                print("No callback set for updating the GUI")
+                pass
 
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
         if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:

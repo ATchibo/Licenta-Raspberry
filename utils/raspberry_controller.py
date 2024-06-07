@@ -159,22 +159,17 @@ class RaspberryController(Observer):
             changed_doc = change.document
             updated_data = changed_doc.to_dict()
 
-            print("Watering callback updated data: ", updated_data)
-
             # check for moisture request
             if "soilMoisture" in updated_data.keys():
                 if "REQUEST" in str(updated_data["soilMoisture"]):
-                    print("Sending moisture info")
                     self._send_moisture_info()
 
             if "waterTankVolume" in updated_data.keys():
                 if "REQUEST" in str(updated_data["waterTankVolume"]):
-                    print("Sending water volume info")
                     self._send_water_tank_volume_info()
 
             # check for watering now command
             if "command" in updated_data.keys():
-                print("Is watering:", self.pump_controller.is_watering)
                 if updated_data["command"] == "start_watering" and not self.pump_controller.is_watering:
                     RemoteRequests().update_watering_info('processing', 0.0, 0)
                     self.start_watering()
@@ -188,7 +183,7 @@ class RaspberryController(Observer):
                             liters_sent=round(self.liters_sent, 2)
                         )
                 else:
-                    print("Current data: null")
+                    pass
 
     def stop_listening_for_watering_now(self):
         RemoteRequests().unsubscribe_watering_now_listener()

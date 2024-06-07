@@ -68,28 +68,18 @@ class FirebaseController(Subject):
         if self.db is None:
             raise FirebaseUninitializedException()
 
-        print("Checking if raspberry is registered")
         doc_ref = self.db.collection(self._raspberryInfoCollectionName).document(serial)
         query_result = doc_ref.get()
-        print("Raspberry registered query result: " + str(query_result.exists))
         return query_result.exists
 
     def register_raspberry(self, rpi_info: RaspberryInfo) -> bool:
-        print("Registering raspberry with id: " + rpi_info.raspberryId)
-        print("Raspberry info: " + str(rpi_info.to_dict()))
-
         if self.db is None:
             raise FirebaseUninitializedException()
 
-        print("Registering raspberry: db is not none")
-
         _is_registered = self._is_raspberry_registered(rpi_info.raspberryId)
-        print("Is registered: " + str(_is_registered))
 
         if not _is_registered:
-            print("Registering raspberry: " + rpi_info.raspberryId)
             self.db.collection(self._raspberryInfoCollectionName).document(rpi_info.raspberryId).set(rpi_info.to_dict())
-
             return True
         else:
             raise Exception("Raspberry Pi already registered")
@@ -251,18 +241,14 @@ class FirebaseController(Subject):
 
         for doc in docs:
             if my_doc is not None:
-                print("More than one document found for the same raspberry id")
                 return
 
             my_doc = doc
 
         if my_doc is None:
-            print("No document found for the raspberry id")
             return
 
         owner_id = my_doc.id
-
-        print(f"Owner id: {owner_id}")
 
         self.db.collection(self._ownerInfoCollectionName).document(owner_id).update({
             "raspberry_ids": firestore.ArrayRemove([raspberry_id])
@@ -428,8 +414,6 @@ class FirebaseController(Subject):
             self._ping_listener.unsubscribe()
 
     def login_with_custom_token(self, token=None):
-        print("Attempting login")
-
         self.db = None
 
         if token is None:
@@ -509,7 +493,6 @@ class FirebaseController(Subject):
             return True
 
         except Exception as e:
-            print(f"Error authenticating firestore client with tokens: {e}")
             self._instance.db = None
             return False
 
@@ -527,10 +510,8 @@ class FirebaseController(Subject):
                 self.__refresh_token = _refresh_token
                 self._schedule_token_refresh(_expires_in - self._refresh_token_time_delay_sec)
 
-                print("Token refreshed")
-
         except Exception as e:
-            print(f"Error attempting to refresh token: {e}")
+            pass
 
     def is_logged_in(self):
         return self.db is not None

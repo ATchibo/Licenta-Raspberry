@@ -101,6 +101,4 @@ class BackendController:
             "data": json.dumps(_data)
         }
 
-        res = requests.post(f"{self._backend_url}/api/send-notification", json=_message)
-
-        print(f"Login notification send result: {res.text}")
+        requests.post(f"{self._backend_url}/api/send-notification", json=_message)

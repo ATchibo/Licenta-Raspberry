@@ -48,8 +48,6 @@ class ConnectPage(MDScreen):
         self.ids.connect_button.text = "Connect"
 
     def start_connect(self):
-        print("Starting to connect")
-
         if self.backend_thread is not None:
             self._is_logged_in.set()
             self.backend_thread.join()
@@ -79,34 +77,24 @@ class ConnectPage(MDScreen):
         return delta_time.seconds
 
     def _backend_ops(self):
-        print("Starting backend ops")
-
         _expiry_datetime, token = self._backend_request()
         self._connect_to_ws(token)
-        print("Connected to WS")
         _wait_time = self._compute_wait_time(_expiry_datetime)
 
-        if _wait_time > 20:
-            _wait_time = 19
-
-        print("Wait time:", _wait_time)
+        if _wait_time > 19:
+            _wait_time = 19  # 19 seconds until token refresh
 
         while not self._is_logged_in.wait(_wait_time):
             if self._is_logged_in.is_set():
                 self._is_logged_in.clear()
                 return
 
-            print("Another token request")
-
             _expiry_datetime, token = self._backend_request()
             self._connect_to_ws(token)
-            print("Connected to WS")
             _wait_time = self._compute_wait_time(_expiry_datetime)
 
-            if _wait_time > 20:
-                _wait_time = 19
-
-            print("Wait time:", _wait_time)
+            if _wait_time > 19:
+                _wait_time = 19  # 19 seconds until token refresh
 
     def _connect_to_ws(self, token):
         if self._is_logged_in.is_set():
@@ -116,7 +104,6 @@ class ConnectPage(MDScreen):
             self._disconnect_from_ws()
 
         self._token = token
-        print("Token:", token)
 
         def _temp():
             BackendController().connect_to_ws(
@@ -128,11 +115,7 @@ class ConnectPage(MDScreen):
 
         threading.Thread(target=_temp).start()
 
-        print("Connected to WS")
-
     def _on_message_received(self, ws, message):
-        print(message)
-
         message_json = json.loads(message)
         if (message_json["token"] is None
                 or message_json["token"] == ""
@@ -143,10 +126,9 @@ class ConnectPage(MDScreen):
         self._try_login(message_json["token"], message_json["email"])
 
     def _on_connection_closed(self, ws, stat_code, reason):
-        print("Connection closed: ", stat_code, reason)
+        pass
 
     def _on_connection_error(self, ws, error):
-        print("Connection error in connect page:", error)
         self.info_text = "Connection error"
 
     def _disconnect_from_ws(self):

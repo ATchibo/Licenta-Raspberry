@@ -65,11 +65,7 @@ class NotificationLoginController:
 
         threading.Thread(target=_temp, daemon=True).start()
 
-        print("Connected to WS")
-
     def _on_message_received(self, ws, message):
-        print(message)
-
         message_json = json.loads(message)
 
         if "message" in message_json.keys() and message_json["message"] == "REJECT_CONN":
