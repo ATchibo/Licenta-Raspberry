@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from utils.datetime_utils import get_current_datetime_tz
 
 

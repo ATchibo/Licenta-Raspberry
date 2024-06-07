@@ -1,4 +1,5 @@
 from gpiozero import MCP3008
+
 from utils.local_storage_controller import LocalStorageController
 
 

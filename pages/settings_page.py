@@ -3,9 +3,7 @@ from kivy.lang import Builder
 from kivy.properties import StringProperty, BooleanProperty
 from kivymd.uix.screen import MDScreen
 
-from domain.RaspberryInfo import RaspberryInfo
 from domain.logging.MessageType import MessageType
-from utils.local_storage_controller import LocalStorageController
 from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 

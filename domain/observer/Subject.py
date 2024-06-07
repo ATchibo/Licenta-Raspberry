@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Observer import Observer
+from domain.observer.ObserverNotificationType import ObserverNotificationType
 
 
 class Subject(ABC):

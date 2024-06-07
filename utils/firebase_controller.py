@@ -1,24 +1,20 @@
 import json
 import os
 import threading
-from typing import List, Any
+from typing import Any
 
-# import firebase_admin
-import keyring
+import google.oauth2.credentials
+import requests
 from dotenv import load_dotenv
+from google.cloud import firestore
 from google.cloud.firestore_v1 import FieldFilter
 from requests import HTTPError
 
 from components.exceptions.FirebaseUninitializedException import FirebaseUninitializedException
 from domain.RaspberryInfo import RaspberryInfo
 from domain.WateringProgram import WateringProgram
-
-import requests
-import google.oauth2.credentials
-from google.cloud import firestore
-
-from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Observer import Observer
+from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Subject import Subject
 from utils.get_rasp_uuid import getserial
 
@@ -175,18 +171,6 @@ class FirebaseController(Subject):
                 watering_program_data["id"] = doc_snapshot.id
                 watering_programs.append(WateringProgram().fromDict(watering_program_data))
 
-        # global_watering_programs_ref = self.db.collection(self._globalWateringProgramsCollectionName)
-        #
-        # global_watering_programs = []
-        #
-        # for doc_snapshot in global_watering_programs_ref.get():
-        #     global_watering_program_data = doc_snapshot.to_dict()
-        #
-        #     if global_watering_program_data:
-        #         global_watering_program_data["id"] = doc_snapshot.id
-        #         global_watering_programs.append(WateringProgram().fromDict(global_watering_program_data))
-        #
-        # watering_programs.extend(global_watering_programs)
         return watering_programs
 
     def get_active_watering_program_id(self, raspberry_id) -> str | None:
@@ -481,41 +465,6 @@ class FirebaseController(Subject):
             return True
         else:
             return False
-
-    # should deprecate
-    # def anonymous_login(self):
-    #     load_dotenv()
-    #     self.__api_key = os.getenv("PROJECT_WEB_API_KEY")
-    #     self.__project_id = os.getenv("PROJECT_ID")
-    #
-    #     request_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={self.__api_key}"
-    #     headers = {"Content-Type": "application/json; charset=UTF-8"}
-    #     data = json.dumps({"returnSecureToken": True})
-    #     response = requests.post(request_url, headers=headers, data=data)
-    #     try:
-    #         response.raise_for_status()
-    #     except (HTTPError, Exception):
-    #         content = response.json()
-    #         error = f"error: {content['error']['message']}"
-    #
-    #         self._instance.db = None
-    #
-    #         raise Exception(error)
-    #
-    #     json_response = response.json()
-    #     _token = json_response["idToken"]
-    #     _refresh_token = json_response["refreshToken"]
-    #     _expires_in = int(json_response["expiresIn"])
-    #
-    #     if self._authenticate_firestore_client_with_tokens(_token, _refresh_token):
-    #         self._start_listening_for_ping()
-    #         self.__token = _token
-    #         self.__refresh_token = _refresh_token
-    #         self._schedule_token_refresh(_expires_in - self._refresh_token_time_delay)
-    #
-    #         return True
-    #     else:
-    #         return False
 
     def _get_new_tokens(self, refresh_token) -> tuple[str, str, int] | None:
         load_dotenv()

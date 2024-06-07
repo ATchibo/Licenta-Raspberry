@@ -1,16 +1,8 @@
-from datetime import datetime
-
 from kivy.clock import Clock
-from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.lang import Builder
-from kivy.uix.recycleview import RecycleView
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.list import MDList, OneLineListItem, TwoLineListItem
-from kivymd.uix.scrollview import MDScrollView
-from matplotlib import pyplot as plt
 
 from utils.event_logger import EventLogger
-from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 
 Builder.load_file("components/homepage/watering_history_view.kv")

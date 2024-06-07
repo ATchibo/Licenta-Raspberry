@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from domain.logging.LogMessage import LogMessage
 from domain.logging.MessageType import MessageType
 

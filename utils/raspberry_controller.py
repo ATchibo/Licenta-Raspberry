@@ -4,8 +4,8 @@ from datetime import datetime
 
 from domain.RaspberryInfo import RaspberryInfoBuilder, RaspberryInfo
 from domain.logging.MessageType import MessageType
-from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Observer import Observer
+from domain.observer.ObserverNotificationType import ObserverNotificationType
 from utils.datetime_utils import get_current_datetime_tz
 from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
@@ -187,21 +187,6 @@ class RaspberryController(Observer):
                             watering_time=round(self.watering_time),
                             liters_sent=round(self.liters_sent, 2)
                         )
-
-                    # if not self.pump_controller.is_watering:
-                    #     return
-                    #
-                    # self.pump_controller.stop_watering()
-                    # self.stop_sending_watering_updates()
-                    #
-                    # if self._while_watering_callback_function is not None:
-                    #     self._while_watering_callback_function(
-                    #         is_watering=self.pump_controller.is_watering,
-                    #         watering_time=round(self.watering_time),
-                    #         liters_sent=round(self.liters_sent, 2)
-                    #     )
-                    #
-                    # self._log_manual_watering_cycle()
                 else:
                     print("Current data: null")
 
@@ -259,7 +244,6 @@ class RaspberryController(Observer):
             round(self.watering_time)
         )
 
-        # self.stop_sending_watering_updates()
         self.pump_controller.stop_watering()
 
     def _update_current_watering_info(self):
@@ -328,7 +312,6 @@ class RaspberryController(Observer):
             RemoteRequests().register_raspberry(self._raspberry_info)
 
     def on_notification_from_subject(self, notification_type: ObserverNotificationType):
-        print(f"Subject notified raspberry controller: {notification_type}")
         if notification_type == ObserverNotificationType.FIRESTORE_CLIENT_CHANGED:
             self._set_ping_callback()
             self.start_listening_for_watering_now()

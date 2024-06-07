@@ -1,13 +1,10 @@
 import json
 import threading
 
-from utils.WateringProgramController import WateringProgramController
 from utils.backend_controller import BackendController
-from utils.event_logger import EventLogger
 from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.raspberry_controller import RaspberryController
-from utils.remote_requests import RemoteRequests
 
 
 class NotificationLoginController:
@@ -45,9 +42,7 @@ class NotificationLoginController:
         error, response = BackendController().request_login_id(self._raspberry_id)
 
         if error:
-            print("Failed to send notification for login: " + error)
             return None
-            # raise Exception("Failed to send notification for login: " + response)
 
         return response
 
@@ -90,16 +85,15 @@ class NotificationLoginController:
         self._try_login(message_json["token"], message_json["email"])
 
     def _on_connection_opened(self, ws):
-        print("Connection opened")
         _raspberry_info = RaspberryController().get_raspberry_info()
         _message = f"{_raspberry_info.raspberryName} requests permission to log in"
         self._send_notification_for_login(_message, self._ws_code)
 
     def _on_connection_closed(self, ws, stat_code, reason):
-        print("Connection closed: ", stat_code, reason)
+        pass
 
     def _on_connection_error(self, ws, error):
-        print("Connection error in login controller:", error)
+        pass
 
     def _disconnect_from_ws(self):
         BackendController().close_ws()
@@ -111,13 +105,9 @@ class NotificationLoginController:
             BackendController().send_message_to_ws("OK")
             self._login_page_on_try_login_callback(True, email)
 
-            print("Logged in hehehehe")
-
         else:
             BackendController().send_message_to_ws("FAIL")
             self._login_page_on_try_login_callback(False, None)
-
-            print("Failed to login hehehehe")
 
             self._stop_retry_login_notification_thread()
 
@@ -126,8 +116,6 @@ class NotificationLoginController:
 
         if self._ws_code is None:
             return
-
-        print("Ws code: ", self._ws_code)
 
         self._connect_to_ws(self._ws_code)
 

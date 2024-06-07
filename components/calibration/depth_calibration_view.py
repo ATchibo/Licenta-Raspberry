@@ -1,14 +1,12 @@
 import threading
-import time
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import BooleanProperty, StringProperty, Clock, NumericProperty
+from kivy.properties import BooleanProperty, StringProperty, Clock
 from kivymd.uix.screen import MDScreen
 
 from utils.local_storage_controller import LocalStorageController
 from utils.raspberry_controller import RaspberryController
-from utils.water_depth_measurement_controller import WaterDepthMeasurementController
 
 Builder.load_file("components/calibration/depth_calibration_view.kv")
 

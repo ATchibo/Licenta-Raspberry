@@ -5,7 +5,6 @@ from kivy.lang import Builder
 from kivy.properties import BooleanProperty, StringProperty, Clock
 from kivymd.uix.screen import MDScreen
 
-from utils.local_storage_controller import LocalStorageController
 from utils.raspberry_controller import RaspberryController
 
 Builder.load_file("components/calibration/moisture_calibration_view.kv")

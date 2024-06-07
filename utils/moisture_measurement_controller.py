@@ -1,9 +1,7 @@
 import threading
-from datetime import datetime
 
 from utils.datetime_utils import get_current_datetime_tz
 from utils.event_logger import EventLogger
-from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.moisture_controller import MoistureController
 from utils.remote_requests import RemoteRequests

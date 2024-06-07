@@ -11,9 +11,6 @@ class WateringProgram:
         self.min_moisture = min_moisture
         self.max_moisture = max_moisture
 
-    # def __str__(self):
-    #     return f"WateringProgram(id={self.id}, name={self.name}, frequency_days={self.frequency_days}, quantity_l={self.quantity_l}, time_of_day_min={self.time_of_day_min}, min_moisture={self.min_moisture}, max_moisture={self.max_moisture})"
-
     def __str__(self):
         return f"{self.name}"
 

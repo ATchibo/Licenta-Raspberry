@@ -1,6 +1,5 @@
-import threading
-import time
 import datetime
+import threading
 
 from google.cloud.firestore_v1.watch import ChangeType
 from tzlocal import get_localzone
@@ -11,7 +10,6 @@ from domain.observer.ObserverNotificationType import ObserverNotificationType
 from domain.observer.Subject import Subject
 from utils.datetime_utils import get_current_datetime_tz
 from utils.event_logger import EventLogger
-from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.local_storage_controller import LocalStorageController
 from utils.raspberry_controller import RaspberryController
@@ -243,7 +241,6 @@ class WateringProgramController(Observer, Subject):
                 current_soil_moisture = self._moisture_controller.get_moisture_percentage()
 
                 if current_soil_moisture < program.min_moisture:
-                    # self._raspberry_controller.water_for_liters(program.quantity_l * 0.3)  # 30% of the quantity
                     EventLogger().add_low_moisture_level_message(
                         current_soil_moisture,
                         program.min_moisture,
@@ -265,17 +262,12 @@ class WateringProgramController(Observer, Subject):
             changes,
             read_time
     ):
-        # print(f"Received new data from network in {read_time}")
 
         for change in changes:
             change_type = change.type
             changed_doc = change.document
             doc_id = changed_doc.id
             doc_data = changed_doc.to_dict()
-            #
-            # print(f"Change type: {change_type}")
-            # print(f"Changed doc id: {doc_id}")
-            # print(f"Changed doc data: {doc_data}")
 
             new_programs = self._watering_programs.copy()
             new_active_program_id = None

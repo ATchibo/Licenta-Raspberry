@@ -7,12 +7,9 @@ from kivy.lang import Builder
 from kivy.properties import StringProperty, Clock
 from kivymd.uix.screen import MDScreen
 
-from utils.WateringProgramController import WateringProgramController
 from utils.backend_controller import BackendController
-from utils.firebase_controller import FirebaseController
 from utils.get_rasp_uuid import getserial
 from utils.notification_login_controller import NotificationLoginController
-from utils.raspberry_controller import RaspberryController
 from utils.remote_requests import RemoteRequests
 
 Builder.load_file("pages/connect_page.kv")

@@ -1,25 +1,15 @@
-from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
+from datetime import timedelta
 
+import matplotlib.pyplot as plt
 from kivy.clock import Clock
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivy.lang import Builder
-from kivy.metrics import dp
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
-from kivy.uix.boxlayout import BoxLayout
-from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
-from kivy.uix.label import Label
-from kivy_garden.graph import Graph, MeshLinePlot
 from kivymd.uix.boxlayout import MDBoxLayout
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from kivymd.uix.scrollview import MDScrollView
 from tzlocal import get_localzone
 
 from utils.datetime_utils import get_current_datetime_tz
-from utils.firebase_controller import FirebaseController
-from utils.get_rasp_uuid import getserial
-from utils.moisture_measurement_controller import MoistureMeasurementController
 from utils.remote_requests import RemoteRequests
 
 Builder.load_file("components/homepage/graph_view.kv")

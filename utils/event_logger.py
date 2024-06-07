@@ -1,7 +1,7 @@
-import json
 import threading
 from datetime import datetime
 
+from domain.logging.AutoWateringCycleMessage import AutoWateringCycleMessage
 from domain.logging.HighMoistureLevelMessage import HighMoistureLevelMessage
 from domain.logging.LogMessage import LogMessage
 from domain.logging.LowMoistureLevelMessage import LowMoistureLevelMessage
@@ -13,8 +13,6 @@ from domain.logging.NoWaterMessage import NoWaterMessage
 from domain.observer.Observer import Observer
 from domain.observer.ObserverNotificationType import ObserverNotificationType
 from utils.backend_controller import BackendController
-from utils.firebase_controller import FirebaseController
-from domain.logging.AutoWateringCycleMessage import AutoWateringCycleMessage
 from utils.get_rasp_uuid import getserial
 from utils.remote_requests import RemoteRequests
 

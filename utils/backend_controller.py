@@ -7,9 +7,6 @@ import requests
 from dotenv import load_dotenv
 from websocket import WebSocketApp
 
-from utils.firebase_controller import FirebaseController
-import rel
-
 from utils.remote_requests import RemoteRequests
 
 

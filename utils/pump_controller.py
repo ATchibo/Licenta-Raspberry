@@ -1,5 +1,4 @@
 import threading
-import time
 
 import RPi.GPIO as GPIO
 
@@ -29,15 +28,6 @@ class PumpController:
 
     def start_watering_for_seconds(self, seconds):
         """Start watering for the specified amount of seconds."""
-
-        # time_end = time.time() + seconds
-        # while time.time() < time_end:
-        #     if self.stop_watering_event.is_set():
-        #         break
-        #     self.start_watering()
-        #
-        # self.stop_watering()
-        # self.stop_watering_event.clear()
 
         self.start_watering()
         self.stop_watering_event.wait(seconds)

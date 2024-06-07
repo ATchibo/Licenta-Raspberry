@@ -30,9 +30,6 @@ class RemoteRequests:
         self._firebase_controller = FirebaseController()
         self._local_storage_controller = LocalStorageController()
 
-    # def try_initial_login(self) -> bool:
-    #     return self._login_controller.try_initial_login()
-
     def attempt_login(self, auth_token: str) -> bool:
         return self._firebase_controller.login_with_custom_token(auth_token)
 
