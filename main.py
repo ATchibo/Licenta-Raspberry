@@ -11,6 +11,15 @@ from utils.moisture_measurement_controller import MoistureMeasurementController
 from utils.notification_login_controller import NotificationLoginController
 from utils.raspberry_controller import RaspberryController
 
+from pages.home_page import HomePage
+from pages.connect_page import ConnectPage
+from pages.settings_page import SettingsPage
+from pages.calibration_page import CalibrationPage
+from components.calibration.moisture_calibration_view import MoistureCalibrationView
+from components.calibration.pump_calibration_view import PumpCalibrationView
+from components.calibration.depth_calibration_view import DepthCalibrationView
+
+
 
 class ContentNavigationDrawer(MDScrollView):
     screen_manager = ObjectProperty()
