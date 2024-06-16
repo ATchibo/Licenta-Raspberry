@@ -291,7 +291,14 @@ class RaspberryController(Observer):
         RemoteRequests().update_raspberry_notifiable_message(message_type, value)
 
     def _send_moisture_info(self):
-        RemoteRequests().update_moisture_info(self.get_moisture_percentage())
+        moisture_percentage = self.get_moisture_percentage()
+        RemoteRequests().update_moisture_info(moisture_percentage)
+
+        self._log_moisture_percentage_measurement(moisture_percentage)
+
+    def _log_moisture_percentage_measurement(self, moisture_percentage):
+        _measurement_time = get_current_datetime_tz()
+        RemoteRequests().add_moisture_percentage_measurement(moisture_percentage, _measurement_time)
 
     def _send_water_tank_volume_info(self):
         RemoteRequests().update_water_tank_volume_info(
