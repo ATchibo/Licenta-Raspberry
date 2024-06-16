@@ -9,7 +9,9 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from domain.observer.Observer import Observer
 from domain.observer.ObserverNotificationType import ObserverNotificationType
 from utils.WateringProgramController import WateringProgramController
+from utils.datetime_utils import get_current_datetime_tz
 from utils.raspberry_controller import RaspberryController
+from utils.remote_requests import RemoteRequests
 
 Builder.load_file("components/homepage/watering_options_view.kv")
 
@@ -179,6 +181,9 @@ class WateringOptionsView(MDBoxLayout):
     def check_moisture(self):
         moisture_percentage = self.raspberry_controller.get_moisture_percentage()
         self.moisture_variable = f"Moisture: {moisture_percentage}%"
+
+        _measurement_time = get_current_datetime_tz()
+        RemoteRequests().add_moisture_percentage_measurement(moisture_percentage, _measurement_time)
 
     def on_change_next_watering_time(self, _scheduled_datetime):
         if _scheduled_datetime is None:
