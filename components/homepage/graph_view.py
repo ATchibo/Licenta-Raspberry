@@ -34,7 +34,7 @@ class GraphView(MDBoxLayout):
     def add_graph(self, *args):
         self.update_plot()
 
-    def update_plot(self):
+    def update_plot(self, *args):
         graph_box = self.ids.graph_box
         graph_box.clear_widgets()
 
@@ -117,4 +117,4 @@ class GraphView(MDBoxLayout):
         self.update_plot()
 
     def refresh_data(self, *args):
-        self.update_plot()
+        Clock.schedule_once(self.update_plot, 0.1)
