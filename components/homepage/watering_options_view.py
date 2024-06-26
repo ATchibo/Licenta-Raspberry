@@ -39,7 +39,7 @@ class WateringOptionsView(MDBoxLayout):
 
         self.bind_raspberry_controller_properties()
         self.load_programs()
-#        self.check_moisture()
+        self._display_moisture()
 
         self._watering_options_observer = self.WateringProgramObserver(self._watering_program_controller, self)
         self._watering_program_controller.attach(self._watering_options_observer)
@@ -179,11 +179,16 @@ class WateringOptionsView(MDBoxLayout):
                     break
 
     def check_moisture(self):
-        moisture_percentage = self.raspberry_controller.get_moisture_percentage()
-        self.moisture_variable = f"Moisture: {moisture_percentage}%"
+        moisture_percentage = self._display_moisture()
 
         _measurement_time = get_current_datetime_tz()
         RemoteRequests().add_moisture_percentage_measurement(moisture_percentage, _measurement_time)
+
+    def _display_moisture(self):
+        moisture_percentage = self.raspberry_controller.get_moisture_percentage()
+        self.moisture_variable = f"Moisture: {moisture_percentage}%"
+
+        return moisture_percentage
 
     def on_change_next_watering_time(self, _scheduled_datetime):
         if _scheduled_datetime is None:
