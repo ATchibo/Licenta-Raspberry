@@ -81,12 +81,12 @@ class LocalStorageController:
                 _moisture_info = pickle.load(file)
 
                 if start_date is None:
-                    start_date = datetime.datetime.min
+                    start_date = datetime.datetime.now() - datetime.timedelta(days=30)
                 if end_date is None:
                     end_date = datetime.datetime.now()
 
-                start_date = start_date.astimezone(get_localzone())
-                end_date = end_date.astimezone(get_localzone())
+                start_date = start_date.astimezone()
+                end_date = end_date.astimezone()
 
                 _moisture_info_filtered = [measurement for measurement in _moisture_info
                                   if start_date <= measurement["measurementTime"] <= end_date]
@@ -106,6 +106,8 @@ class LocalStorageController:
         try:
             _current_moisture_info = self.get_moisture_info()
             _current_moisture_info.extend(moisture_info)
+            temp = {frozenset(item.items()): item for item in _current_moisture_info}
+            _current_moisture_info = [dict(s) for s in temp.values()]
             _current_moisture_info = sorted(_current_moisture_info, key=lambda x: x["measurementTime"], reverse=True)
             _current_moisture_info = _current_moisture_info[:100]
             self.save_moisture_info(_current_moisture_info)

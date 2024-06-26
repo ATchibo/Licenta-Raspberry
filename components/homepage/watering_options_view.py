@@ -39,7 +39,7 @@ class WateringOptionsView(MDBoxLayout):
 
         self.bind_raspberry_controller_properties()
         self.load_programs()
-        self.check_moisture()
+#        self.check_moisture()
 
         self._watering_options_observer = self.WateringProgramObserver(self._watering_program_controller, self)
         self._watering_program_controller.attach(self._watering_options_observer)

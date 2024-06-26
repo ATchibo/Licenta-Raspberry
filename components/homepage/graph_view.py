@@ -28,10 +28,11 @@ class GraphView(MDBoxLayout):
         self.end_datetime = get_current_datetime_tz()
         self.start_datetime = self.end_datetime - timedelta(days=1)
 
-        Clock.schedule_once(self.add_graph, 0.1)
+        Clock.schedule_once(self.update_plot, 0.1)
         Clock.schedule_once(self.init_dropdown, 0.1)
 
-    def add_graph(self, *args):
+    def on_enter(self, *args):
+        print("GraphView on_enter")
         self.update_plot()
 
     def update_plot(self, *args):

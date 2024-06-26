@@ -55,11 +55,11 @@ class MoistureMeasurementController:
         self._moisture_check_thread_finished.clear()
 
     def _moisture_check_thread_function(self):
-        _moisture_perc = self._moisture_controller.get_moisture_percentage()
-        _measurement_time = get_current_datetime_tz()
-
-        RemoteRequests().add_moisture_percentage_measurement(_moisture_perc, _measurement_time)
-        EventLogger().add_moisture_measurement_message(_moisture_perc, _measurement_time)
+        # _moisture_perc = self._moisture_controller.get_moisture_percentage()
+        # _measurement_time = get_current_datetime_tz()
+        #
+        # RemoteRequests().add_moisture_percentage_measurement(_moisture_perc, _measurement_time)
+        # EventLogger().add_moisture_measurement_message(_moisture_perc, _measurement_time)
 
         while not self._moisture_check_thread_finished.is_set():
             self._moisture_check_thread_finished.wait(self._moisture_check_interval_sec)
