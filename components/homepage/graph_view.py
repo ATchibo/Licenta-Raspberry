@@ -31,10 +31,6 @@ class GraphView(MDBoxLayout):
         Clock.schedule_once(self.update_plot, 0.1)
         Clock.schedule_once(self.init_dropdown, 0.1)
 
-    def on_enter(self, *args):
-        print("GraphView on_enter")
-        self.update_plot()
-
     def update_plot(self, *args):
         graph_box = self.ids.graph_box
         graph_box.clear_widgets()
