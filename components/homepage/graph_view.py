@@ -62,11 +62,11 @@ class GraphView(MDBoxLayout):
         ax.set_ylim(0, 100)
 
         if len(timestamps) > 20:
-            _rotation = 45
+            _rotation = 50
             _fontsize = 8
             _format = "%d.%m %H:%M"
         elif len(timestamps) > 10:
-            _rotation = 50
+            _rotation = 30
             _fontsize = 9
             _format = "%d.%m %H:%M"
         else:
