@@ -206,6 +206,10 @@ class RaspberryController(Observer):
         self._update_info_for_watering_callback()
 
     def _send_watering_updates_worker(self):
+        if self._send_watering_updates_event.is_set():
+            return
+        self._send_watering_update_function()
+
         self.watering_time_start = time.time()
         TIMEOUT = self._send_watering_updates_interval_ms / 1000.0
 
